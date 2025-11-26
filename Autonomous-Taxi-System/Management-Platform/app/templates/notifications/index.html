@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}系统通知管理 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notifications/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="display: none;">
+    <div id="indexUrl" data-url="{{ url_for('notifications.index') }}"></div>
+    <div id="searchUrl" data-url="{{ url_for('notifications.advanced_search') }}"></div>
+    {% if search_params %}
+        {% for key, value in search_params.items() %}
+            <div data-search-param data-param-key="{{ key }}" data-param-value="{{ value }}"></div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>{{ _("系统通知管理") }}</h2>
+            <p class="text-muted">{{ _("管理平台通知信息，包括查看、搜索、标记已读和删除通知") }}</p>
+        </div>
+        <div class="col-auto">
+            <button id="batchDeleteBtn" class="btn btn-danger me-2" disabled><i class="bi bi-trash"></i> {{ _("批量删除所选") }}</button>
+            <button id="markAllReadBtn" class="btn btn-primary"><i class="bi bi-check-all"></i> {{ _("全部标为已读") }}</button>
+            <a href="{{ url_for('notifications.user_notifications') }}" class="btn btn-success me-2"><i class="bi bi-person-check"></i> {{ _("用户通知") }}</a>
+            <a href="{{ url_for('notifications.create_test_notification') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> {{ _("创建测试通知") }}</a>
+        </div>
+    </div>
+
+    <!-- 通知状态统计卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card notification-card">
+                <div class="notification-card-content">
+                    <div class="notification-icon bg-primary">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div class="notification-info">
+                        <div class="notification-count" id="totalCount">{{ status_counts.total }}</div>
+                        <div class="notification-label">通知总数</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card notification-card">
+                <div class="notification-card-content">
+                    <div class="notification-icon bg-danger">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                    <div class="notification-info">
+                        <div class="notification-count" id="unreadCount">{{ status_counts.unread }}</div>
+                        <div class="notification-label">未读通知</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card notification-card">
+                <div class="notification-card-content">
+                    <div class="notification-icon bg-success">
+                        <i class="bi bi-bell-slash-fill"></i>
+                    </div>
+                    <div class="notification-info">
+                        <div class="notification-count" id="readCount">{{ status_counts.read }}</div>
+                        <div class="notification-label">已读通知</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 搜索区域 -->
+    <div class="search-section">
+        <div class="d-flex align-items-center mb-2 search-toggle" id="searchToggle" data-bs-toggle="collapse" data-bs-target="#searchForm" aria-expanded="false">
+            <i class="bi bi-chevron-down me-2"></i>
+            <h5 class="mb-0">{{ _("高级搜索") }}</h5>
+        </div>
+        
+        <!-- 搜索条件标签 -->
+        {% if search_params %}
+        <div class="search-tags">
+            {% for field, value in search_params.items() %}
+                {% if value %}
+                <span class="search-tag" data-search-param data-param-key="{{ field }}" data-param-value="{{ value }}">
+                    {{ field_names.get(field, field) }}: {{ value }}
+                    <span class="badge bg-secondary" onclick="(function(fieldName) {
+                        // 获取现有的查询字符串
+                        const queryParams = {};
+                        const urlParams = window.location.search.substring(1).split('&');
+                        
+                        // 解析当前 URL 参数
+                        for (let i = 0; i < urlParams.length; i++) {
+                            if (urlParams[i]) {
+                                const pair = urlParams[i].split('=');
+                                const key = decodeURIComponent(pair[0]);
+                                const value = pair.length > 1 ? decodeURIComponent(pair[1]) : '';
+                                queryParams[key] = value;
+                            }
+                        }
+                        
+                        // 删除指定参数
+                        delete queryParams[fieldName];
+                        
+                        // 重置页码为 1
+                        if ('page' in queryParams) {
+                            queryParams['page'] = '1';
+                        }
+                        
+                        // 构建新的查询字符串
+                        let newQueryString = '';
+                        for (const key in queryParams) {
+                            if (queryParams[key]) {
+                                if (newQueryString) {
+                                    newQueryString += '&';
+                                }
+                                newQueryString += encodeURIComponent(key) + '=' + encodeURIComponent(queryParams[key]);
+                            }
+                        }
+                        
+                        // 获取基础 URL 路径
+                        const searchBaseUrl = document.getElementById('searchUrl').getAttribute('data-url');
+                        
+                        // 构建新 URL
+                        let newUrl = searchBaseUrl;
+                        if (newQueryString) {
+                            newUrl += '?' + newQueryString;
+                        }
+                        
+                        // 重定向到新 URL
+                        window.location.href = newUrl;
+                    })('{{ field }}')">×</span>
+                </span>
+                {% endif %}
+            {% endfor %}
+            {% if search_params %}
+            <a href="{{ url_for('notifications.index') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-circle"></i> {{ _("清除所有筛选") }}</a>
+            <button id="deleteFilteredBtn" class="btn btn-sm btn-outline-danger ms-2"><i class="bi bi-trash"></i> {{ _("删除筛选结果") }}</button>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="collapse" id="searchForm">
+            <div class="search-form">
+                <form id="notificationSearchForm" method="GET" action="{{ url_for('notifications.advanced_search') }}">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="title" class="form-label">{{ _("标题") }}</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ search_params.title if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="content" class="form-label">{{ _("内容") }}</label>
+                            <input type="text" class="form-control" id="content" name="content" value="{{ search_params.content if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="type" class="form-label">{{ _("类型") }}</label>
+                            <select class="form-select" id="type" name="type">
+                                <option value="">{{ _("全部") }}</option>
+                                <option value="system" {% if search_params and search_params.type == 'system' %}selected{% endif %}>{{ _("系统") }}</option>
+                                <option value="vehicle" {% if search_params and search_params.type == 'vehicle' %}selected{% endif %}>{{ _("车辆") }}</option>
+                                <option value="order" {% if search_params and search_params.type == 'order' %}selected{% endif %}>{{ _("订单") }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="priority" class="form-label">{{ _("优先级") }}</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="">{{ _("全部") }}</option>
+                                <option value="通知" {% if search_params and search_params.priority == '通知' %}selected{% endif %}>{{ _("通知") }}</option>
+                                <option value="警告" {% if search_params and search_params.priority == '警告' %}selected{% endif %}>{{ _("警告") }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">{{ _("状态") }}</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">{{ _("全部") }}</option>
+                                <option value="未读" {% if search_params and search_params.status == '未读' %}selected{% endif %}>{{ _("未读") }}</option>
+                                <option value="已读" {% if search_params and search_params.status == '已读' %}selected{% endif %}>{{ _("已读") }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="created_after" class="form-label">{{ _("创建时间（开始）") }}</label>
+                            <input type="datetime-local" class="form-control" id="created_after" name="created_after" value="{{ search_params.created_after if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="created_before" class="form-label">{{ _("创建时间（结束）") }}</label>
+                            <input type="datetime-local" class="form-control" id="created_before" name="created_before" value="{{ search_params.created_before if search_params else '' }}">
+                        </div>
+                        </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="reset" class="btn btn-secondary me-2">{{ _("重置") }}</button>
+                        <button type="submit" class="btn btn-primary">{{ _("搜索") }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知列表 -->
+    <div class="card">
+        <div class="card-body">
+            {% if error %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i> 错误：{{ error }}
+            </div>
+            {% endif %}
+            
+            <div class="table-responsive notification-table-container">
+                {% include 'notifications/_notification_table.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 通知详情模态框 -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">{{ _("通知详情") }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h5 id="notificationTitle" class="fw-bold"></h5>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ _("内容") }}</label>
+                    <p id="notificationContent" class="border p-2 rounded"></p>
+                            </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{{ _("类型") }}</label>
+                        <p id="notificationType" class="border p-2 rounded"></p>
+                        </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{{ _("优先级") }}</label>
+                        <p id="notificationPriority" class="border p-2 rounded"></p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{{ _("状态") }}</label>
+                        <p id="notificationStatus" class="border p-2 rounded"></p>
+                            </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{{ _("阅读时间") }}</label>
+                        <p id="notificationReadAt" class="border p-2 rounded"></p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ _("创建时间") }}</label>
+                    <p id="notificationCreatedAt" class="border p-2 rounded"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="markAsReadBtn">{{ _("标记为已读") }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _("关闭") }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- 先加载通用组件 -->
+<script src="{{ url_for('static', filename='js/components/dataTable.js') }}?v={{ range(1, 10000) | random }}"></script>
+<!-- 加载通知表格组件 -->
+<script src="{{ url_for('static', filename='js/notifications/notificationTable.js') }}?v={{ range(1, 10000) | random }}"></script>
+<!-- 加载兼容性脚本 -->
+<script src="{{ url_for('static', filename='js/notifications/notifications.js') }}?v={{ range(1, 10000) | random }}"></script>
+{% endblock %} 

@@ -1,0 +1,1118 @@
+{% extends "finance/analysis_base.html" %}
+
+{% block analysis_content %}
+ 
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line me-1"></i>
+                                收支平衡趋势
+                                <a href="javascript:void(0);" class="ms-2 text-decoration-none info-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   title="<div style='text-align:left'>展示总收入、总支出和净利润之间的关系。<br/>数据来源：所选时间范围内的收入和支出记录。<br/>计算方式：净利润 = 总收入 - 总支出。</div>">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div id="waterFallChartContainer" style="height: 350px; width: 100%; position: relative;">
+                                    <div id="waterFallChart" style="height: 100%; width: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line me-1"></i>
+                                边际成本与边际收益
+                                <a href="javascript:void(0);" class="ms-2 text-decoration-none info-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   title="<div style='text-align:left'>边际收益(MR)：单位产出增加所带来的总收入增量。<br/>计算方式：总收入变化量/产量变化量。<br/><br/>边际成本(MC)：企业增加一单位产量所引起的总成本的增量。<br/>计算方式：总成本变化量/产量变化量。</div>">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 350px;">
+                                    <canvas id="marginalChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line me-1"></i>
+                                利润率变化趋势
+                                <a href="javascript:void(0);" class="ms-2 text-decoration-none info-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   title="<div style='text-align:left'>展示利润率随时间的变化情况。<br/>数据来源：各月份的收入和支出记录。<br/>计算方式：利润率 = (总收入 - 总支出) / 总收入 × 100%。</div>">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 350px;">
+                                    <canvas id="profitRateChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-pie me-1"></i>
+                                利润来源分析
+                                <a href="javascript:void(0);" class="ms-2 text-decoration-none info-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   title="<div style='text-align:left'>展示不同收入来源对总收入的贡献情况。<br/>数据来源：按收入来源分类的收入记录。<br/>计算方式：特定收入来源占总收入的百分比。</div>">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 350px;">
+                                    <canvas id="profitContributionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+{% endblock %}
+
+{% block analysis_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" integrity="sha512-Tn2m0TIpgVyTzzvmxLNuqbSJH3JP8jm+Cy3hvHrW7ndTDcJ1w5mBiksqDBb8GpE2ksktFvDB/ykZ0mDpsZj20w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化工具提示
+        var tooltipElements = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipElements.forEach(function(element) {
+            new bootstrap.Tooltip(element, {
+                html: true,
+                container: 'body'
+            });
+        });
+        
+        // 检查FontAwesome是否正确加载
+        setTimeout(function() {
+            if (document.querySelector('.fa-info-circle').clientWidth === 0) {
+                console.warn('FontAwesome未正确加载，使用Bootstrap图标替代');
+                document.querySelectorAll('.fa-info-circle').forEach(function(icon) {
+                    icon.classList.remove('fa-info-circle');
+                    icon.classList.remove('fas');
+                    icon.classList.add('bi');
+                    icon.classList.add('bi-info-circle-fill');
+                });
+            }
+        }, 1000);
+        
+        // 获取当前选择的日期范围
+        function getSelectedDateRange() {
+            const dateRangeSelect = document.getElementById('date-range');
+            const customDateFrom = document.getElementById('custom-date-from');
+            const customDateTo = document.getElementById('custom-date-to');
+            
+            if (dateRangeSelect.value === 'custom') {
+                return {
+                    startDate: customDateFrom.value,
+                    endDate: customDateTo.value
+                };
+            } else {
+                // 计算预设日期范围
+                const today = new Date();
+                const days = parseInt(dateRangeSelect.value);
+                const startDate = new Date(today);
+                startDate.setDate(today.getDate() - days);
+                
+                // 格式化日期为YYYY-MM-DD
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+                
+                return {
+                    startDate: formatDate(startDate),
+                    endDate: formatDate(today)
+                };
+            }
+        }
+        
+        // 使用真实数据渲染边际成本图表
+        function renderMarginalChart(canvas, data) {
+            // 获取数据
+            const labels = data.dates || [];
+            const marginalRevenue = data.marginal_revenue || [];
+            const marginalCost = data.marginal_cost || [];
+            
+            // 如果没有数据，使用示例数据
+            if (labels.length === 0) {
+                renderMarginalChartWithSampleData(canvas);
+                return;
+            }
+            
+            // 清除可能存在的旧图表实例
+            if (window.marginalChart instanceof Chart) {
+                window.marginalChart.destroy();
+            }
+            
+            // 创建新的图表实例
+            window.marginalChart = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                    labels: labels,
+                datasets: [
+                    {
+                        label: '边际收益',
+                            data: marginalRevenue,
+                        borderColor: 'rgba(40, 167, 69, 0.8)',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '边际成本',
+                            data: marginalCost,
+                        borderColor: 'rgba(220, 53, 69, 0.8)',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += '¥' + context.parsed.y.toFixed(2) + '/单';
+                                    }
+                                    return label;
+                                }
+                            }
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                                text: '边际收益 (元/单)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + value.toFixed(2);
+                                }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        title: {
+                            display: true,
+                                text: '边际成本 (元/单)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 使用示例数据渲染边际成本图表
+        function renderMarginalChartWithSampleData(canvas) {
+            // 示例数据
+            const sampleLabels = ['1月', '2月', '3月', '4月', '5月', '6月'];
+            const sampleMarginalRevenue = [100, 120, 130, 170, 150, 160];
+            const sampleMarginalCost = [80, 90, 100, 110, 120, 140];
+            
+            // 清除可能存在的旧图表实例
+            if (window.marginalChart instanceof Chart) {
+                window.marginalChart.destroy();
+            }
+            
+            // 创建新的图表实例
+            window.marginalChart = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: sampleLabels,
+                    datasets: [
+                        {
+                            label: '边际收益 (示例数据)',
+                            data: sampleMarginalRevenue,
+                            borderColor: 'rgba(40, 167, 69, 0.8)',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '边际成本 (示例数据)',
+                            data: sampleMarginalCost,
+                            borderColor: 'rgba(220, 53, 69, 0.8)',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += '¥' + context.parsed.y.toFixed(2) + '/单';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '边际收益 (元/单)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + value.toFixed(2);
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: '边际成本 (元/单)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + value.toFixed(2);
+                                }
+                        }
+                    }
+                }
+            }
+        });
+        }
+        
+        // 使用真实数据渲染收支平衡瀑布图
+        function renderWaterfallChart(waterFallDom, data) {
+            // 获取数据
+            const totalIncome = data.total_income || 0;
+            const totalExpense = data.total_expense || 0;
+            const netProfit = totalIncome - totalExpense;
+            
+            // 确保DOM元素已经完全渲染
+            if (!waterFallDom) {
+                console.error('waterFallDom元素不存在');
+                return;
+            }
+            
+            console.log('初始化瀑布图，容器大小:', waterFallDom.offsetWidth, 'x', waterFallDom.offsetHeight);
+            
+            // 检查并清理之前的图表实例
+            try {
+                if (window.waterFallChart) {
+                    // echarts的销毁方法是destroy，不是dispose
+                    if (typeof window.waterFallChart.dispose === 'function') {
+                        window.waterFallChart.dispose();
+                    } else if (typeof window.waterFallChart.destroy === 'function') {
+                        window.waterFallChart.destroy();
+                    } else {
+                        // 如果没有合适的销毁方法，直接清空DOM并创建新实例
+                        window.waterFallChart = null;
+                    }
+                }
+            } catch (error) {
+                console.warn('清除旧图表实例出错:', error);
+                window.waterFallChart = null;
+            }
+            
+            // 创建新的ECharts实例
+            try {
+                // 确保容器在创建图表前是空的
+                waterFallDom.innerHTML = '';
+                
+                window.waterFallChart = echarts.init(waterFallDom);
+                
+                // 设置图表选项
+            const option = {
+                title: {
+                        text: '收支平衡趋势',
+                        left: 'center',
+                        textStyle: {
+                            fontSize: 16
+                        }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    formatter: function (params) {
+                            let tar = params[1];
+                            return tar.name + ': ¥' + tar.value.toFixed(2);
+                    }
+                },
+                    color: ['#28a745', '#dc3545', '#17a2b8'],
+                xAxis: {
+                    type: 'category',
+                        data: ['总收入', '总支出', '净利润']
+                },
+                yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            formatter: function(value) {
+                                return '¥' + value;
+                            }
+                        }
+                },
+                series: [
+                    {
+                        name: '辅助',
+                        type: 'bar',
+                        stack: '总量',
+                        itemStyle: {
+                            color: 'transparent'
+                        },
+                            data: [0, totalIncome, 0]
+                    },
+                    {
+                        name: '收支',
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            show: true,
+                                position: 'top',
+                                formatter: '¥{c}'
+                            },
+                            data: [
+                                {
+                                    value: totalIncome,
+                                    itemStyle: { color: '#28a745' }
+                                },
+                                {
+                                    value: -totalExpense,
+                                    itemStyle: { color: '#dc3545' }
+                                },
+                                {
+                                    value: netProfit,
+                                    itemStyle: { color: netProfit >= 0 ? '#17a2b8' : '#dc3545' }
+                                }
+                            ]
+                        }
+                    ]
+                };
+                
+                // 应用图表配置
+                window.waterFallChart.setOption(option);
+                
+                // 强制重绘一次
+                setTimeout(() => {
+                    if (window.waterFallChart) {
+                        window.waterFallChart.resize();
+                    }
+                }, 200);
+                
+                // 响应窗口大小变化
+                window.addEventListener('resize', function() {
+                    if (window.waterFallChart) {
+                        window.waterFallChart.resize();
+                    }
+                });
+                
+                console.log('收支平衡图表渲染完成');
+            } catch (error) {
+                console.error('渲染瀑布图出错:', error);
+            }
+        }
+        
+        // 使用示例数据渲染收支平衡瀑布图
+        function renderWaterfallChartWithSampleData(waterFallDom) {
+            if (!waterFallDom) {
+                console.error('waterFallDom元素不存在');
+                return;
+            }
+            
+            try {
+                // 确保容器在创建图表前是空的
+                waterFallDom.innerHTML = '';
+                
+                // 示例数据
+                const sampleTotalIncome = 10000;
+                const sampleTotalExpense = 8000;
+                const sampleNetProfit = sampleTotalIncome - sampleTotalExpense;
+                
+                // 创建新的ECharts实例
+                window.waterFallChart = echarts.init(waterFallDom);
+                
+                // 设置图表选项
+                const option = {
+                    title: {
+                        text: '收支平衡趋势 (示例数据)',
+                        left: 'center',
+                        textStyle: {
+                            fontSize: 16
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        },
+                        formatter: function (params) {
+                            let tar = params[1];
+                            return tar.name + ': ¥' + tar.value.toFixed(2);
+                        }
+                    },
+                    color: ['#28a745', '#dc3545', '#17a2b8'],
+                    xAxis: {
+                        type: 'category',
+                        data: ['总收入', '总支出', '净利润']
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            formatter: function(value) {
+                                return '¥' + value;
+                            }
+                        }
+                    },
+                    series: [
+                        {
+                            name: '辅助',
+                            type: 'bar',
+                            stack: '总量',
+                            itemStyle: {
+                                color: 'transparent'
+                            },
+                            data: [0, sampleTotalIncome, 0]
+                        },
+                        {
+                            name: '收支',
+                            type: 'bar',
+                            stack: '总量',
+                            label: {
+                                show: true,
+                                position: 'top',
+                                formatter: '¥{c}'
+                            },
+                            data: [
+                                {
+                                    value: sampleTotalIncome,
+                                    itemStyle: { color: '#28a745' }
+                                },
+                                {
+                                    value: -sampleTotalExpense,
+                                    itemStyle: { color: '#dc3545' }
+                                },
+                                {
+                                    value: sampleNetProfit,
+                                    itemStyle: { color: sampleNetProfit >= 0 ? '#17a2b8' : '#dc3545' }
+                                }
+                            ]
+                        }
+                    ]
+                };
+                
+                // 应用图表配置
+                window.waterFallChart.setOption(option);
+            
+            // 响应窗口大小变化
+            window.addEventListener('resize', function() {
+                    if (window.waterFallChart) {
+                        window.waterFallChart.resize();
+                    }
+                });
+                
+                console.log('示例收支平衡图表渲染完成');
+            } catch (error) {
+                console.error('渲染示例瀑布图出错:', error);
+            }
+        }
+        
+        // 初始化边际成本与边际收益图表
+        function initMarginalChart() {
+            const canvas = document.getElementById('marginalChart');
+            if (!canvas) {
+                console.error('找不到边际成本图表容器');
+                return;
+            }
+            
+            // 创建加载中提示
+            const container = canvas.parentElement;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'text-center position-absolute top-50 start-50 translate-middle';
+            loadingDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div>';
+            container.style.position = 'relative';
+            container.appendChild(loadingDiv);
+            
+            // 获取当前日期范围
+            const dateRange = getSelectedDateRange();
+            
+            // 从API获取数据
+            fetch(`/finance/api/profit_data?start_date=${dateRange.startDate}&end_date=${dateRange.endDate}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`网络响应异常: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 移除加载提示
+                    container.removeChild(loadingDiv);
+                    
+                    // 使用真实数据渲染图表
+                    renderMarginalChart(canvas, data);
+                })
+                .catch(error => {
+                    console.error('获取数据失败:', error);
+                    // 移除加载提示，显示错误信息
+                    container.removeChild(loadingDiv);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'chart-error-overlay alert alert-danger position-absolute top-50 start-50 translate-middle';
+                    errorDiv.style.zIndex = '100';
+                    errorDiv.textContent = '加载数据失败: ' + error.message;
+                    container.appendChild(errorDiv);
+                    
+                    // 使用示例数据渲染图表
+                    renderMarginalChartWithSampleData(canvas);
+                });
+        }
+        
+        // 初始化收支平衡瀑布图
+        function initWaterfallChart() {
+            console.log('开始初始化收支平衡瀑布图...');
+            const waterFallDom = document.getElementById('waterFallChart');
+            const container = document.getElementById('waterFallChartContainer');
+            
+            if (!waterFallDom) {
+                console.error('找不到收支平衡瀑布图容器 #waterFallChart');
+                return;
+            }
+            
+            if (!container) {
+                console.error('找不到收支平衡瀑布图外层容器 #waterFallChartContainer');
+                return;
+            }
+            
+            // 创建加载中提示
+            let loadingDiv = document.createElement('div');
+            loadingDiv.id = 'waterfall-loading';
+            loadingDiv.className = 'text-center position-absolute top-50 start-50 translate-middle';
+            loadingDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div>';
+            container.style.position = 'relative';
+            
+            // 检查是否已存在加载提示，避免重复添加
+            const existingLoader = container.querySelector('#waterfall-loading');
+            if (existingLoader) {
+                existingLoader.remove();
+            }
+            
+            container.appendChild(loadingDiv);
+            
+            // 获取当前日期范围
+            const dateRange = getSelectedDateRange();
+            console.log('收支平衡图表日期范围:', dateRange);
+            
+            // 从API获取数据
+            fetch(`/finance/api/profit_data?start_date=${dateRange.startDate}&end_date=${dateRange.endDate}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`网络响应异常: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 移除加载提示（安全检查）
+                    loadingDiv = document.getElementById('waterfall-loading');
+                    if (loadingDiv && loadingDiv.parentNode) {
+                        loadingDiv.parentNode.removeChild(loadingDiv);
+                    }
+                    
+                    console.log('收支平衡图表数据获取成功:', data);
+                    
+                    // 使用真实数据渲染图表
+                    renderWaterfallChart(waterFallDom, data);
+                })
+                .catch(error => {
+                    console.error('获取数据失败:', error);
+                    
+                    // 移除加载提示（安全检查）
+                    loadingDiv = document.getElementById('waterfall-loading');
+                    if (loadingDiv && loadingDiv.parentNode) {
+                        loadingDiv.parentNode.removeChild(loadingDiv);
+                    }
+                    
+                    // 创建并添加错误提示
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'chart-error-overlay alert alert-danger position-absolute top-50 start-50 translate-middle';
+                    errorDiv.style.zIndex = '100';
+                    errorDiv.textContent = '加载数据失败: ' + error.message;
+                    container.appendChild(errorDiv);
+                    
+                    // 使用示例数据渲染图表
+                    renderWaterfallChartWithSampleData(waterFallDom);
+                    
+                    // 5秒后移除错误提示
+                    setTimeout(() => {
+                        if (errorDiv.parentNode) {
+                            errorDiv.parentNode.removeChild(errorDiv);
+                        }
+                    }, 5000);
+                });
+        }
+        
+        // 初始化利润率变化趋势图表
+        function initProfitRateChart() {
+            console.log('开始初始化利润率变化趋势图表...');
+            const canvas = document.getElementById('profitRateChart');
+            if (!canvas) {
+                console.error('找不到利润率变化趋势图表容器');
+                return;
+            }
+            
+            // 创建加载中提示
+            const container = canvas.parentElement;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'text-center position-absolute top-50 start-50 translate-middle';
+            loadingDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div>';
+            container.style.position = 'relative';
+            container.appendChild(loadingDiv);
+            
+            // 获取当前日期范围
+            const dateRange = getSelectedDateRange();
+            
+            // 从API获取数据
+            fetch(`/finance/api/profit_data?start_date=${dateRange.startDate}&end_date=${dateRange.endDate}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`网络响应异常: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 移除加载提示
+                    container.removeChild(loadingDiv);
+                    
+                    // 使用真实数据渲染图表
+                    renderProfitRateChart(canvas, data);
+                })
+                .catch(error => {
+                    console.error('获取数据失败:', error);
+                    // 移除加载提示，显示错误信息
+                    container.removeChild(loadingDiv);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'chart-error-overlay alert alert-danger position-absolute top-50 start-50 translate-middle';
+                    errorDiv.style.zIndex = '100';
+                    errorDiv.textContent = '加载数据失败: ' + error.message;
+                    container.appendChild(errorDiv);
+                    
+                    // 使用示例数据渲染图表
+                    renderProfitRateChartWithSampleData(canvas);
+                });
+        }
+        
+        // 使用真实数据渲染利润率变化趋势图表
+        function renderProfitRateChart(canvas, data) {
+            // 获取日期数据
+            const labels = data.dates || [];
+            
+            // 检查API是否返回了日收入和日支出数据
+            const dailyIncome = data.daily_income || [];
+            const dailyExpense = data.daily_expense || [];
+            
+            // 计算每日利润率
+            const profitRates = [];
+            if (dailyIncome.length > 0 && dailyExpense.length > 0) {
+                for (let i = 0; i < labels.length; i++) {
+                    if (dailyIncome[i] > 0) {
+                        // 利润率 = (收入 - 支出) / 收入 * 100%
+                        const profit = dailyIncome[i] - dailyExpense[i];
+                        const profitRate = (profit / dailyIncome[i]) * 100;
+                        profitRates.push(parseFloat(profitRate.toFixed(2)));
+                    } else {
+                        // 如果当日收入为0，则利润率为0
+                        profitRates.push(0);
+                    }
+                }
+                console.log("已计算利润率数据:", profitRates);
+            } else {
+                console.warn("API未返回日收入或日支出数据，无法计算利润率");
+            }
+            
+            // 如果没有数据，使用示例数据
+            if (labels.length === 0 || profitRates.length === 0) {
+                console.log("没有足够的数据渲染利润率图表，使用示例数据");
+                renderProfitRateChartWithSampleData(canvas);
+                return;
+            }
+            
+            // 清除可能存在的旧图表实例
+            if (window.profitRateChart instanceof Chart) {
+                window.profitRateChart.destroy();
+            }
+            
+            // 创建新的图表实例
+            window.profitRateChart = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '利润率(%)',
+                        data: profitRates,
+                        borderColor: 'rgba(23, 162, 184, 1)',
+                        backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `利润率: ${context.raw.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: '利润率(%)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 使用示例数据渲染利润率变化趋势图表
+        function renderProfitRateChartWithSampleData(canvas) {
+            // 示例数据
+            const sampleLabels = ['1月', '2月', '3月', '4月', '5月', '6月'];
+            const sampleProfitRates = [15, 18, 16, 20, 22, 21];
+            
+            // 清除可能存在的旧图表实例
+            if (window.profitRateChart instanceof Chart) {
+                window.profitRateChart.destroy();
+            }
+            
+            // 创建新的图表实例
+            window.profitRateChart = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: sampleLabels,
+                    datasets: [{
+                        label: '利润率(%) (示例数据)',
+                        data: sampleProfitRates,
+                        borderColor: 'rgba(23, 162, 184, 1)',
+                        backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `利润率: ${context.raw.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: '利润率(%)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 初始化利润来源分析图表
+        function initProfitContributionChart() {
+            console.log('开始初始化利润来源分析图表...');
+            const canvas = document.getElementById('profitContributionChart');
+            if (!canvas) {
+                console.error('找不到利润来源分析图表容器');
+                return;
+            }
+            
+            // 创建加载中提示
+            const container = canvas.parentElement;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'text-center position-absolute top-50 start-50 translate-middle';
+            loadingDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div>';
+            container.style.position = 'relative';
+            container.appendChild(loadingDiv);
+            
+            // 获取当前日期范围
+            const dateRange = getSelectedDateRange();
+            
+            // 从API获取数据
+            fetch(`/finance/api/profit_data?start_date=${dateRange.startDate}&end_date=${dateRange.endDate}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`网络响应异常: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 移除加载提示
+                    container.removeChild(loadingDiv);
+                    
+                    // 使用真实数据渲染图表
+                    renderProfitContributionChart(canvas, data);
+                })
+                .catch(error => {
+                    console.error('获取数据失败:', error);
+                    // 移除加载提示，显示错误信息
+                    container.removeChild(loadingDiv);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'chart-error-overlay alert alert-danger position-absolute top-50 start-50 translate-middle';
+                    errorDiv.style.zIndex = '100';
+                    errorDiv.textContent = '加载数据失败: ' + error.message;
+                    container.appendChild(errorDiv);
+                    
+                    // 使用示例数据渲染图表
+                    renderProfitContributionChartWithSampleData(canvas);
+                });
+        }
+        
+        // 使用真实数据渲染利润来源分析图表
+        function renderProfitContributionChart(canvas, data) {
+            // 获取数据
+            const labels = data.profit_contribution_types || [];
+            const values = data.profit_contribution_values || [];
+            
+            // 如果没有数据，使用示例数据
+            if (labels.length === 0) {
+                renderProfitContributionChartWithSampleData(canvas);
+                return;
+            }
+            
+            // 清除可能存在的旧图表实例
+            if (window.profitContributionChart instanceof Chart) {
+                window.profitContributionChart.destroy();
+            }
+            
+            // 颜色数组
+            const backgroundColors = [
+                'rgba(40, 167, 69, 0.7)',
+                'rgba(23, 162, 184, 0.7)',
+                'rgba(255, 193, 7, 0.7)',
+                'rgba(220, 53, 69, 0.7)',
+                'rgba(111, 66, 193, 0.7)'
+            ];
+            
+            // 创建新的图表实例
+            window.profitContributionChart = new Chart(canvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: backgroundColors.slice(0, values.length)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ¥${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 使用示例数据渲染利润来源分析图表
+        function renderProfitContributionChartWithSampleData(canvas) {
+            // 示例数据
+            const sampleLabels = ['充值收入', '车费收入', '广告收入', '保险收入', '其他'];
+            const sampleValues = [5000, 3000, 2000, 1000, 500];
+            
+            // 颜色数组
+            const backgroundColors = [
+                'rgba(40, 167, 69, 0.7)',
+                'rgba(23, 162, 184, 0.7)',
+                'rgba(255, 193, 7, 0.7)',
+                'rgba(220, 53, 69, 0.7)',
+                'rgba(111, 66, 193, 0.7)'
+            ];
+            
+            // 清除可能存在的旧图表实例
+            if (window.profitContributionChart instanceof Chart) {
+                window.profitContributionChart.destroy();
+            }
+            
+            // 创建新的图表实例
+            window.profitContributionChart = new Chart(canvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: sampleLabels,
+                    datasets: [{
+                        label: '利润来源 (示例数据)',
+                        data: sampleValues,
+                        backgroundColor: backgroundColors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ¥${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 确保Chart.js和ECharts已正确加载
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js未加载，尝试动态加载...');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js';
+            script.onload = function() {
+                console.log('Chart.js加载成功，初始化边际成本图表...');
+                initMarginalChart();
+                initProfitRateChart();
+                initProfitContributionChart();
+            };
+            document.head.appendChild(script);
+        } else {
+            console.log('Chart.js已加载，直接初始化图表...');
+            initMarginalChart();
+            initProfitRateChart();
+            initProfitContributionChart();
+        }
+        
+        if (typeof echarts === 'undefined') {
+            console.error('ECharts未加载，尝试动态加载...');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js';
+            script.onload = function() {
+                console.log('ECharts加载成功，初始化收支平衡图表...');
+                initWaterfallChart();
+            };
+            document.head.appendChild(script);
+        } else {
+            console.log('ECharts已加载，直接初始化收支平衡图表...');
+            initWaterfallChart();
+        }
+        
+        // 监听筛选条件变化，并重新加载图表
+        document.getElementById('apply-filter').addEventListener('click', function() {
+            console.log('刷新利润分析图表...');
+            // 重新初始化所有图表
+            initMarginalChart();
+            initWaterfallChart();
+            initProfitRateChart();
+            initProfitContributionChart();
+        });
+    });
+</script>
+{% endblock %} 

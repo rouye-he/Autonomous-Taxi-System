@@ -1,0 +1,56 @@
+<!-- 车辆位置跟踪模态框 -->
+<div class="modal fade" id="vehicleTrackingModal" tabindex="-1" aria-labelledby="vehicleTrackingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="vehicleTrackingModalLabel">车辆位置跟踪</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="vehicleInfo" class="mb-4">
+                    <h5 class="mb-3">车辆信息</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>车辆ID:</strong> <span id="trackingVehicleId"></span></p>
+                            <p><strong>当前状态:</strong> <span id="trackingVehicleStatus"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>当前位置:</strong> <span id="trackingVehicleLocation"></span></p>
+                            <p><strong>坐标:</strong> (<span id="trackingVehicleX"></span>, <span id="trackingVehicleY"></span>)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="orderInfo" class="mb-4">
+                    <h5 class="mb-3">订单信息</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>订单ID:</strong> <span id="trackingOrderId"></span></p>
+                            <p><strong>上车点:</strong> <span id="trackingPickupLocation"></span></p>
+                            <p><strong>上车坐标:</strong> (<span id="trackingPickupX"></span>, <span id="trackingPickupY"></span>)</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>订单状态:</strong> <span id="trackingOrderStatus"></span></p>
+                            <p><strong>下车点:</strong> <span id="trackingDropoffLocation"></span></p>
+                            <p><strong>下车坐标:</strong> (<span id="trackingDropoffX"></span>, <span id="trackingDropoffY"></span>)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress mb-3">
+                    <div id="movementProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span>当前位置</span>
+                    <span id="progressPhase">前往上车点</span>
+                    <span>目的地</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="refreshTrackingBtn">刷新位置</button>
+            </div>
+        </div>
+    </div>
+</div> 

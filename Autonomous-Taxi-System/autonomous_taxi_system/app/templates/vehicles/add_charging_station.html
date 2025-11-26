@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+
+{% block title %}添加充电站{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">添加充电站</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('vehicles.index') }}">车辆管理</a></li>
+        <li class="breadcrumb-item active">添加充电站</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                添加新充电站后，系统将自动将其纳入调度系统，车辆可前往此站点充电。请确保填写的信息准确无误。
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-lightning-charge me-1"></i>
+            充电站信息
+        </div>
+        <div class="card-body">
+            <form id="addChargingStationForm" method="POST" action="{{ url_for('vehicles.add_charging_station_submit') }}">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="stationCode" name="station_code" type="text" required />
+                            <label for="stationCode">充电站编号 <span class="text-danger">*</span></label>
+                            <div class="form-text">推荐格式: CITY-CS-XXX (例如: SHANGHAI-CS-001)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="cityCode" name="city_code" required>
+                                <option value="" selected disabled>请选择城市</option>
+                                <option value="沈阳市">沈阳市</option>
+                                <option value="上海市">上海市</option>
+                                <option value="北京市">北京市</option>
+                                <option value="广州市">广州市</option>
+                                <option value="深圳市">深圳市</option>
+                                <option value="杭州市">杭州市</option>
+                                <option value="南京市">南京市</option>
+                                <option value="成都市">成都市</option>
+                                <option value="重庆市">重庆市</option>
+                                <option value="武汉市">武汉市</option>
+                                <option value="西安市">西安市</option>
+                            </select>
+                            <label for="cityCode">所在城市 <span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="maxCapacity" name="max_capacity" type="number" min="1" max="20" value="5" required />
+                            <label for="maxCapacity">最大容纳车辆数 <span class="text-danger">*</span></label>
+                            <div class="form-text">该充电站同时最多可容纳的车辆数量</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="lastMaintenanceDate" name="last_maintenance_date" type="date" />
+                            <label for="lastMaintenanceDate">上次维护日期</label>
+                            <div class="form-text">可选，默认为当前日期</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="locationX" name="location_x" type="number" min="0" max="1000" />
+                            <label for="locationX">X坐标</label>
+                            <div class="form-text">可选，不填写将在城市中心区域随机生成（400-600范围内）</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="locationY" name="location_y" type="number" min="0" max="1000" />
+                            <label for="locationY">Y坐标</label>
+                            <div class="form-text">可选，不填写将在城市中心区域随机生成（400-600范围内）</div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                
+                <!-- 新增的充电站价格计算部分 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-currency-yen me-1"></i>
+                        充电站购置成本计算
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">基础成本</span>
+                                    <input type="text" class="form-control" id="baseCost" value="{{ base_cost }}" readonly>
+                                    <span class="input-group-text">元</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">可变成本</span>
+                                    <input type="text" class="form-control" id="variableCost" value="{{ variable_cost }}" readonly>
+                                    <span class="input-group-text">元/车位</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">城市价格系数</span>
+                                    <input type="text" class="form-control" id="cityPriceFactor" value="1.00" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-primary">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>充电站购置总价计算公式:</strong></p>
+                                    <p class="mb-1">(基础成本 + 充电站车位 × 可变成本) × 城市价格系数</p>
+                                    <p class="mb-1">({{ base_cost }} + <span id="capacityValue">5</span> × {{ variable_cost }}) × <span id="cityFactorValue">1.00</span> = <span id="totalCost">{{ (base_cost + 5 * variable_cost)|int }}</span> 元</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="bg-light p-3 rounded text-center">
+                                        <h4 class="mb-0">当前配置总价: <span id="totalCostDisplay" class="text-primary">{{ (base_cost + 5 * variable_cost)|int }}</span> 元</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 mb-0">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                            <i class="bi bi-plus-circle me-1"></i> 添加充电站
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 设置默认的上次维护日期为当前日期
+        document.getElementById('lastMaintenanceDate').valueAsDate = new Date();
+        
+        // 价格计算功能
+        const maxCapacity = document.getElementById('maxCapacity');
+        const capacityValue = document.getElementById('capacityValue');
+        const totalCost = document.getElementById('totalCost');
+        const totalCostDisplay = document.getElementById('totalCostDisplay');
+        const baseCost = parseFloat(document.getElementById('baseCost').value);
+        const variableCost = parseFloat(document.getElementById('variableCost').value);
+        const cityCode = document.getElementById('cityCode');
+        const cityPriceFactor = document.getElementById('cityPriceFactor');
+        const cityFactorValue = document.getElementById('cityFactorValue');
+        
+        // 城市价格系数数据
+        let cityPriceFactors = {};
+        
+        // 获取城市价格系数
+        fetch('/api/v1/city_price_factors')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.price_factors) {
+                    cityPriceFactors = data.price_factors;
+                    // 如果已经选择了城市，更新价格计算
+                    if (cityCode.value) {
+                        updatePriceCalculation();
+                    }
+                } else {
+                    console.error('获取城市价格系数失败:', data.message || '未知错误');
+                }
+            })
+            .catch(error => {
+                console.error('获取城市价格系数时出错:', error);
+            });
+        
+        // 更新价格计算
+        function updatePriceCalculation() {
+            const capacity = parseInt(maxCapacity.value) || 0;
+            const selectedCity = cityCode.value;
+            
+            // 获取城市充电站价格系数
+            let factor = 1.0; // 默认系数为1.0
+            if (selectedCity && cityPriceFactors && cityPriceFactors[selectedCity]) {
+                factor = parseFloat(cityPriceFactors[selectedCity].chargingStationPrice || 1.0);
+            }
+            
+            // 更新显示的系数值
+            cityPriceFactor.value = factor.toFixed(2);
+            cityFactorValue.textContent = factor.toFixed(2);
+            
+            // 计算基础总价（不含系数）
+            const baseTotal = baseCost + (capacity * variableCost);
+            
+            // 计算最终总价（含系数）
+            const total = baseTotal * factor;
+            
+            // 更新显示
+            capacityValue.textContent = capacity;
+            totalCost.textContent = total.toLocaleString('zh-CN');
+            totalCostDisplay.textContent = total.toLocaleString('zh-CN');
+        }
+        
+        // 初始计算价格
+        updatePriceCalculation();
+        
+        // 添加输入监听
+        maxCapacity.addEventListener('input', updatePriceCalculation);
+        maxCapacity.addEventListener('change', updatePriceCalculation);
+        
+        // 添加城市选择监听
+        cityCode.addEventListener('change', updatePriceCalculation);
+        
+        // 位置预览功能
+        const locationX = document.getElementById('locationX');
+        const locationY = document.getElementById('locationY');
+        const stationMarker = document.getElementById('stationMarker');
+        const locationPreview = document.getElementById('locationPreview');
+        const cityMapOverlay = document.getElementById('cityMapOverlay');
+        
+        // 预览函数
+        function updateLocationPreview() {
+            const x = locationX.value.trim();
+            const y = locationY.value.trim();
+            
+            if (x && y && !isNaN(x) && !isNaN(y)) {
+                const xPos = (parseInt(x) / 1000) * 100; // 转换为百分比
+                const yPos = (parseInt(y) / 1000) * 100;
+                
+                // 限制在预览区域内
+                const limitedX = Math.max(0, Math.min(100, xPos));
+                const limitedY = Math.max(0, Math.min(100, yPos));
+                
+                stationMarker.style.left = limitedX + '%';
+                stationMarker.style.top = limitedY + '%';
+                stationMarker.classList.remove('d-none');
+                cityMapOverlay.classList.add('d-none');
+            } else {
+                stationMarker.classList.add('d-none');
+                cityMapOverlay.classList.remove('d-none');
+            }
+        }
+        
+        // 添加输入监听
+        locationX.addEventListener('input', updateLocationPreview);
+        locationY.addEventListener('input', updateLocationPreview);
+        
+        // 随机坐标生成按钮
+        const randomLocBtn = document.createElement('button');
+        randomLocBtn.type = 'button';
+        randomLocBtn.className = 'btn btn-outline-secondary mt-2';
+        randomLocBtn.innerHTML = '<i class="bi bi-shuffle me-1"></i> 生成随机坐标';
+        randomLocBtn.onclick = function() {
+            // 在城市中心区域生成随机坐标 (400-600范围)
+            locationX.value = Math.floor(Math.random() * 201) + 400;
+            locationY.value = Math.floor(Math.random() * 201) + 400;
+            updateLocationPreview();
+        };
+        
+        // 添加到界面
+        if (locationPreview) {
+            locationPreview.parentNode.appendChild(randomLocBtn);
+        }
+        
+        // 表单验证和提交
+        const form = document.getElementById('addChargingStationForm');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            let stationCode = document.getElementById('stationCode').value.trim();
+            // 验证充电站编号格式
+            if (!/^[A-Za-z0-9\-]+$/.test(stationCode)) {
+                showToast('充电站编号只能包含字母、数字和连字符', 'danger');
+                document.getElementById('stationCode').focus();
+                return false;
+            }
+            
+            let maxCapacity = parseInt(document.getElementById('maxCapacity').value);
+            if (isNaN(maxCapacity) || maxCapacity < 1) {
+                showToast('最大容纳车辆数必须是大于0的整数', 'danger');
+                document.getElementById('maxCapacity').focus();
+                return false;
+            }
+            
+            // 检查坐标是否有效（如果提供）
+            const x = locationX.value.trim();
+            const y = locationY.value.trim();
+            if ((x && !y) || (!x && y)) {
+                showToast('X坐标和Y坐标必须同时提供或同时留空', 'warning');
+                return false;
+            }
+            
+            if (x && y) {
+                const xVal = parseInt(x);
+                const yVal = parseInt(y);
+                if (isNaN(xVal) || isNaN(yVal) || xVal < 0 || xVal > 1000 || yVal < 0 || yVal > 1000) {
+                    showToast('坐标必须是0-1000之间的整数', 'warning');
+                    return false;
+                }
+            }
+            
+            // 显示确认对话框
+            if (confirm('确定要添加这个新充电站吗？添加后将立即生效并纳入调度系统。')) {
+                // 禁用提交按钮防止重复提交
+                const submitBtn = document.getElementById('submitBtn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 提交中...';
+                
+                // 收集表单数据
+                const formData = new FormData(form);
+                const formDataObj = {};
+                formData.forEach((value, key) => {
+                    formDataObj[key] = value;
+                });
+                
+                // 添加计算后的总价到表单数据中
+                formData.append('total_cost', parseFloat(totalCost.textContent.replace(/,/g, '')));
+                formData.append('city_price_factor', parseFloat(cityPriceFactor.value));
+                
+                // 发送AJAX请求
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    // 重定向到车辆管理页面
+                    if (response.redirected) {
+                        // 在本地存储中设置一个成功消息，以便在重定向后显示
+                        const station_code = formDataObj.station_code;
+                        localStorage.setItem('stationAddSuccess', `成功添加充电站，编号: ${station_code}`);
+                        window.location.href = response.url;
+                    } else {
+                        return response.text();
+                    }
+                })
+                .catch(error => {
+                    // 显示错误消息
+                    showToast('提交表单时发生错误，请重试', 'danger');
+                    console.error('提交表单错误:', error);
+                    
+                    // 恢复按钮状态
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                });
+            }
+        });
+        
+        // 显示Toast提示消息
+        function showToast(message, type = 'info') {
+            const toastId = 'toast-' + Date.now();
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            const toastContainer = document.getElementById('toast-container');
+            toastContainer.innerHTML += toastHTML;
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, {delay: 3000});
+            toast.show();
+            
+            // 自动移除
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                this.remove();
+            });
+        }
+    });
+</script>
+{% endblock %} 

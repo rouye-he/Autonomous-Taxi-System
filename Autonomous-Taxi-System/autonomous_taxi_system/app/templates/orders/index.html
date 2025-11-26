@@ -1,0 +1,756 @@
+{% extends "base.html" %}
+
+{% block title %}订单管理 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/orders/index.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 添加Toast消息容器 -->
+    <div id="toast-container"></div>
+    
+    <div class="row mb-4">
+        <div class="col">
+            <h2>订单管理</h2>
+            <p class="text-muted">查看和管理无人驾驶出租车订单</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" onclick="showBulkAddOrdersModal()">
+                <i class="bi bi-plus-circle"></i> 添加订单
+            </button>
+            <button class="btn btn-success" id="autoAssignBtn">
+                <i class="bi bi-lightning-charge"></i> 一键分配
+            </button>
+            <button class="btn btn-info" id="batchAutoAssignBtn">
+                <i class="bi bi-robot"></i> 自动分配
+            </button>
+            <div class="btn-group ms-2">
+                <button type="button" class="btn btn-outline-secondary view-toggle-btn" data-view="table">
+                    <i class="bi bi-table"></i> 表格视图
+                </button>
+                <button type="button" class="btn btn-outline-secondary view-toggle-btn" data-view="card">
+                    <i class="bi bi-grid-3x3-gap-fill"></i> 卡片视图
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏元素存储URL和搜索参数 -->
+    <div style="display: none;">
+        <div id="indexUrl" data-url="{{ url_for('orders.index') }}"></div>
+        <div id="searchUrl" data-url="{{ url_for('orders.advanced_search') }}"></div>
+        {% if search_params %}
+            {% for key, value in search_params.items() %}
+                <div data-search-param data-param-key="{{ key }}" data-param-value="{{ value }}"></div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- 高级搜索区域 -->
+    <div class="search-section">
+        <div class="d-flex align-items-center mb-2 search-toggle" id="searchToggle" data-bs-toggle="collapse" data-bs-target="#searchForm" aria-expanded="false">
+            <i class="bi bi-chevron-down me-2"></i>
+            <h5 class="mb-0">高级搜索</h5>
+        </div>
+        
+        <!-- 搜索条件标签 -->
+        {% if search_params %}
+        <div class="search-tags">
+            {% for field, value in search_params.items() %}
+                {% if value and field != 'page' %}
+                <span class="search-tag" data-search-param data-param-key="{{ field }}" data-param-value="{{ value }}">
+                    {% if field_names and field in field_names %}
+                        {{ field_names[field] }}: {{ value }}
+                    {% elif field == 'city_code' %}
+                        城市: {{ value }}
+                    {% elif field == 'order_status' %}
+                        订单状态: {{ value }}
+                    {% elif field == 'create_time_start' %}
+                        下单时间(开始): {{ value }}
+                    {% elif field == 'create_time_end' %}
+                        下单时间(结束): {{ value }}
+                    {% elif field == 'order_id' %}
+                        订单ID: {{ value }}
+                    {% else %}
+                        {{ field }}: {{ value }}
+                    {% endif %}
+                    <span class="badge bg-secondary" onclick="removeSearchParam('{{ field }}')">×</span>
+                </span>
+                {% endif %}
+            {% endfor %}
+            {% if search_params %}
+            <button class="btn btn-sm btn-outline-secondary" onclick="clearAllSearchParams()">
+                <i class="bi bi-x-circle"></i> 清除所有筛选
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="collapse" id="searchForm">
+            <div class="search-form">
+                <form id="orderSearchForm" method="GET" action="{{ url_for('orders.advanced_search') }}">
+                    <div class="row g-3">
+                        <!-- 基本筛选字段 -->
+                        <div class="col-md-3">
+                            <label for="order_id" class="form-label">订单ID</label>
+                            <input type="text" class="form-control" id="order_id" name="order_id" value="{{ search_params.order_id if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="order_number" class="form-label">订单号</label>
+                            <input type="text" class="form-control" id="order_number" name="order_number" value="{{ search_params.order_number if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="user_id" class="form-label">用户ID</label>
+                            <input type="text" class="form-control" id="user_id" name="user_id" value="{{ search_params.user_id if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="vehicle_id" class="form-label">车辆ID</label>
+                            <input type="text" class="form-control" id="vehicle_id" name="vehicle_id" value="{{ search_params.vehicle_id if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="city_code" class="form-label">城市</label>
+                            <select class="form-select" id="city_code" name="city_code">
+                                <option value="">所有城市</option>
+                                <option value="沈阳市" {% if search_params and search_params.city_code == '沈阳市' %}selected{% endif %}>沈阳市</option>
+                                <option value="上海市" {% if search_params and search_params.city_code == '上海市' %}selected{% endif %}>上海市</option>
+                                <option value="北京市" {% if search_params and search_params.city_code == '北京市' %}selected{% endif %}>北京市</option>
+                                <option value="广州市" {% if search_params and search_params.city_code == '广州市' %}selected{% endif %}>广州市</option>
+                                <option value="深圳市" {% if search_params and search_params.city_code == '深圳市' %}selected{% endif %}>深圳市</option>
+                                <option value="杭州市" {% if search_params and search_params.city_code == '杭州市' %}selected{% endif %}>杭州市</option>
+                                <option value="南京市" {% if search_params and search_params.city_code == '南京市' %}selected{% endif %}>南京市</option>
+                                <option value="成都市" {% if search_params and search_params.city_code == '成都市' %}selected{% endif %}>成都市</option>
+                                <option value="重庆市" {% if search_params and search_params.city_code == '重庆市' %}selected{% endif %}>重庆市</option>
+                                <option value="武汉市" {% if search_params and search_params.city_code == '武汉市' %}selected{% endif %}>武汉市</option>
+                                <option value="西安市" {% if search_params and search_params.city_code == '西安市' %}selected{% endif %}>西安市</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 订单状态字段（从原来的tab移过来） -->
+                        <div class="col-md-3">
+                            <label for="order_status" class="form-label">订单状态</label>
+                            <select class="form-select" id="order_status" name="order_status">
+                                <option value="">全部状态</option>
+                                <option value="待分配" {% if search_params and search_params.order_status == '待分配' %}selected{% endif %}>待分配</option>
+                                <option value="进行中" {% if search_params and search_params.order_status == '进行中' %}selected{% endif %}>进行中</option>
+                                <option value="已结束" {% if search_params and search_params.order_status == '已结束' %}selected{% endif %}>已结束</option>
+                               
+                            </select>
+                        </div>
+                        
+                        <!-- 位置字段 -->
+                        <div class="col-md-3">
+                            <label for="pickup_location" class="form-label">上车地点</label>
+                            <input type="text" class="form-control" id="pickup_location" name="pickup_location" value="{{ search_params.pickup_location if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dropoff_location" class="form-label">下车地点</label>
+                            <input type="text" class="form-control" id="dropoff_location" name="dropoff_location" value="{{ search_params.dropoff_location if search_params else '' }}">
+                        </div>
+                        
+                        <!-- 时间范围字段 -->
+                        <div class="col-md-3">
+                            <label for="create_time_start" class="form-label">下单时间(开始)</label>
+                            <input type="datetime-local" class="form-control" id="create_time_start" name="create_time_start" value="{{ search_params.create_time_start if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="create_time_end" class="form-label">下单时间(结束)</label>
+                            <input type="datetime-local" class="form-control" id="create_time_end" name="create_time_end" value="{{ search_params.create_time_end if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="arrival_time_start" class="form-label">到达时间(开始)</label>
+                            <input type="datetime-local" class="form-control" id="arrival_time_start" name="arrival_time_start" value="{{ search_params.arrival_time_start if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="arrival_time_end" class="form-label">到达时间(结束)</label>
+                            <input type="datetime-local" class="form-control" id="arrival_time_end" name="arrival_time_end" value="{{ search_params.arrival_time_end if search_params else '' }}">
+                        </div>
+                        
+                        <!-- 操作按钮 -->
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> 搜索
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary ms-2" id="resetSearchBtn">
+                                <i class="bi bi-arrow-counterclockwise"></i> 重置
+                            </button>
+                            <button type="button" class="btn btn-outline-danger ms-2" onclick="clearAllSearchParams()">
+                                <i class="bi bi-x-circle"></i> 清除搜索
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <!-- 订单状态统计卡片 -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="stat-icon bg-warning">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="card-subtitle mb-1 text-muted">待分配订单</h6>
+                                <h3 class="card-title mb-0">{{ status_counts.waiting }}</h3>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('orders.advanced_search', order_status='待分配') }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-eye"></i> 查看
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="stat-icon bg-primary">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="card-subtitle mb-1 text-muted">进行中订单</h6>
+                                <h3 class="card-title mb-0">{{ status_counts.in_progress }}</h3>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('orders.advanced_search', order_status='进行中') }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> 查看
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="stat-icon bg-success">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="card-subtitle mb-1 text-muted">已结束订单</h6>
+                                <h3 class="card-title mb-0">{{ status_counts.completed }}</h3>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('orders.advanced_search', order_status='已结束') }}" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-eye"></i> 查看
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">订单列表 <span class="text-muted">(共{{ total_count }}条记录)</span></h5>
+                        <button id="stopAutoAssignBtn" class="btn btn-danger" style="display: none;">
+                            <i class="fas fa-stop"></i> 停止分配
+                        </button>
+                    </div>
+                    
+                    <!-- 自动分配状态显示区域 -->
+                    <div id="autoAssignStatus" class="mt-3" style="display: none;">
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                <i class="bi bi-robot me-2"></i><span id="statusText">正在处理订单...</span>
+                            </div>
+                            <div class="text-muted">
+                                <span id="statusCounts" class="badge bg-info"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- 表格视图 -->
+                    <div id="tableView">
+                        <div class="table-responsive order-table-container">
+                            {% include 'orders/_order_table.html' %}
+                        </div>
+                    </div>
+                    
+                    <!-- 卡片视图 -->
+                    <div id="cardView" style="display: none;">
+                        <div class="row">
+                            {% if orders %}
+                                {% for order in orders %}
+                                <div class="col-md-4 col-lg-3">
+                                    <div class="card order-card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <span class="text-truncate">{{ order.order_number }}</span>
+                                            {% if order.order_status == '已完成' %}
+                                                <span class="badge bg-success">已完成</span>
+                                            {% elif order.order_status == '进行中' %}
+                                                <span class="badge bg-primary">进行中</span>
+                                            {% elif order.order_status == '已取消' %}
+                                                <span class="badge bg-danger">已取消</span>
+                                            {% elif order.order_status == '待分配' %}
+                                                <span class="badge bg-warning text-dark">待分配</span>
+                                            {% elif order.order_status == '待支付' %}
+                                                <span class="badge bg-warning text-dark">待支付</span>
+                                            {% elif order.order_status == '已支付待出行' %}
+                                                <span class="badge bg-info">待出行</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ order.order_status }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="order-info">
+                                                <div class="order-info-item">
+                                                    <span class="label">用户:</span>
+                                                    <span>
+                                                    {% if order.real_name %}
+                                                        {{ order.real_name }}
+                                                    {% elif order.username %}
+                                                        {{ order.username }}
+                                                    {% else %}
+                                                        ID:{{ order.user_id }}
+                                                    {% endif %}
+                                                    </span>
+                                                </div>
+                                                <div class="order-info-item">
+                                                    <span class="label">车辆:</span>
+                                                    <span>
+                                                    {% if order.vehicle_id %}
+                                                        {% if order.plate_number %}
+                                                            {{ order.plate_number }}
+                                                        {% else %}
+                                                            ID:{{ order.vehicle_id }}
+                                                        {% endif %}
+                                                    {% else %}
+                                                        待分配
+                                                    {% endif %}
+                                                    </span>
+                                                </div>
+                                                <div class="order-info-item">
+                                                    <span class="label">起点:</span>
+                                                    <span class="text-truncate">{{ order.pickup_location }}</span>
+                                                </div>
+                                                <div class="order-info-item">
+                                                    <span class="label">终点:</span>
+                                                    <span class="text-truncate">{{ order.dropoff_location }}</span>
+                                                </div>
+                                                <div class="order-info-item">
+                                                    <span class="label">下单时间:</span>
+                                                    <span>{{ order.create_time }}</span>
+                                                </div>
+                                                <div class="order-info-item">
+                                                    <span class="label">城市:</span>
+                                                    <span>{{ order.city_code }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-end mt-3">
+                                                <button class="btn btn-sm btn-info action-btn view-order-btn" data-order-id="{{ order.order_id }}">
+                                                    <i class="bi bi-info-circle"></i> 查看
+                                                </button>
+                                                
+                                                {% if order.order_status == '待分配' %}
+                                                <button class="btn btn-sm btn-success action-btn assign-vehicle-btn" data-order-id="{{ order.order_id }}" data-city-code="{{ order.city_code }}">
+                                                    <i class="bi bi-check-circle"></i> 分配
+                                                </button>
+                                                {% endif %}
+                                                
+                                                <!-- 所有状态的订单都有删除按钮 -->
+                                                <button class="btn btn-sm btn-danger action-btn cancel-order-btn" data-order-id="{{ order.order_id }}">
+                                                    <i class="bi bi-trash"></i> 删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                                <!-- 卡片视图分页控件 -->
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mt-4">
+                                        <div>显示 {{ offset + 1 }} 到 {{ offset + orders|length }} 条，共 {{ total_count }} 条</div>
+                                        <nav aria-label="Page navigation">
+                                            <div class="d-flex align-items-center">
+                                                <ul class="pagination mb-0 me-3">
+                                                    <!-- 上一页 -->
+                                                    <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                                                        <a class="page-link" href="?page={{ current_page - 1 }}{% if search_params %}{% for key, value in search_params.items() %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}" {% if current_page == 1 %}aria-disabled="true"{% endif %}>上一页</a>
+                                                    </li>
+                                                    
+                                                    <!-- 页码按钮组 -->
+                                                    {% set left_edge = 1 %}
+                                                    {% set right_edge = 1 %}
+                                                    {% set left_current = 2 %}
+                                                    {% set right_current = 2 %}
+                                                    
+                                                    {% set page_range = [] %}
+                                                    {% for num in range(1, total_pages + 1) %}
+                                                        {% if num <= left_edge or num > total_pages - right_edge or (num >= current_page - left_current and num <= current_page + right_current) %}
+                                                            {% set _ = page_range.append(num) %}
+                                                        {% elif page_range[-1] != 0 %}
+                                                            {% set _ = page_range.append(0) %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    
+                                                    {% for page_num in page_range %}
+                                                        {% if page_num != 0 %}
+                                                            <li class="page-item {% if page_num == current_page %}active{% endif %}">
+                                                                <a class="page-link" href="?page={{ page_num }}{% if search_params %}{% for key, value in search_params.items() %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}">{{ page_num }}</a>
+                                                            </li>
+                                                        {% else %}
+                                                            <li class="page-item disabled">
+                                                                <a class="page-link" href="#">…</a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    
+                                                    <!-- 下一页 -->
+                                                    <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
+                                                        <a class="page-link" href="?page={{ current_page + 1 }}{% if search_params %}{% for key, value in search_params.items() %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}" {% if current_page >= total_pages %}aria-disabled="true"{% endif %}>下一页</a>
+                                                    </li>
+                                                </ul>
+                                                
+                                                <!-- 跳转到指定页 -->
+                                                <div class="input-group" style="width: 180px;">
+                                                    <span class="input-group-text">跳至</span>
+                                                    <input type="number" class="form-control" id="jumpToPage" min="1" max="{{ total_pages }}" placeholder="{{ current_page }}/{{ total_pages }}">
+                                                    <button class="btn btn-outline-primary" type="button" id="jumpButton">
+                                                        <i class="bi bi-arrow-right-circle"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </nav>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="col-12">
+                                    <div class="alert alert-info">暂无订单数据</div>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- 搜索结果统计 (卡片视图) -->
+                            {% if search_params and total_count %}
+                            <div class="col-12">
+                                <div class="mt-3 text-center text-muted">
+                                    <p><i class="bi bi-filter-circle"></i> 共筛选出 <strong>{{ total_count }}</strong> 条符合条件的订单记录</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 各种模态框在这里放置 -->
+{% include "orders/modals/order_detail_modal.html" %}
+{% include "orders/modals/assign_vehicle_modal.html" %}
+{% include "orders/modals/vehicle_tracking_modal.html" %}
+{% include "orders/modals/bulk_add_orders_modal.html" %}
+
+<!-- 取消订单模态框 -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelOrderModalLabel">删除订单</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除订单 <strong id="cancelOrderNumber"></strong> 吗？</p>
+                <p class="text-danger">此操作不可撤销，订单将被永久删除。</p>
+                <input type="hidden" id="cancelOrderId" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelOrderBtn">
+                    <i class="bi bi-trash me-1"></i> 确认删除
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- 引入通用表格组件和订单组件 -->
+<script src="{{ url_for('static', filename='js/components/dataTable.js') }}"></script>
+<script src="{{ url_for('static', filename='js/orders/orderTable.js') }}"></script>
+<script src="{{ url_for('static', filename='js/orders/search.js') }}"></script>
+<script src="{{ url_for('static', filename='js/orders/index.js') }}"></script>
+<!-- 引入AJAX分页组件 -->
+<script src="{{ url_for('static', filename='js/orders/orderAjaxPagination.js') }}"></script>
+
+<script>
+    // 原有的脚本逻辑
+    // ... existing code ...
+    
+    /**
+     * 显示批量添加订单模态框
+     */
+    function showBulkAddOrdersModal() {
+        const modal = new bootstrap.Modal(document.getElementById('bulkAddOrdersModal'));
+        modal.show();
+    }
+    
+    /**
+     * 显示本地化的Toast提示
+     */
+    function showLocalToast(message, type = 'info', duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = `toast-message toast-${type}`;
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+        
+        // 自动移除
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.5s';
+            setTimeout(() => {
+                toast.remove();
+            }, 500);
+        }, duration);
+    }
+
+    let currentTaskId = null;
+
+    // 批量自动分配按钮点击事件
+    $('#batchAutoAssignBtn').click(function() {
+        const btn = $(this);
+        btn.prop('disabled', true);
+        
+        // 显示停止按钮
+        $('#stopAutoAssignBtn').show();
+        
+        // 显示状态区域
+        $('#autoAssignStatus').show();
+        
+        // 发送自动分配请求
+        $.ajax({
+            url: '/orders/api/auto_assign_pending_orders',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                batch_size: 10,
+                city_code: $('select[name="city_code"]').val()
+            }),
+            success: function(response) {
+                if (response.status === 'success') {
+                    currentTaskId = response.data.task_id;
+                    updateStatus();
+                } else {
+                    alert('启动自动分配失败：' + response.message);
+                    resetButtons();
+                }
+            },
+            error: function(xhr) {
+                alert('启动自动分配失败：' + (xhr.responseJSON?.message || '未知错误'));
+                resetButtons();
+            }
+        });
+    });
+
+    // 一键分配按钮点击事件 - 使用autoAssignVehicles函数而不使用进度条
+    $('#autoAssignBtn').click(function() {
+        // 调用静态JS文件中的一键分配功能
+        if (typeof autoAssignVehicles === 'function') {
+            autoAssignVehicles();
+        } else {
+            alert('一键分配功能未正确加载');
+        }
+    });
+
+    // 停止按钮点击事件
+    $('#stopAutoAssignBtn').click(function() {
+        if (!currentTaskId) return;
+        
+        // 显示停止中提示并禁用按钮
+        $(this).html('<i class="fas fa-spinner fa-spin"></i> 正在停止...');
+        $(this).prop('disabled', true);
+        
+        // 更新状态文本为"正在停止..."
+        $('#statusText').text('正在停止分配...');
+        $('.progress-bar').addClass('bg-warning');
+        
+        // 设置超时计时器，即使后端没有响应也能重置界面
+        const stopTimeout = setTimeout(() => {
+            console.log('停止操作超时，强制重置界面');
+            resetButtons();
+            showLocalToast('操作超时，已强制停止分配', 'warning', 3000);
+            setTimeout(() => location.reload(), 1500);
+        }, 10000);  // 10秒超时
+        
+        $.ajax({
+            url: '/orders/api/stop_auto_assign',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                task_id: currentTaskId
+            }),
+            success: function(response) {
+                if (response.status === 'success') {
+                    showLocalToast('已发送停止信号，正在终止任务...', 'warning', 3000);
+                    
+                    // 立即更新状态
+                    updateStatus();
+                    
+                    // 使用短间隔频繁检查状态
+                    for (let i = 1; i <= 10; i++) {
+                        setTimeout(updateStatus, i * 300);  // 每300毫秒检查一次，持续3秒
+                    }
+                    
+                    // 如果6秒后界面还没重置，强制重置
+                    setTimeout(() => {
+                        if (currentTaskId) {
+                            console.log('6秒后界面未重置，强制重置');
+                            clearTimeout(stopTimeout);
+                            resetButtons();
+                            showLocalToast('任务已停止', 'success', 3000);
+                            setTimeout(() => location.reload(), 1000);
+                        }
+                    }, 6000);
+                } else {
+                    clearTimeout(stopTimeout);
+                    $('#stopAutoAssignBtn').html('<i class="fas fa-stop"></i> 停止分配');
+                    $('#stopAutoAssignBtn').prop('disabled', false);
+                    showLocalToast('发送停止信号失败：' + response.message, 'error', 5000);
+                }
+            },
+            error: function(xhr) {
+                clearTimeout(stopTimeout);
+                $('#stopAutoAssignBtn').html('<i class="fas fa-stop"></i> 停止分配');
+                $('#stopAutoAssignBtn').prop('disabled', false);
+                showLocalToast('发送停止信号失败: ' + (xhr.responseJSON?.message || '未知错误'), 'error', 5000);
+            }
+        });
+    });
+
+    // 更新状态函数
+    function updateStatus() {
+        if (!currentTaskId) return;
+        
+        $.ajax({
+            url: '/orders/api/auto_assign_status/' + currentTaskId,
+            method: 'GET',
+            success: function(response) {
+                if (response.status === 'success') {
+                    const status = response.data;
+                    
+                    // 显示状态区域
+                    $('#autoAssignStatus').show();
+                    
+                    // 如果任务已完成(包括正常完成或被中止)，重置界面
+                    if (status.status === 'completed') {
+                        console.log('任务已完成，准备重置界面');
+                        // 设置进度条为100%完成
+                        const progressBar = $('.progress-bar');
+                        progressBar.css('width', '100%').removeClass('bg-info bg-warning').addClass('bg-success');
+                        
+                        // 更新完成状态文本
+                        $('#statusText').text('✅ 分配完成');
+                        $('#statusCounts').html(`成功: <strong>${status.successful_count}</strong> | 失败: <strong>${status.failed_count}</strong> | 完成!`);
+                        
+                        // 短暂延迟后淡出并重置界面
+                        setTimeout(() => {
+                            // 淡出进度条
+                            $('#autoAssignStatus').fadeOut(800, function() {
+                                resetButtons();
+                                // 使用Toast代替alert
+                                showLocalToast(`自动分配已结束! 总共处理: ${status.total_processed || (status.successful_count + status.failed_count)} 成功: ${status.successful_count} 失败: ${status.failed_count}`, 'success', 5000);
+                                // 刷新订单列表
+                                location.reload();
+                            });
+                        }, 1500);
+                        return;
+                    }
+                    
+                    // 任务仍在进行中，更新进度
+                    // 更新进度条 - 固定使用正确的总订单数计算进度
+                    const processed = status.successful_count + status.failed_count;
+                    let progress = 0;
+                    
+                    // 如果存储了初始总订单数，则使用它；否则使用当前total_orders并存储
+                    if (!window.initialTotalOrders && status.total_orders && status.total_orders > 0) {
+                        window.initialTotalOrders = status.total_orders;
+                        console.log('设置初始订单总数:', window.initialTotalOrders);
+                    }
+                    
+                    // 使用固定的总订单数计算进度
+                    const totalOrders = window.initialTotalOrders || (status.total_orders > 0 ? status.total_orders : Math.max(processed, 1));
+                    
+                    // 计算进度百分比
+                    progress = Math.min(99, (processed / totalOrders) * 100);
+                    
+                    // 如果已处理订单等于总订单数，显示100%
+                    if (processed >= totalOrders) {
+                        progress = 100;
+                    }
+                    
+                    // 更新进度条颜色和宽度
+                    const progressBar = $('.progress-bar');
+                    progressBar.css('width', progress + '%');
+                    
+                    // 根据进度设置不同颜色
+                    if (progress < 30) {
+                        progressBar.removeClass('bg-success bg-warning').addClass('bg-info');
+                    } else if (progress < 70) {
+                        progressBar.removeClass('bg-info bg-success').addClass('bg-warning');
+                    } else {
+                        progressBar.removeClass('bg-info bg-warning').addClass('bg-success');
+                    }
+                    
+                    // 更新状态文本
+                    $('#statusText').text('正在处理订单...');
+                    
+                    // 显示进度信息，包括订单总数
+                    let statusHTML = `成功: <strong>${status.successful_count}</strong> | 失败: <strong>${status.failed_count}</strong>`;
+                    
+                    // 始终显示分数形式的进度
+                    statusHTML += ` | 进度: <strong>${processed}/${totalOrders}</strong> (${progress.toFixed(1)}%)`;
+                    
+                    $('#statusCounts').html(statusHTML);
+                    
+                    // 确保停止按钮可见
+                    $('#stopAutoAssignBtn').show();
+                    
+                    // 如果停止按钮是禁用状态但任务仍在运行，恢复按钮状态
+                    if ($('#stopAutoAssignBtn').prop('disabled')) {
+                        $('#stopAutoAssignBtn').html('<i class="fas fa-stop"></i> 停止分配');
+                        $('#stopAutoAssignBtn').prop('disabled', false);
+                    }
+                    
+                    // 继续更新状态，运行中的任务每秒更新一次
+                    setTimeout(updateStatus, 1000);
+                } else {
+                    // API返回错误，可能是任务已不存在，重置界面
+                    console.log('获取任务状态失败，准备重置界面');
+                    resetButtons();
+                    showLocalToast('自动分配已完成或已停止', 'info', 3000);
+                }
+            },
+            error: function(xhr) {
+                // 发生错误时，重置界面
+                console.log('获取任务状态发生错误', xhr);
+                resetButtons();
+                showLocalToast('获取任务状态失败，请检查网络连接', 'error', 5000);
+            }
+        });
+    }
+
+    // 重置按钮和界面状态
+    function resetButtons() {
+        $('#autoAssignBtn').prop('disabled', false);
+        $('#batchAutoAssignBtn').prop('disabled', false);
+        $('#stopAutoAssignBtn').hide();
+        $('#autoAssignStatus').hide();
+        currentTaskId = null;
+        window.initialTotalOrders = null; // 清除存储的初始订单总数
+    }
+</script>
+{% endblock %} 

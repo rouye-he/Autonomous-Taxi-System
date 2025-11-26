@@ -1,0 +1,206 @@
+<navigation-bar title="我的信用" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="container">
+  <!-- 内容区域容器 -->
+  <view class="content-area">
+    <!-- 信用分卡片 -->
+    <view class="credit-card">
+      <view class="credit-header">
+        <text class="credit-label">当前信用分</text>
+        <text class="credit-score">{{creditScore}}</text>
+      </view>
+      <view class="credit-level">
+        <text class="level-label">信用等级：</text>
+        <text class="level-name">{{creditLevel.level_name}}</text>
+     
+      </view>
+    </view>
+
+    <!-- 导航栏 -->
+    <view class="tab-navigation">
+      <view 
+        class="tab-navigation-item tab-levels {{activeTab === 0 ? 'active' : ''}}"
+        bindtap="onTabChange"
+        data-index="0"
+      >
+        信用等级
+        <text class="tab-count">({{allLevels.length}})</text>
+      </view>
+      <view 
+        class="tab-navigation-item tab-rules {{activeTab === 1 ? 'active' : ''}}"
+        bindtap="onTabChange"
+        data-index="1"
+      >
+        变动规则
+        <text class="tab-count">({{rules.length}})</text>
+      </view>
+      <view 
+        class="tab-navigation-item tab-logs {{activeTab === 2 ? 'active' : ''}}"
+        bindtap="onTabChange"
+        data-index="2"
+      >
+        变动记录
+        <text class="tab-count">({{logs.length}})</text>
+      </view>
+    </view>
+
+    <!-- 内容列表 -->
+    <view class="content-list">
+
+      
+      <!-- 信用等级内容 -->
+      <block wx:if="{{activeTab === 0}}">
+        <view 
+          class="level-item"
+          wx:for="{{allLevels}}"
+          wx:key="level_id"
+        >
+          <view class="level-header">
+            <view class="level-info">
+              <text class="level-title">{{item.level_name}}</text>
+              <text class="level-range">{{item.min_score}} - {{item.max_score}}分</text>
+              <text wx:if="{{item.level_id === creditLevel.level_id}}" class="current-badge">当前等级</text>
+            </view>
+          </view>
+          <view class="level-content">
+            <text class="section-title">等级权益</text>
+            <text class="benefits-text">{{item.benefits}}</text>
+            <text class="section-title">使用限制</text>
+            <text class="limitations-text">{{item.limitations}}</text>
+          </view>
+        </view>
+
+        <!-- 空状态卡片 -->
+        <view class="level-item empty-card" wx:if="{{!loading && allLevels.length === 0}}">
+          <view class="level-header">
+            <view class="level-info">
+              <text class="level-title">🏆 暂无信用等级数据</text>
+              <text class="level-range">系统提示</text>
+            </view>
+          </view>
+          <view class="level-content">
+            <text class="section-title">说明</text>
+            <text class="benefits-text">信用等级信息会显示在这里</text>
+            <text class="section-title">提示</text>
+            <text class="limitations-text">请联系管理员配置信用等级数据</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 变动规则内容 -->
+      <block wx:if="{{activeTab === 1}}">
+        <view 
+          class="rule-item"
+          wx:for="{{rules}}"
+          wx:key="rule_id"
+        >
+          <view class="rule-header">
+            <view class="rule-info">
+              <text class="rule-name">{{item.rule_name}}</text>
+              <text class="rule-trigger">{{item.trigger_event}}</text>
+            </view>
+            <view class="rule-score {{item.rule_type === '奖励' ? 'reward' : item.rule_type === '惩罚' ? 'penalty' : 'restore'}}">
+              {{item.score_change > 0 ? '+' : ''}}{{item.score_change}}
+            </view>
+          </view>
+
+          <view class="rule-details">
+            <text class="rule-desc">{{item.description}}</text>
+          </view>
+
+          <view class="rule-meta">
+            <text class="rule-type-label">类型：{{item.rule_type}}</text>
+            <text class="rule-status">{{item.is_active ? '激活' : '停用'}}</text>
+          </view>
+        </view>
+
+        <!-- 空状态卡片 -->
+        <view class="rule-item empty-card" wx:if="{{!loading && rules.length === 0}}">
+          <view class="rule-header">
+            <view class="rule-info">
+              <text class="rule-name">📋 暂无变动规则</text>
+              <text class="rule-trigger">系统提示</text>
+            </view>
+            <view class="rule-score empty-score">
+              系统
+            </view>
+          </view>
+
+          <view class="rule-details">
+            <text class="rule-desc">信用分变动规则会显示在这里</text>
+          </view>
+
+          <view class="rule-meta">
+            <text class="rule-type-label">类型：系统提示</text>
+            <text class="rule-status">请联系管理员配置规则</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 变动记录内容 -->
+      <block wx:if="{{activeTab === 2}}">
+        <view 
+          class="log-item"
+          wx:for="{{logs}}"
+          wx:key="log_id"
+        >
+          <view class="log-header">
+            <view class="log-info">
+              <text class="log-type">{{item.change_type}}</text>
+              <text class="log-time">{{formatTime(item.created_at)}}</text>
+            </view>
+            <view class="log-score {{item.change_amount > 0 ? 'positive' : 'negative'}}">
+              {{item.change_amount > 0 ? '+' : ''}}{{item.change_amount}}
+            </view>
+          </view>
+
+          <view class="log-details">
+            <text class="log-reason">{{item.reason}}</text>
+          </view>
+
+          <view class="log-meta">
+            <text class="score-range">{{item.credit_before}} → {{item.credit_after}}</text>
+            <text class="log-operator">{{item.operator || '系统'}}</text>
+          </view>
+        </view>
+
+        <!-- 空状态卡片 -->
+        <view class="log-item empty-card" wx:if="{{!loading && logs.length === 0}}">
+          <view class="log-header">
+            <view class="log-info">
+              <text class="log-type">📊 暂无变动记录</text>
+              <text class="log-time">系统提示</text>
+            </view>
+            <view class="log-score empty-score">
+              系统
+            </view>
+          </view>
+
+          <view class="log-details">
+            <text class="log-reason">信用分变动记录会显示在这里</text>
+          </view>
+
+          <view class="log-meta">
+            <text class="score-range">暂无记录</text>
+            <text class="log-operator">系统</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 加载状态 -->
+      <view class="loading-state" wx:if="{{loading}}">
+        <view class="loading-text">加载中...</view>
+      </view>
+
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMore && !loading && (allLevels.length > 0 || rules.length > 0 || logs.length > 0)}}">
+        <text class="load-more-text">上拉加载更多</text>
+      </view>
+
+      <!-- 没有更多 -->
+      <view class="no-more" wx:if="{{!hasMore && (allLevels.length > 0 || rules.length > 0 || logs.length > 0)}}">
+        <text class="no-more-text">没有更多了</text>
+      </view>
+    </view>
+  </view>
+</view> 

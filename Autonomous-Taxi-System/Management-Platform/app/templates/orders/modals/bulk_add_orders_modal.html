@@ -1,0 +1,52 @@
+<!-- 批量添加订单模态框 -->
+<div class="modal fade" id="bulkAddOrdersModal" tabindex="-1" aria-labelledby="bulkAddOrdersModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkAddOrdersModalLabel">{{ _("批量添加订单") }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bulkAddOrdersForm">
+                    <div class="mb-3">
+                        <label for="citySelect" class="form-label">{{ _("选择城市") }}</label>
+                        <select class="form-select" id="citySelect" name="city" required>
+                            <option value="">{{ _("请选择城市") }}</option>
+                            <option value="沈阳市">{{ _("沈阳市") }}</option>
+                            <option value="上海市">{{ _("上海市") }}</option>
+                            <option value="北京市">{{ _("北京市") }}</option>
+                            <option value="广州市">{{ _("广州市") }}</option>
+                            <option value="深圳市">{{ _("深圳市") }}</option>
+                            <option value="杭州市">{{ _("杭州市") }}</option>
+                            <option value="南京市">{{ _("南京市") }}</option>
+                            <option value="成都市">{{ _("成都市") }}</option>
+                            <option value="重庆市">{{ _("重庆市") }}</option>
+                            <option value="武汉市">{{ _("武汉市") }}</option>
+                            <option value="西安市">{{ _("西安市") }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="orderCount" class="form-label">{{ _("订单数量") }}</label>
+                        <input type="number" class="form-control" id="orderCount" name="order_count" min="1" max="1000" value="10" required>
+                        <div class="form-text">最多可一次性添加1000条订单</div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="updateLastLoginTime" name="update_last_login" checked>
+                        <label class="form-check-label" for="updateLastLoginTime">{{ _("更新用户最后登录时间") }}</label>
+                        <div class="form-text">勾选此项会将当前时间更新为相关用户的最后登录时间</div>
+                    </div>
+                    
+                    <div class="progress mb-3" style="display: none;" id="generateProgress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div id="generationStatus" class="alert alert-info" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _("取消") }}</button>
+                <button type="button" class="btn btn-primary" id="generateOrdersBtn">{{ _("生成订单") }}</button>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,3 @@
+<view class="user-icon" bindtap="toggleSidebar">
+  <image class="user-avatar" src="{{userInfo.avatarUrl || '/static/images/user-default.png'}}"></image>
+</view> 

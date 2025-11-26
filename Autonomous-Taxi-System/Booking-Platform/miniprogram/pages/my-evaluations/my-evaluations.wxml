@@ -1,0 +1,169 @@
+<navigation-bar title="我的评价" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<view class="container">
+  <!-- 内容区域容器 -->
+  <view class="content-area">
+    <!-- 导航栏 -->
+    <view class="tab-navigation">
+      <view 
+        class="tab-navigation-item tab-pending-evaluation {{currentTab === 0 ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="0"
+      >
+        待评价
+        <text class="tab-count">({{evaluationStats.pending}})</text>
+      </view>
+      <view 
+        class="tab-navigation-item tab-completed-evaluation {{currentTab === 1 ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="1"
+      >
+        已评价
+        <text class="tab-count">({{evaluationStats.completed}})</text>
+      </view>
+    </view>
+
+    <!-- 评价列表 -->
+    <view class="evaluation-list">
+      <view 
+        class="evaluation-item"
+        wx:for="{{evaluations}}"
+        wx:key="order_id"
+      >
+        <!-- 订单基本信息 -->
+        <view class="evaluation-header">
+          <view class="order-info">
+            <text class="order-number">订单号：{{item.order_number}}</text>
+            <text class="order-time">{{formatTime(item.create_time)}}</text>
+          </view>
+          <view class="order-amount">¥{{item.amount}}</view>
+        </view>
+
+        <!-- 行程信息 -->
+        <view class="trip-info">
+          <view class="location-item">
+            <view class="location-dot start-dot"></view>
+            <view class="location-text">
+              <text class="location-label">起点</text>
+              <text class="location-address">起点位置 <text class="location-coords" wx:if="{{item.pickup_location_x && item.pickup_location_y}}">({{item.pickup_location_x}}, {{item.pickup_location_y}})</text></text>
+            </view>
+          </view>
+          <view class="location-item">
+            <view class="location-dot end-dot"></view>
+            <view class="location-text">
+              <text class="location-label">终点</text>
+              <text class="location-address">终点位置 <text class="location-coords" wx:if="{{item.dropoff_location_x && item.dropoff_location_y}}">({{item.dropoff_location_x}}, {{item.dropoff_location_y}})</text></text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 评价信息或操作按钮 -->
+        <view class="evaluation-action">
+          <!-- 待评价状态 -->
+          <view wx:if="{{currentTab === 0}}" class="pending-evaluation">
+            <view class="evaluation-prompt">
+              <text class="prompt-text">请为本次行程评价</text>
+              <text class="prompt-desc">您的评价对我们很重要</text>
+            </view>
+            <button 
+              class="evaluate-btn"
+              bindtap="goToEvaluation"
+              data-order-number="{{item.order_number}}"
+            >
+              立即评价
+            </button>
+          </view>
+
+          <!-- 已评价状态 -->
+          <view wx:else class="completed-evaluation">
+            <view class="rating-display">
+              <view class="stars">
+                <text 
+                  class="star {{index < item.rating ? 'filled' : ''}}"
+                  wx:for="{{[1,2,3,4,5]}}"
+                  wx:key="*this"
+                >
+                  ★
+                </text>
+              </view>
+              <text class="rating-text">{{item.rating}}星</text>
+            </view>
+            <view class="comment-preview" wx:if="{{item.comment}}">
+              <text class="comment-text">{{item.comment}}</text>
+            </view>
+            <button 
+              class="view-detail-btn"
+              bindtap="viewEvaluationDetail"
+              data-evaluation="{{item}}"
+            >
+              查看详情
+            </button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态卡片 -->
+      <view class="evaluation-item empty-card" wx:if="{{!loading && evaluations.length === 0}}">
+        <!-- 订单基本信息 -->
+        <view class="evaluation-header">
+          <view class="order-info">
+            <text class="order-number">📝 暂无{{currentTab === 0 ? '待评价' : '已评价'}}订单</text>
+            <text class="order-time">系统提示</text>
+          </view>
+          <view class="order-amount">系统</view>
+        </view>
+
+        <!-- 行程信息 -->
+        <view class="trip-info">
+          <view class="location-item">
+            <view class="location-dot start-dot"></view>
+            <view class="location-text">
+              <text class="location-label">提示</text>
+              <text class="location-address">{{currentTab === 0 ? '完成订单后可以进行评价' : '评价后的订单会显示在这里'}}</text>
+            </view>
+          </view>
+          <view class="location-item">
+            <view class="location-dot end-dot"></view>
+            <view class="location-text">
+              <text class="location-label">说明</text>
+              <text class="location-address">您的{{currentTab === 0 ? '待评价' : '评价'}}记录将在此处显示</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 评价信息 -->
+        <view class="evaluation-action">
+          <view class="completed-evaluation">
+            <view class="rating-display">
+              <view class="stars">
+                <text class="star">☆</text>
+                <text class="star">☆</text>
+                <text class="star">☆</text>
+                <text class="star">☆</text>
+                <text class="star">☆</text>
+              </view>
+              <text class="rating-text">暂无评价</text>
+            </view>
+            <view class="comment-preview">
+              <text class="comment-text">快去体验我们的无人驾驶出租车服务吧</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 加载状态 -->
+      <view class="loading-state" wx:if="{{loading}}">
+        <view class="loading-text">加载中...</view>
+      </view>
+
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMore && !loading && evaluations.length > 0}}">
+        <text class="load-more-text">上拉加载更多</text>
+      </view>
+
+      <!-- 没有更多 -->
+      <view class="no-more" wx:if="{{!hasMore && evaluations.length > 0}}">
+        <text class="no-more-text">没有更多了</text>
+      </view>
+    </view>
+  </view>
+</view> 

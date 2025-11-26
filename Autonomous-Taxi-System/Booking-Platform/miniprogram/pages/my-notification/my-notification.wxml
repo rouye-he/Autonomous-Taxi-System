@@ -1,0 +1,143 @@
+<navigation-bar title="我的通知" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<view class="container">
+  <!-- 内容区域容器 -->
+  <view class="content-area">
+    <!-- 导航栏 -->
+    <view class="tab-navigation">
+      <view 
+        class="tab-navigation-item {{activeTab === 0 ? 'active' : ''}}"
+        bindtap="onTabChange"
+        data-index="0"
+      >
+        未读
+        <text class="tab-count" wx:if="{{unreadCount > 0}}">({{unreadCount}})</text>
+      </view>
+      <view 
+        class="tab-navigation-item {{activeTab === 1 ? 'active' : ''}}"
+        bindtap="onTabChange"
+        data-index="1"
+      >
+        已读
+        <text class="tab-count" wx:if="{{readCount > 0}}">({{readCount}})</text>
+      </view>
+    </view>
+
+    <!-- 内容列表 -->
+    <view class="content-list">
+      <!-- 加载状态 -->
+      <view class="loading-state" wx:if="{{loading}}">
+        <view class="loading-text">加载中...</view>
+      </view>
+
+      <!-- 未读通知内容 -->
+      <block wx:elif="{{activeTab === 0}}">
+        <view class="notification-list" wx:if="{{unreadNotifications.length > 0}}">
+          <view 
+            class="notification-item"
+            wx:for="{{unreadNotifications}}"
+            wx:key="notification_id"
+            bindtap="markAsRead"
+            data-id="{{item.notification_id}}"
+          >
+            <view class="notification-header">
+              <view class="notification-info">
+                <text class="notification-title">{{item.title}}</text>
+                <text class="notification-time">{{formatTime(item.create_time)}}</text>
+              </view>
+              <view class="right-info">
+                <text class="notification-date">{{item.create_time}}</text>
+              </view>
+            </view>
+
+            <view class="notification-content">
+              <text class="notification-text">{{item.content}}</text>
+            </view>
+
+            <view class="notification-footer">
+              <text class="notification-type">{{item.target_type === 0 ? '系统通知' : '个人通知'}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 空状态卡片 -->
+        <view class="notification-item empty-card" wx:else>
+          <view class="notification-header">
+            <view class="notification-info">
+              <text class="notification-title">📬 暂无未读通知</text>
+              <text class="notification-time">系统提示</text>
+            </view>
+          </view>
+
+          <view class="notification-content">
+            <text class="notification-text">您的未读通知将显示在这里，请稍后查看</text>
+          </view>
+
+          <view class="notification-footer">
+            <text class="notification-type">系统提示</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 已读通知内容 -->
+      <block wx:elif="{{activeTab === 1}}">
+        <view class="notification-list" wx:if="{{readNotifications.length > 0}}">
+          <view 
+            class="notification-item read"
+            wx:for="{{readNotifications}}"
+            wx:key="notification_id"
+          >
+            <view class="notification-header">
+              <view class="notification-info">
+                <text class="notification-title">{{item.title}}</text>
+                <text class="notification-time">{{formatTime(item.create_time)}}</text>
+              </view>
+              <view class="right-info">
+                <text class="notification-date">{{item.create_time}}</text>
+              </view>
+            </view>
+
+            <view class="notification-content">
+              <text class="notification-text">{{item.content}}</text>
+            </view>
+
+            <view class="notification-footer">
+              <text class="notification-type">{{item.target_type === 0 ? '系统通知' : '个人通知'}}</text>
+              <text class="read-time" wx:if="{{item.read_time}}">已读于: {{item.read_time}}</text>
+
+
+            </view>
+          </view>
+        </view>
+
+        <!-- 空状态卡片 -->
+        <view class="notification-item empty-card" wx:else>
+          <view class="notification-header">
+            <view class="notification-info">
+              <text class="notification-title">📭 暂无已读通知</text>
+              <text class="notification-time">系统提示</text>
+            </view>
+          </view>
+
+          <view class="notification-content">
+            <text class="notification-text">您的已读通知将显示在这里，已读的通知会保留一段时间</text>
+          </view>
+
+          <view class="notification-footer">
+            <text class="notification-type">系统提示</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMore && !loading && ((activeTab === 0 && unreadNotifications.length > 0) || (activeTab === 1 && readNotifications.length > 0))}}">
+        <text class="load-more-text">上拉加载更多</text>
+      </view>
+
+      <!-- 没有更多 -->
+      <view class="no-more" wx:if="{{!hasMore && ((activeTab === 0 && unreadNotifications.length > 0) || (activeTab === 1 && readNotifications.length > 0))}}">
+        <text class="no-more-text">没有更多了</text>
+      </view>
+    </view>
+  </view>
+</view> 

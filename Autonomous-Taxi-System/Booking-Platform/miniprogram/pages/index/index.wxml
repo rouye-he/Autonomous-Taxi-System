@@ -1,0 +1,274 @@
+<!--index.wxml-->
+<navigation-bar title="无人驾驶出租车平台" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="container">
+    <!-- 用户图标 -->
+    <user-icon userInfo="{{userInfo}}" bindtoggle="toggleSidebar"></user-icon>
+    
+    <!-- 侧边栏 -->
+    <sidebar 
+      show="{{showSidebar}}" 
+      userInfo="{{userInfo}}" 
+      isLogged="{{isLogged}}" 
+      bindclose="closeSidebar">
+    </sidebar>
+    
+    <!-- 城市选择器 - 使用更小的样式 -->
+    <view class="city-selector-mini">
+      <picker bindchange="cityChange" value="{{cityIndex}}" range="{{cities}}">
+        <view class="picker-mini">
+          {{cities[cityIndex]}}
+        </view>
+      </picker>
+    </view>
+    
+    <!-- 车辆位置刷新按钮 - 移动到城市选择器下方 -->
+    <view class="vehicle-refresh-btn-below-city" wx:if="{{isLogged && !showVehicleDetail && !showOrderConfirm}}" bindtap="refreshVehicleLocation">
+      <text class="refresh-icon">🔄</text>
+      <text class="refresh-text">刷新车辆</text>
+    </view>
+    
+    <!-- 车辆信息按钮 - 位于刷新车辆按钮下方 -->
+    <view class="vehicle-info-btn-below-refresh" wx:if="{{isLogged && vehicleLocation && !showVehicleDetail && !showOrderConfirm}}" bindtap="showVehicleDetail">
+      <text class="info-icon">🚗</text>
+      <text class="info-text">车辆信息</text>
+    </view>
+    
+    <!-- 高德地图组件 - 现在占据更多空间 -->
+    <view class="map-container-large">
+      <map id="myMap"
+           class="map"
+           longitude="{{longitude}}"
+           latitude="{{latitude}}"
+           scale="{{scale}}"
+           markers="{{markers}}"
+           polygons="{{polygons}}"
+           show-location="true"
+           bindtap="onMapTap">
+      </map>
+      
+      <!-- 起点终点信息显示 -->
+      <view class="route-info" wx:if="{{(startPoint || endPoint) && !showVehicleDetail && !showOrderConfirm}}">
+        <view class="point-info" wx:if="{{startPoint}}">
+          <text class="point-label">起点:</text>
+          <text class="point-addr">{{startPoint.address || '已选择'}}</text>
+        </view>
+        <view class="point-info" wx:if="{{endPoint}}">
+          <text class="point-label">终点:</text>
+          <text class="point-addr">{{endPoint.address || '已选择'}}</text>
+        </view>
+      </view>
+      
+      <!-- 点击地图弹出的窗口 - 改为固定在地图中心 -->
+      <view class="map-popup-center" wx:if="{{showPopup}}">
+        <view class="popup-content">
+          <view class="popup-header">
+            <text class="popup-title">选择操作</text>
+            <button class="popup-close-btn" bindtap="closePopup">✕</button>
+          </view>
+          <view class="popup-buttons">
+            <button class="popup-btn" bindtap="setAsStart" wx:if="{{!hasSetStart}}">设为起点</button>
+            <button class="popup-btn" bindtap="setAsEnd" wx:if="{{hasSetStart && !hasSetEnd}}">设为终点</button>
+            <button class="popup-btn reset-btn" bindtap="resetPoints" wx:if="{{hasSetStart || hasSetEnd}}">重置</button>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 车辆详情弹窗 -->
+      <view class="vehicle-detail-popup" wx:if="{{showVehicleDetail && selectedVehicle}}">
+        <view class="vehicle-detail-content">
+          <view class="vehicle-detail-header">
+            <text class="vehicle-detail-title">车辆详情</text>
+            <button class="popup-close-btn" bindtap="closeVehicleDetail">✕</button>
+          </view>
+          <view class="vehicle-detail-body">
+            <!-- 基本信息 -->
+            <view class="detail-section">
+              <view class="section-title">基本信息</view>
+              <view class="detail-item">
+                <text class="detail-label">车牌号:</text>
+                <text class="detail-value">{{selectedVehicle.plateNumber}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">车型:</text>
+                <text class="detail-value">{{selectedVehicle.model}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">当前状态:</text>
+                <text class="detail-value status-{{selectedVehicle.currentStatus === '运行中' ? 'running' : selectedVehicle.currentStatus === '空闲中' ? 'idle' : selectedVehicle.currentStatus === '充电中' ? 'charging' : selectedVehicle.currentStatus === '维护中' ? 'maintenance' : ''}}">{{selectedVehicle.currentStatus}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">电池电量:</text>
+                <text class="detail-value battery-{{selectedVehicle.batteryLevel >= 80 ? 'high' : selectedVehicle.batteryLevel >= 50 ? 'medium' : 'low'}}">{{selectedVehicle.batteryLevel}}%</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">车辆评分:</text>
+                <text class="detail-value">{{selectedVehicle.rating === -1 ? '尚无评价' : selectedVehicle.rating + '⭐'}}</text>
+              </view>
+            </view>
+
+            <!-- 位置信息 -->
+            <view class="detail-section">
+              <view class="section-title">位置信息</view>
+              <view class="detail-item">
+               
+            
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">所在城市:</text>
+                <text class="detail-value">{{selectedVehicle.location.city}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">坐标:</text>
+                <text class="detail-value">{{selectedVehicle.location.systemX}}, {{selectedVehicle.location.systemY}}</text>
+              </view>
+            </view>
+
+            <!-- 订单信息 -->
+            <view class="detail-section" wx:if="{{selectedVehicle.orderInfo}}">
+              <view class="section-title">当前订单</view>
+              <view class="detail-item">
+                <text class="detail-label">订单号:</text>
+                <text class="detail-value">{{selectedVehicle.orderInfo.orderNumber}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">订单状态:</text>
+                <text class="detail-value">{{selectedVehicle.orderInfo.orderStatus}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">创建时间:</text>
+                <text class="detail-value">{{selectedVehicle.orderInfo.createTime}}</text>
+              </view>
+              <view class="detail-item" wx:if="{{selectedVehicle.orderInfo.arrivalTime}}">
+                <text class="detail-label">到达时间:</text>
+                <text class="detail-value">{{selectedVehicle.orderInfo.arrivalTime}}</text>
+              </view>
+              <view class="detail-item">
+               
+            
+                <text class="detail-label">上车坐标:</text>
+                <text class="detail-value">{{selectedVehicle.orderInfo.pickupLocationX}}, {{selectedVehicle.orderInfo.pickupLocationY}}</text>
+              </view>
+              <view class="detail-item">
+             
+             
+                <text class="detail-label">下车坐标:</text>
+                <text class="detail-value">{{selectedVehicle.orderInfo.dropoffLocationX}}, {{selectedVehicle.orderInfo.dropoffLocationY}}</text>
+              </view>
+            </view>
+
+            <!-- 更新时间 -->
+            <view class="detail-section">
+              <view class="detail-item">
+                <text class="detail-label">最后更新:</text>
+                <text class="detail-value">{{selectedVehicle.lastUpdate}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 订单确认弹窗 -->
+      <view class="order-confirm-popup" wx:if="{{showOrderConfirm && orderConfirmData}}">
+        <view class="order-confirm-content">
+          <view class="order-confirm-header">
+            <text class="order-confirm-title">确认订单</text>
+            <button class="popup-close-btn" bindtap="closeOrderConfirm">✕</button>
+          </view>
+          <view class="order-confirm-body">
+            <!-- 路线信息 -->
+            <view class="detail-section">
+              <view class="section-title">📍 路线信息</view>
+              <view class="detail-item">
+                <text class="detail-label">起点坐标:</text>
+                <text class="detail-value">({{orderConfirmData.pickupSystemCoords.x}}, {{orderConfirmData.pickupSystemCoords.y}})</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">终点坐标:</text>
+                <text class="detail-value">({{orderConfirmData.dropoffSystemCoords.x}}, {{orderConfirmData.dropoffSystemCoords.y}})</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">行程距离:</text>
+                <text class="detail-value" wx:if="{{orderConfirmData.priceEstimate}}">{{orderConfirmData.priceEstimate.distance}}公里</text>
+                <text class="detail-value" wx:else>{{orderConfirmData.distance}}公里</text>
+              </view>
+            </view>
+
+            <!-- 价格信息 -->
+            <view class="detail-section">
+              <view class="section-title">💰 价格构成</view>
+              <view wx:if="{{orderConfirmData.priceEstimate}}">
+                <view class="detail-item">
+                  <text class="detail-label">起步距离:</text>
+                  <text class="detail-value">{{orderConfirmData.priceEstimate.base_distance}}公里</text>
+                </view>
+                <view class="detail-item">
+                  <text class="detail-label">起步价:</text>
+                  <text class="detail-value">¥{{orderConfirmData.priceEstimate.adjusted_base_price}}</text>
+                </view>
+                <view class="detail-item">
+                  <text class="detail-label">超出部分:</text>
+                  <text class="detail-value">¥{{orderConfirmData.priceEstimate.adjusted_price_per_km}}/公里</text>
+                </view>
+                <view class="detail-item price-highlight">
+                  <text class="detail-label">预计价格:</text>
+                  <text class="detail-value price-range">{{orderConfirmData.priceEstimate.price_range}}</text>
+                </view>
+              </view>
+              <view wx:else>
+                <view class="detail-item">
+                  <text class="detail-label">起步价:</text>
+                  <text class="detail-value">¥{{orderConfirmData.basePrice}}</text>
+                </view>
+                <view class="detail-item">
+                  <text class="detail-label">里程费:</text>
+                  <text class="detail-value">¥{{orderConfirmData.distancePrice}}</text>
+                </view>
+                <view class="detail-item price-highlight">
+                  <text class="detail-label">总计:</text>
+                  <text class="detail-value price-range">¥{{orderConfirmData.totalPrice}}</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 价格说明 -->
+            <view class="detail-section">
+              <view class="section-title">💡 价格说明</view>
+              <view class="price-explanation">
+                <view wx:if="{{orderConfirmData.priceEstimate}}">
+                  <text class="explanation-text">• 前{{orderConfirmData.priceEstimate.base_distance}}公里按起步价¥{{orderConfirmData.priceEstimate.adjusted_base_price}}计费</text>
+                  <text class="explanation-text">• 超出{{orderConfirmData.priceEstimate.base_distance}}公里部分按¥{{orderConfirmData.priceEstimate.adjusted_price_per_km}}/公里计费</text>
+                  <text class="explanation-text">• 不同车型价格不同，经济型车辆价格较低，豪华型车辆价格较高</text>
+                  <text class="explanation-text">• 系统将为您匹配最优车辆，最终价格以实际乘坐车型为准</text>
+                </view>
+                <view wx:else>
+                  <text class="explanation-text">• 此为基础价格估算</text>
+                  <text class="explanation-text">• 实际价格可能因车型和城市系数有所调整</text>
+                </view>
+              </view>
+            </view>
+          </view>
+          
+          <!-- 操作按钮 -->
+          <view class="order-confirm-footer">
+            <button class="unified-btn" style="flex: 1; margin-right: 16rpx;" bindtap="closeOrderConfirm">取消</button>
+            <button class="unified-btn success" style="flex: 2;" bindtap="confirmOrder">确认下单</button>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 发起订单按钮 -->
+      <view class="order-btn-container">
+        <button class="unified-btn {{hasSetStart && hasSetEnd ? '' : 'disabled'}}" 
+                bindtap="createOrder" 
+                disabled="{{!(hasSetStart && hasSetEnd)}}">
+          发起订单
+        </button>
+      </view>
+    </view>
+    
+    <view class="usermotto">
+      <text class="user-motto">{{motto}}</text>
+    </view>
+  </view>
+</scroll-view>

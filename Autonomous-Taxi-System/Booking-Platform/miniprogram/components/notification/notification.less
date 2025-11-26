@@ -1,0 +1,19 @@
+.notification {
+  position: fixed; top: 20rpx; left: 50%; transform: translateX(-50%); z-index: 9999;
+  opacity: 0; transition: all 0.3s ease; pointer-events: none;
+  
+  &.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  
+  .notification-content {
+    display: flex; align-items: center; padding: 20rpx 30rpx; border-radius: 10rpx;
+    background: #fff; box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.1); min-width: 200rpx;
+    
+    .notification-icon { font-size: 32rpx; margin-right: 16rpx; }
+    .notification-text { font-size: 28rpx; color: #333; flex: 1; }
+    
+    &.notification-success { border-left: 6rpx solid #52c41a; .notification-icon { color: #52c41a; } }
+    &.notification-error { border-left: 6rpx solid #ff4d4f; .notification-icon { color: #ff4d4f; } }
+    &.notification-warning { border-left: 6rpx solid #faad14; .notification-icon { color: #faad14; } }
+    &.notification-info { border-left: 6rpx solid #1890ff; .notification-icon { color: #1890ff; } }
+  }
+} 

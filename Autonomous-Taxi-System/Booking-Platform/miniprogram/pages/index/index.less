@@ -1,0 +1,910 @@
+/* 导入公共样式 */
+@import '/static/styles/profile.less';
+
+/**index.less**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.scrollarea {
+  flex: 1;
+  overflow-y: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.userinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #aaa;
+  width: 100%;
+  margin-bottom: 40rpx;
+}
+
+.userinfo-avatar {
+  overflow: hidden;
+  width: 128rpx;
+  height: 128rpx;
+  margin: 20rpx;
+  border-radius: 50%;
+}
+
+.usermotto {
+  margin-top: 30rpx;
+  padding: 20rpx;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%);
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.05);
+  border: 1rpx solid rgba(102, 126, 234, 0.1);
+}
+
+.user-motto {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 500;
+  text-align: center;
+}
+
+.avatar-wrapper {
+  padding: 0;
+  width: 56px !important;
+  border-radius: 8px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.avatar {
+  display: block;
+  width: 56px;
+  height: 56px;
+}
+
+.nickname-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.nickname-label {
+  margin-bottom: 10rpx;
+  color: #999;
+}
+
+.nickname-input {
+  border: 1px solid #ddd;
+  border-radius: 4rpx;
+  padding: 8rpx 16rpx;
+  width: 200rpx;
+  text-align: center;
+}
+
+/* 新增样式 */
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20rpx;
+}
+
+.userinfo-nickname {
+  font-size: 32rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.userinfo-credit {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.userinfo-realname {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.action-buttons {
+  margin-top: 30rpx;
+  width: 80%;
+}
+
+.logout-btn {
+  background-color: #f5f5f5;
+  color: #666;
+  font-size: 28rpx;
+  padding: 16rpx 0;
+  border-radius: 8rpx;
+}
+
+.logout-btn::after {
+  border: none;
+}
+
+/* 地图容器样式 - 增大尺寸 */
+.map-container-large {
+  width: 95%;
+  height: 75vh;
+  margin: 20rpx 0;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15), 
+              0 6rpx 20rpx rgba(0, 0, 0, 0.1),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  border: 3rpx solid rgba(102, 126, 234, 0.2);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  transition: all 0.3s ease;
+}
+
+.map-container-large:hover {
+  transform: translateY(-4rpx);
+  box-shadow: 0 16rpx 50rpx rgba(0, 0, 0, 0.2), 
+              0 8rpx 25rpx rgba(0, 0, 0, 0.15);
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+}
+
+/* 城市选择器样式 - 更小的版本 */
+.city-selector-mini {
+  position: absolute;
+  top: 100rpx;
+  right: 20rpx;
+  z-index: 50;
+  width: auto;
+}
+
+.picker-mini {
+  padding: 12rpx 20rpx;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  border-radius: 12rpx;
+  text-align: center;
+  color: #333;
+  font-size: 24rpx;
+  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.15), 
+              0 4rpx 10rpx rgba(0, 0, 0, 0.1),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  border: 2rpx solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10rpx);
+}
+
+.picker-mini:active {
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+/* 车辆位置刷新按钮 - 移动到路线信息正下方 */
+.vehicle-refresh-btn-below-city {
+  position: absolute;
+  top: 240rpx;
+  left: 35rpx;
+  z-index: 60;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  box-shadow: 0 8rpx 25rpx rgba(102, 126, 234, 0.3), 
+              0 4rpx 10rpx rgba(0, 0, 0, 0.1),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10rpx);
+  font-size: 22rpx;
+  min-width: 140rpx;
+}
+
+.vehicle-refresh-btn-below-city:active {
+  transform: scale(0.95) translateY(2rpx);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  box-shadow: 0 4rpx 15rpx rgba(102, 126, 234, 0.4);
+}
+
+/* 车辆信息按钮 - 位于刷新车辆按钮下方 */
+.vehicle-info-btn-below-refresh {
+  position: absolute;
+  top: 290rpx;
+  left: 35rpx;
+  z-index: 60;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  box-shadow: 0 8rpx 25rpx rgba(72, 187, 120, 0.3), 
+              0 4rpx 10rpx rgba(0, 0, 0, 0.1),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10rpx);
+  font-size: 22rpx;
+  min-width: 140rpx;
+}
+
+.vehicle-info-btn-below-refresh:active {
+  transform: scale(0.95) translateY(2rpx);
+  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+  box-shadow: 0 4rpx 15rpx rgba(72, 187, 120, 0.4);
+}
+
+.info-icon {
+  font-size: 20rpx;
+}
+
+.info-text {
+  font-size: 20rpx;
+  font-weight: 500;
+}
+
+.refresh-icon {
+  font-size: 20rpx;
+  animation: rotate 2s linear infinite;
+}
+
+.refresh-text {
+  font-size: 20rpx;
+  font-weight: 500;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 地图点击弹出窗口样式 */
+.map-popup {
+  position: absolute;
+  z-index: 1000;
+  transform: translate(-50%, -100%);
+  margin-top: -15px;
+}
+
+/* 新增：地图中心弹出窗口样式 */
+.map-popup-center {
+  position: absolute;
+  z-index: 1500;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -150%);
+}
+
+.popup-content {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  border-radius: 16rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.25), 
+              0 6rpx 20rpx rgba(0, 0, 0, 0.15),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  padding: 20rpx;
+  position: relative;
+  border: 2rpx solid rgba(102, 126, 234, 0.2);
+  backdrop-filter: blur(15rpx);
+  animation: popupSlideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes popupSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20rpx);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-bottom: 2rpx solid rgba(102, 126, 234, 0.1);
+  border-top-left-radius: 12rpx;
+  border-top-right-radius: 12rpx;
+  position: relative;
+  margin: -20rpx -20rpx 16rpx -20rpx;
+}
+
+.popup-title {
+  font-size: 26rpx;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.popup-close-btn {
+  width: 36rpx !important;
+  height: 36rpx !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%) !important;
+  color: white !important;
+  font-size: 24rpx;
+  line-height: 50rpx;
+  text-align: center;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 2rpx solid rgba(255, 255, 255, 0.2) !important;
+  min-height: 36rpx !important;
+  min-width: 36rpx !important;
+  max-width: 36rpx !important;
+  max-height: 36rpx !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  position: static;
+  z-index: 10;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.4), 
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.popup-close-btn::after {
+  border: none !important;
+  content: none !important;
+}
+
+.popup-close-btn::before {
+  border: none !important;
+  content: none !important;
+}
+
+.popup-close-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 1) 100%) !important;
+  transform: scale(1.1);
+  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.5);
+}
+
+.popup-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.popup-btn {
+  font-size: 26rpx;
+  padding: 12rpx 20rpx;
+  min-height: unset;
+  line-height: 1.5;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4rpx 15rpx rgba(102, 126, 234, 0.3), 
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.popup-btn:active {
+  transform: scale(0.95) translateY(2rpx);
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.4);
+}
+
+.reset-btn {
+  background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
+  box-shadow: 0 4rpx 15rpx rgba(229, 62, 62, 0.3), 
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+}
+
+.reset-btn:active {
+  box-shadow: 0 2rpx 8rpx rgba(229, 62, 62, 0.4);
+}
+
+/* 路线信息样式 */
+.route-info {
+  position: absolute;
+  top: 15rpx;
+  left: 15rpx;
+  z-index: 60;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx 16rpx 20rpx;
+  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.15), 
+              0 4rpx 10rpx rgba(0, 0, 0, 0.1),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  max-width: 70%;
+  border: 2rpx solid rgba(102, 126, 234, 0.2);
+  backdrop-filter: blur(10rpx);
+  transition: all 0.3s ease;
+  animation: routeInfoSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  margin-bottom: 15rpx;
+  min-height: 80rpx;
+}
+
+@keyframes routeInfoSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-30rpx);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.route-info:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+}
+
+.point-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+  padding: 8rpx 0;
+  border-bottom: 1rpx solid rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
+}
+
+.point-info:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.point-info:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 6rpx;
+  padding-left: 8rpx;
+}
+
+.point-label {
+  font-size: 24rpx;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-right: 12rpx;
+  min-width: 60rpx;
+}
+
+.point-addr {
+  font-size: 22rpx;
+  color: #4a5568;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+/* 发起订单按钮样式 */
+.order-btn-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 0;
+  z-index: 80;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.1) 0%, transparent 100%);
+}
+
+.order-btn-container .unified-btn {
+  border-radius: 0 0 12rpx 12rpx;
+  height: 100rpx;
+  font-size: 34rpx;
+  font-weight: 600;
+  letter-spacing: 4rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(102, 126, 234, 0.3), 
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  border-top: 2rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.order-btn-container .unified-btn.disabled {
+  background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%) !important;
+  color: #718096 !important;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1) !important;
+  animation: none !important;
+}
+
+/* 车辆详情弹窗样式 */
+.vehicle-detail-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  backdrop-filter: blur(8rpx);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.vehicle-detail-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20rpx;
+  width: 100%;
+  max-width: 600rpx;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.4), 
+              0 10rpx 30rpx rgba(0, 0, 0, 0.2),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  border: 2rpx solid rgba(102, 126, 234, 0.2);
+  animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(50rpx) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.vehicle-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  border-bottom: 2rpx solid rgba(102, 126, 234, 0.1);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.vehicle-detail-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: headerShine 3s ease-in-out infinite;
+}
+
+@keyframes headerShine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.vehicle-detail-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.vehicle-detail-body {
+  padding: 24rpx 32rpx;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.detail-section {
+  margin-bottom: 32rpx;
+  padding: 20rpx;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%);
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.detail-section:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 16rpx;
+  padding-bottom: 8rpx;
+  border-bottom: 2rpx solid rgba(102, 126, 234, 0.2);
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -2rpx;
+  left: 0;
+  width: 40rpx;
+  height: 2rpx;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 26rpx;
+  color: #666;
+  flex-shrink: 0;
+  width: 160rpx;
+}
+
+.detail-value {
+  font-size: 26rpx;
+  color: #333;
+  text-align: right;
+  flex: 1;
+  word-break: break-all;
+}
+
+/* 状态颜色 */
+.status-running {
+  color: #00c853;
+  font-weight: bold;
+}
+
+.status-idle {
+  color: #2196f3;
+}
+
+.status-charging {
+  color: #ff9800;
+}
+
+.status-maintenance {
+  color: #f44336;
+}
+
+/* 电量颜色 */
+.battery-high {
+  color: #00c853;
+  font-weight: bold;
+}
+
+.battery-medium {
+  color: #ff9800;
+}
+
+.battery-low {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* 订单确认弹窗样式 */
+.order-confirm-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  backdrop-filter: blur(8rpx);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.order-confirm-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20rpx;
+  width: 100%;
+  max-width: 600rpx;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.4), 
+              0 10rpx 30rpx rgba(0, 0, 0, 0.2),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  border: 2rpx solid rgba(76, 175, 80, 0.2);
+  animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.order-confirm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  border-bottom: 2rpx solid rgba(76, 175, 80, 0.1);
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.order-confirm-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: headerShine 3s ease-in-out infinite;
+}
+
+.order-confirm-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.order-confirm-body {
+  padding: 24rpx 32rpx;
+  max-height: 55vh;
+  overflow-y: auto;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.price-highlight {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(72, 187, 120, 0.1) 100%);
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx !important;
+  margin: 12rpx 0;
+  border: 2rpx solid rgba(76, 175, 80, 0.2);
+  box-shadow: 0 4rpx 15rpx rgba(76, 175, 80, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.price-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.1), transparent);
+  animation: priceShine 2s ease-in-out infinite;
+}
+
+@keyframes priceShine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.price-range {
+  font-size: 30rpx !important;
+  font-weight: bold !important;
+  background: linear-gradient(135deg, #48bb78, #38a169) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  position: relative;
+  z-index: 1;
+}
+
+.price-explanation {
+  background: linear-gradient(135deg, rgba(255, 243, 205, 0.8) 0%, rgba(255, 234, 167, 0.8) 100%);
+  border: 2rpx solid rgba(255, 193, 7, 0.3);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 15rpx rgba(255, 193, 7, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.price-explanation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, #ffc107, #ff9800, #ffc107);
+  background-size: 200% 100%;
+  animation: explanationShine 2s ease-in-out infinite;
+}
+
+@keyframes explanationShine {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.explanation-text {
+  display: block;
+  font-size: 24rpx;
+  color: #8b5a00;
+  line-height: 1.6;
+  margin-bottom: 8rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.explanation-text:last-child {
+  margin-bottom: 0;
+}
+
+.order-confirm-footer {
+  display: flex;
+  padding: 24rpx 32rpx;
+  gap: 16rpx;
+  border-top: 2rpx solid rgba(76, 175, 80, 0.1);
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.8) 100%);
+}
+
+/* 订单确认弹窗中的按钮特殊样式 */
+.order-confirm-footer .unified-btn {
+  height: 70rpx;
+  line-height: 70rpx;
+  font-size: 28rpx;
+  border-radius: 35rpx;
+  box-shadow: 0 6rpx 20rpx rgba(102, 126, 234, 0.3);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.order-confirm-footer .unified-btn:active {
+  transform: scale(0.95) translateY(2rpx);
+  box-shadow: 0 3rpx 10rpx rgba(102, 126, 234, 0.4);
+}

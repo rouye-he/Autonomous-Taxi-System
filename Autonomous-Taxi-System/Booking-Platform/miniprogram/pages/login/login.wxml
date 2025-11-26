@@ -1,0 +1,84 @@
+<!-- login.wxml -->
+<view class="auth-page" style="background-image: url('/static/images/background.jpg'); background-size: cover;">
+  <view class="auth-content">
+    <view class="logo-container">
+
+      <text class="auth-form-title">无人驾驶出租车平台</text>
+      <text class="auth-subtitle">智能出行，安全便捷</text>
+    </view>
+
+    <!-- 登录方式切换按钮 -->
+    <view class="login-type-switcher">
+      <view class="{{loginType === 'password' ? 'active' : ''}}" bindtap="switchLoginType" data-type="password">密码登录</view>
+      <view class="{{loginType === 'code' ? 'active' : ''}}" bindtap="switchLoginType" data-type="code">验证码登录</view>
+    </view>
+    
+    <view class="auth-form-item {{emailError ? 'error' : ''}}">
+      <text class="auth-label">邮箱</text>
+      <input 
+        class="auth-input" 
+        type="text" 
+        placeholder="请输入邮箱" 
+        bindinput="onEmailInput"
+        value="{{email}}"
+      />
+      <text wx:if="{{emailError}}" class="auth-error-message">{{emailError}}</text>
+    </view>
+    
+    <!-- 密码登录表单 -->
+    <block wx:if="{{loginType === 'password'}}">
+      <view class="auth-form-item {{passwordError ? 'error' : ''}}">
+        <text class="auth-label">密码</text>
+        <input 
+          class="auth-input" 
+          password 
+          placeholder="请输入密码" 
+          bindinput="onPasswordInput"
+          value="{{password}}"
+        />
+        <text wx:if="{{passwordError}}" class="auth-error-message">{{passwordError}}</text>
+      </view>
+    </block>
+    
+    <!-- 验证码登录表单 -->
+    <block wx:else>
+      <view class="auth-form-item {{verifyCodeError ? 'error' : ''}}">
+        <text class="auth-label">验证码</text>
+        <view class="verify-code-container">
+          <input 
+            class="auth-input verify-code-input" 
+            type="number"
+            maxlength="6"
+            placeholder="请输入验证码" 
+            bindinput="onVerifyCodeInput"
+            value="{{verifyCode}}"
+          />
+          <button 
+            class="verify-code-btn {{codeSending || countdown > 0 ? 'disabled' : ''}}" 
+            bindtap="sendVerifyCode"
+            disabled="{{codeSending || countdown > 0}}"
+          >
+            {{countdown > 0 ? countdown + 's' : '获取验证码'}}
+          </button>
+        </view>
+        <text wx:if="{{verifyCodeError}}" class="auth-error-message">{{verifyCodeError}}</text>
+      </view>
+    </block>
+    
+    <text wx:if="{{loginError}}" class="auth-form-error">{{loginError}}</text>
+    
+    <button class="auth-btn" bindtap="handleLogin">
+      <text wx:if="{{loading}}" class="auth-loading"></text>
+      <text>登 录</text>
+    </button>
+    
+    <view class="auth-link-container">
+      <text class="auth-link-text">还没有账号？</text>
+      <text class="auth-link" bindtap="navigateToRegister">立即注册</text>
+    </view>
+  </view>
+  
+  <view class="footer">
+    <text class="footer-text">Copyright © 2025 无人驾驶出租车平台</text>
+  </view>
+</view> 

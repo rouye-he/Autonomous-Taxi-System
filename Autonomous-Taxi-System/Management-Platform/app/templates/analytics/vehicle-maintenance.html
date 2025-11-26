@@ -1,0 +1,1239 @@
+{% extends "analytics/index.html" %}
+
+{% block extra_css %}
+{{ super() }}
+<style>
+    /* 额外的CSS样式 */
+    .maintenance-gauge-container {
+        position: relative;
+        width: 100%;
+        max-width: 280px;
+        height: 260px; /* 固定高度 */
+    }
+    
+    .gauge-center-text {
+        position: absolute;
+        top: 52%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+    
+    .gauge-value {
+        display: block;
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #333;
+        line-height: 1;
+    }
+    
+    .gauge-label {
+        display: block;
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .chart-legend {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .legend-color {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        margin-right: 6px;
+    }
+    
+    .bubble-size-legend {
+        display: flex;
+        align-items: center;
+    }
+    
+    .bubble-example {
+        border-radius: 50%;
+        background-color: rgba(75, 192, 192, 0.6);
+        border: 1px solid rgba(75, 192, 192, 1);
+    }
+    
+    .bubble-example.small {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .bubble-example.medium {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .bubble-example.large {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .chart-note {
+        font-size: 0.8rem;
+    }
+    
+    .card-actions .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .dropdown-menu-end {
+        right: 0;
+        left: auto;
+    }
+    
+    /* 新增：控制图表容器高度 */
+    .chart-container {
+        position: relative;
+        height: 280px;
+        width: 100%;
+    }
+    
+    /* 新增：控制主图表高度 */
+    .main-chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
+    }
+    
+    /* 标题图标样式 */
+    .chart-icon {
+        margin-right: 8px;
+        color: #6c757d;
+    }
+    
+    /* 统一卡片高度 */
+    .chart-row .card {
+        height: 100%;
+    }
+    
+    /* 卡片悬停效果 */
+    .chart-card {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+    
+    .chart-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* 图表标题栏渐变背景 */
+    .chart-header {
+        background: linear-gradient(to right, rgba(248, 249, 250, 1), rgba(233, 236, 239, 0.5));
+        border-bottom: none;
+    }
+    
+    /* 图表动画指示器 */
+    .chart-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 10;
+    }
+    
+    .chart-loading .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    /* 图表容器 */
+    .chart-content {
+        opacity: 0;
+        transition: opacity 0.8s ease;
+    }
+    
+    .chart-content.loaded {
+        opacity: 1;
+    }
+    
+    /* 新增悬停提示样式 */
+    .card-header {
+        position: relative;
+    }
+    .chart-info-tooltip {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 0 0 10px 10px;
+        font-size: 14px;
+        z-index: 100;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        line-height: 1.5;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .card-header:hover .chart-info-tooltip {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* 新增：图表操作按钮样式 */
+    .chart-actions .btn {
+        padding: 0.25rem 0.5rem;
+        margin-left: 5px;
+    }
+    
+    .chart-actions .btn i {
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+{% endblock %}
+
+{% block content_area %}
+<!-- 维护指标卡片 -->
+<div class="category-title">维护</div>
+<div class="row mb-4 g-3">
+    <div class="col-md-6">
+        <div class="card metric-card">
+            <div class="metric-card-content">
+                <div class="metric-icon bg-secondary">
+                    <i class="bi bi-tools"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">{{ maintenance_frequency }}</div>
+                    <div class="metric-label">车辆维护频率</div>
+                </div>
+            </div>
+            <div class="metric-tooltip">
+                计算公式：所选时间段内，进入维护状态的车辆次数 ÷ 车队总规模（次/车）
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card metric-card">
+            <div class="metric-card-content">
+                <div class="metric-icon" style="background-color: #6f42c1;">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">{{ maintenance_cost_ratio }}%</div>
+                    <div class="metric-label">车辆成本占比</div>
+                </div>
+            </div>
+            <div class="metric-tooltip">
+                计算公式：所选时间段内，车辆支出 ÷ 总运营支出 × 100%（%）
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图表布局区域 -->
+<div class="row chart-row mb-4">
+    <!-- 当前维护状态车辆占比图 -->
+    <div class="col-md-6 mb-4">
+        <div class="card chart-card h-100" style="border-radius:15px; border: 1px solid rgba(255,150,150,0.3); box-shadow: 0 0 15px rgba(255,100,100,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(150,25,60,0.8), rgba(255,60,120,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white">
+                    <i class="bi bi-pie-chart-fill me-2"></i>当前维护状态车辆占比
+                </h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="maintenanceStatusChart" data-bs-toggle="tooltip" title="{{ _("刷新数据") }}">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="maintenanceStatusChart" data-bs-toggle="tooltip" title="{{ _("下载图表") }}">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> 车辆表中的状态字段统计，区分维护中和运营中的车辆</p>
+                    <p><strong>分析目的:</strong> 直观了解当前车队维护状态，监控维护中车辆比例是否在合理范围</p>
+                    <p><strong>图表说明:</strong> 半圆仪表盘显示维护中车辆占总车队的百分比，红色表示维护中，蓝色表示运营中</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center position-relative">
+                <div class="chart-loading" id="maintenanceStatusLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{ _("加载中...") }}</span>
+                    </div>
+                    <div class="mt-2 text-muted">加载中...</div>
+                </div>
+                <div class="chart-content" id="maintenanceStatusContent">
+                    <div class="position-relative maintenance-gauge-container">
+                        <canvas id="maintenanceStatusChart"></canvas>
+                        <div class="gauge-center-text">
+                            <span class="gauge-value" id="maintenancePercentage"></span>
+                            <span class="gauge-label">{{ _("维护中") }}</span>
+                        </div>
+                    </div>
+                    <div class="chart-legend mt-3">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: rgba(255, 99, 132, 0.8)"></span>
+                            <span class="legend-text" id="maintenanceCount"></span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: rgba(54, 162, 235, 0.8)"></span>
+                            <span class="legend-text" id="operatingCount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 即将到期维护车辆时间分布 -->
+    <div class="col-md-6 mb-4">
+        <div class="card chart-card h-100" style="border-radius:15px; border: 1px solid rgba(255,200,100,0.3); box-shadow: 0 0 15px rgba(255,150,0,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(180,90,0,0.8), rgba(255,150,0,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white">
+                    <i class="bi bi-calendar-check me-2"></i>即将到期维护车辆时间分布
+                </h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="upcomingMaintenanceChart" data-bs-toggle="tooltip" title="{{ _("刷新数据") }}">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="upcomingMaintenanceChart" data-bs-toggle="tooltip" title="{{ _("下载图表") }}">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> 车辆上次维护日期与维护周期计算的剩余时间数据统计</p>
+                    <p><strong>分析目的:</strong> 预测未来维护工作量，合理安排维护计划与资源调度</p>
+                    <p><strong>图表说明:</strong> 水平条形图展示不同时间段内需要维护的车辆数量，红色表示已逾期需立即处理</p>
+                </div>
+            </div>
+            <div class="card-body position-relative">
+                <div class="chart-loading" id="upcomingMaintenanceLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{ _("加载中...") }}</span>
+                    </div>
+                    <div class="mt-2 text-muted">加载中...</div>
+                </div>
+                <div class="chart-content" id="upcomingMaintenanceContent">
+                    <div class="chart-container">
+                        <canvas id="upcomingMaintenanceChart"></canvas>
+                    </div>
+                
+                    <div class="alert alert-danger mt-2 p-2" id="overdueMaintenanceAlert" style="display: none;">
+                        <div class="d-flex">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <div>
+                                <strong>注意：</strong>当前有 <span class="fw-bold" id="overdueMaintenanceCount">0</span> 台车辆已逾期维护
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 已逾期维护车辆按车型分布 -->
+    <div class="col-md-6 mb-4">
+        <div class="card chart-card h-100" style="border-radius:15px; border: 1px solid rgba(100,150,255,0.3); box-shadow: 0 0 15px rgba(0,100,255,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(25,60,125,0.8), rgba(45,120,255,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white">
+                    <i class="bi bi-calendar-day me-2"></i>各车型距维护剩余时间的平均值
+                </h5>
+                <div class="chart-actions d-flex">
+                    <div class="btn-group me-2">
+                        <button class="btn btn-sm btn-outline-light active view-toggle" data-view="count" data-chart="averageRemainingTimeChart">{{ _("天数") }}</button>
+                        <button class="btn btn-sm btn-outline-light view-toggle" data-view="percent" data-chart="averageRemainingTimeChart">{{ _("百分比") }}</button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="averageRemainingTimeChart" data-bs-toggle="tooltip" title="{{ _("刷新数据") }}">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="averageRemainingTimeChart" data-bs-toggle="tooltip" title="{{ _("下载图表") }}">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> 各车型的维护周期和当前状态数据，计算每种车型的平均剩余维护时间</p>
+                    <p><strong>分析目的:</strong> 发现特定车型的维护周期异常，优化维护计划和车型配置决策</p>
+                    <p><strong>图表说明:</strong> 柱状图显示各车型距离下次维护的平均剩余天数，负值(红色)表示已逾期天数</p>
+                </div>
+            </div>
+            <div class="card-body position-relative">
+                <div class="chart-loading" id="overdueMaintenanceLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{ _("加载中...") }}</span>
+                    </div>
+                    <div class="mt-2 text-muted">加载中...</div>
+                </div>
+                <div class="chart-content" id="overdueMaintenanceContent">
+                    <div class="chart-container">
+                        <canvas id="averageRemainingTimeChart"></canvas>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 车辆型号平均维护间隔分析 -->
+    <div class="col-md-6 mb-4">
+        <div class="card chart-card h-100" style="border-radius:15px; border: 1px solid rgba(150,200,150,0.3); box-shadow: 0 0 15px rgba(100,200,100,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(25,125,60,0.8), rgba(45,200,120,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white">
+                    <i class="bi bi-bar-chart-steps me-2"></i>各车辆型号平均每车维护次数
+                </h5>
+                <div class="chart-actions d-flex">
+                    <div class="dropdown me-2">
+                        <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">{{ _("排序方式") }}</button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item sort-chart" href="#" data-sort="asc" data-chart="maintenanceFrequencyChart">{{ _("次数从少到多") }}</a></li>
+                            <li><a class="dropdown-item sort-chart" href="#" data-sort="desc" data-chart="maintenanceFrequencyChart">{{ _("次数从多到少") }}</a></li>
+                            <li><a class="dropdown-item sort-chart" href="#" data-sort="alpha" data-chart="maintenanceFrequencyChart">{{ _("按车型名称") }}</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="maintenanceFrequencyChart" data-bs-toggle="tooltip" title="{{ _("刷新数据") }}">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="maintenanceFrequencyChart" data-bs-toggle="tooltip" title="{{ _("下载图表") }}">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> 车辆维护记录表统计，计算各车型的维护频率与平均值</p>
+                    <p><strong>分析目的:</strong> 对比不同车型的维护需求频率，识别高维护成本车型，优化车队结构</p>
+                    <p><strong>图表说明:</strong> 柱状图展示各车型的平均维护次数，可按不同方式排序查看数据</p>
+                </div>
+            </div>
+            <div class="card-body position-relative">
+                <div class="chart-loading" id="maintenanceIntervalLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{ _("加载中...") }}</span>
+                    </div>
+                    <div class="mt-2 text-muted">加载中...</div>
+                </div>
+                <div class="chart-content" id="maintenanceIntervalContent">
+                    <div class="chart-container">
+                        <canvas id="maintenanceFrequencyChart"></canvas>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <span class="badge bg-light text-dark border">{{ _("单位: 次/车") }}</span>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 车辆年龄分布图 -->
+    <div class="col-md-12 mb-4">
+        <div class="card chart-card" style="border-radius:15px; border: 1px solid rgba(150,150,255,0.3); box-shadow: 0 0 15px rgba(100,100,255,0.1);height: 680px;">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(60,25,150,0.8), rgba(120,60,255,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white">
+                    <i class="bi bi-bar-chart-steps me-2"></i>车辆年龄分布图
+                </h5>
+                <div class="chart-actions d-flex align-items-center">
+                    <div class="form-check form-switch me-3">
+                        <input class="form-check-input" type="checkbox" id="showTotal" checked>
+                        <label class="form-check-label text-white" for="showTotal">{{ _("显示总数") }}</label>
+                    </div>
+                    <select class="form-select form-select-sm chart-type-selector me-2" style="width: 120px">
+                        <option value="bar" selected>{{ _("柱状图") }}</option>
+                        <option value="line">{{ _("折线图") }}</option>
+                        <option value="stacked">{{ _("堆叠图") }}</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="vehicleAgeDistributionChart" data-bs-toggle="tooltip" title="{{ _("刷新数据") }}">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="vehicleAgeDistributionChart" data-bs-toggle="tooltip" title="{{ _("下载图表") }}">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> 车辆表中的注册日期计算得出的车辆使用年限统计数据</p>
+                    <p><strong>分析目的:</strong> 了解车队老化程度，预测未来更新需求，制定车辆更新计划</p>
+                    <p><strong>图表说明:</strong> 多种视图展示不同车型在各年龄段的分布情况，支持切换图表类型和显示方式</p>
+                </div>
+            </div>
+            <div class="card-body p-0 position-relative">
+                <div class="chart-loading" id="vehicleAgeBubbleLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{ _("加载中...") }}</span>
+                    </div>
+                    <div class="mt-2 text-muted">加载中...</div>
+                </div>
+                <div class="chart-content" id="vehicleAgeBubbleContent">
+                    <div class="p-3">
+                        <div class="main-chart-container">
+                            <canvas id="vehicleAgeDistributionChart"></canvas>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图表JS脚本 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化工具提示
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // 模拟加载效果
+        function simulateLoading(chartId, delay = 500) {
+            const loadingId = chartId + 'Loading';
+            const contentId = chartId + 'Content';
+            
+            document.getElementById(loadingId).style.display = 'block';
+            document.getElementById(contentId).classList.remove('loaded');
+            
+            setTimeout(function() {
+                document.getElementById(loadingId).style.display = 'none';
+                document.getElementById(contentId).classList.add('loaded');
+            }, delay);
+        }
+        
+        // 初始化所有图表变量，便于全局访问
+        let maintenanceStatusChart, upcomingMaintenanceChart, averageRemainingTimeChart, maintenanceFrequencyChart, vehicleAgeDistributionChart;
+        
+        // 将加载ID和图表ID的对应关系进行映射
+        const chartToLoadingMap = {
+            'maintenanceStatusChart': 'maintenanceStatus',
+            'upcomingMaintenanceChart': 'upcomingMaintenance',
+            'averageRemainingTimeChart': 'overdueMaintenance',
+            'maintenanceFrequencyChart': 'maintenanceInterval',
+            'vehicleAgeDistributionChart': 'vehicleAgeBubble'
+        };
+        
+        // 刷新图表按钮事件
+        document.querySelectorAll('.refresh-chart').forEach(button => {
+            button.addEventListener('click', function() {
+                const chartId = this.getAttribute('data-chart');
+                const loadingId = chartToLoadingMap[chartId];
+                if (loadingId) {
+                    simulateLoading(loadingId, 800);
+                }
+            });
+        });
+        
+        // 初始加载所有图表
+        setTimeout(() => simulateLoading('maintenanceStatus', 500), 200);
+        setTimeout(() => simulateLoading('upcomingMaintenance', 700), 300);
+        setTimeout(() => simulateLoading('overdueMaintenance', 900), 400);
+        setTimeout(() => simulateLoading('maintenanceInterval', 1100), 500);
+        setTimeout(() => simulateLoading('vehicleAgeBubble', 1300), 600);
+        
+        // 图表1: 当前维护状态车辆占比图 (半圆仪表盘)
+        const maintenanceStatusCtx = document.getElementById('maintenanceStatusChart').getContext('2d');
+        
+        // 解析从后端传递的数据
+        const maintenanceStatusData = JSON.parse('{{ maintenance_status_data|safe }}');
+        
+        // 更新UI元素显示
+        document.getElementById('maintenancePercentage').textContent = maintenanceStatusData.maintenance_percentage + '%';
+        document.getElementById('maintenanceCount').textContent = `维护中：${maintenanceStatusData.maintenance_count}台`;
+        document.getElementById('operatingCount').textContent = `运营中：${maintenanceStatusData.operating_count}台`;
+        
+        // 创建渐变色
+        const maintenanceGradient = maintenanceStatusCtx.createLinearGradient(0, 0, 0, 200);
+        maintenanceGradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
+        maintenanceGradient.addColorStop(1, 'rgba(255, 99, 132, 0.5)');
+        
+        const operatingGradient = maintenanceStatusCtx.createLinearGradient(0, 0, 0, 200);
+        operatingGradient.addColorStop(0, 'rgba(54, 162, 235, 0.9)');
+        operatingGradient.addColorStop(1, 'rgba(54, 162, 235, 0.5)');
+        
+        maintenanceStatusChart = new Chart(maintenanceStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: maintenanceStatusData.chart_data.labels,
+                datasets: [{
+                    data: maintenanceStatusData.chart_data.data,
+                    backgroundColor: [
+                        maintenanceGradient,
+                        operatingGradient
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 2,
+                    cutout: '70%',
+                    circumference: 180,
+                    rotation: 270,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((acc, data) => acc + data, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value}台 (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+        
+        // 图表2: 即将到期维护车辆时间分布 (水平条形图)
+        const upcomingMaintenanceCtx = document.getElementById('upcomingMaintenanceChart').getContext('2d');
+        
+        // 解析从后端传递的数据
+        const upcomingMaintenanceData = JSON.parse('{{ upcoming_maintenance_data|safe }}');
+        
+        // 创建渐变色
+        const criticalGradient = upcomingMaintenanceCtx.createLinearGradient(0, 0, 400, 0);
+        criticalGradient.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
+        criticalGradient.addColorStop(1, 'rgba(255, 99, 132, 0.6)');
+        
+        const warningGradient = upcomingMaintenanceCtx.createLinearGradient(0, 0, 400, 0);
+        warningGradient.addColorStop(0, 'rgba(255, 159, 64, 0.9)');
+        warningGradient.addColorStop(1, 'rgba(255, 159, 64, 0.6)');
+        
+        const cautionGradient = upcomingMaintenanceCtx.createLinearGradient(0, 0, 400, 0);
+        cautionGradient.addColorStop(0, 'rgba(255, 205, 86, 0.9)');
+        cautionGradient.addColorStop(1, 'rgba(255, 205, 86, 0.6)');
+        
+        const normalGradient = upcomingMaintenanceCtx.createLinearGradient(0, 0, 400, 0);
+        normalGradient.addColorStop(0, 'rgba(75, 192, 192, 0.9)');
+        normalGradient.addColorStop(1, 'rgba(75, 192, 192, 0.6)');
+        
+        upcomingMaintenanceChart = new Chart(upcomingMaintenanceCtx, {
+            type: 'bar',
+            data: {
+                labels: upcomingMaintenanceData.labels,
+                datasets: [{
+                    label: '车辆数量',
+                    data: upcomingMaintenanceData.data,
+                    backgroundColor: [
+                        criticalGradient,
+                        warningGradient,
+                        cautionGradient,
+                        normalGradient
+                    ],
+                    borderColor: upcomingMaintenanceData.borderColors,
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw}台车辆`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            drawBorder: false,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            precision: 0,
+                            color: '#666'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: function(context) {
+                                // 对已逾期标签着重显示
+                                if (context.tick && context.tick.label === '已逾期') {
+                                    return 'rgb(220, 53, 69)';
+                                }
+                                return '#666';
+                            },
+                            font: function(context) {
+                                // 对已逾期标签加粗显示
+                                if (context.tick && context.tick.label === '已逾期') {
+                                    return {
+                                        weight: 'bold'
+                                    };
+                                }
+                                return {
+                                    weight: ''
+                                };
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+        
+        // 图表3: 各车型距维护剩余时间的平均值 (柱状图)
+        const averageRemainingTimeCtx = document.getElementById('averageRemainingTimeChart').getContext('2d');
+        
+        // 解析从后端传递的数据
+        const modelRemainingTimeData = JSON.parse('{{ model_remaining_time_data|safe }}');
+        
+        // 创建渐变色
+        const remainingTimeGradient = averageRemainingTimeCtx.createLinearGradient(0, 400, 0, 0);
+        remainingTimeGradient.addColorStop(0, 'rgba(153, 102, 255, 0.5)');
+        remainingTimeGradient.addColorStop(1, 'rgba(153, 102, 255, 0.9)');
+        
+        averageRemainingTimeChart = new Chart(averageRemainingTimeCtx, {
+            type: 'bar',
+            data: {
+                labels: modelRemainingTimeData.models,
+                datasets: [{
+                    label: '平均剩余天数',
+                    data: modelRemainingTimeData.remaining_days,
+                    backgroundColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value < 0 ? 'rgba(255, 99, 132, 0.8)' : 'rgba(75, 192, 192, 0.8)';
+                    },
+                    borderColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value < 0 ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)';
+                    },
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                if (value < 0) {
+                                    return `已逾期: ${Math.abs(value)}天`;
+                                } else {
+                                    return `剩余: ${value}天`;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#666',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            display: true,
+                            drawBorder: false,
+                            color: function(context) {
+                                if (context.tick && context.tick.value === 0) {
+                                    return 'rgba(255, 0, 0, 0.2)';
+                                }
+                                return 'rgba(0, 0, 0, 0.05)';
+                            }
+                        },
+                        ticks: {
+                            precision: 0,
+                            color: '#666'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+        
+        // 添加天数和百分比视图切换功能
+        document.querySelectorAll('.view-toggle[data-chart="averageRemainingTimeChart"]').forEach(button => {
+            button.addEventListener('click', function() {
+                const viewType = this.getAttribute('data-view');
+                
+                // 切换按钮样式
+                document.querySelectorAll('.view-toggle[data-chart="averageRemainingTimeChart"]').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // 获取维护间隔参数
+                const maintenanceInterval = modelRemainingTimeData.maintenance_interval || 90;
+                
+                // 更新图表数据
+                if (viewType === 'count') {
+                    // 显示天数视图
+                    averageRemainingTimeChart.data.datasets[0].data = [...modelRemainingTimeData.remaining_days];
+                    averageRemainingTimeChart.data.datasets[0].label = '平均剩余天数';
+                    averageRemainingTimeChart.options.plugins.tooltip.callbacks.label = function(context) {
+                        const value = context.raw;
+                        if (value < 0) {
+                            return `已逾期: ${Math.abs(value)}天`;
+                        } else {
+                            return `剩余: ${value}天`;
+                        }
+                    };
+                } else {
+                    // 显示百分比视图 - 计算剩余时间占维护间隔的百分比
+                    const percentData = modelRemainingTimeData.remaining_days.map(days => {
+                        // 逾期维护的百分比为负值
+                        return Math.round(days / maintenanceInterval * 100);
+                    });
+                    
+                    averageRemainingTimeChart.data.datasets[0].data = percentData;
+                    averageRemainingTimeChart.data.datasets[0].label = `剩余维护周期百分比 (${maintenanceInterval}天)`;
+                    averageRemainingTimeChart.options.plugins.tooltip.callbacks.label = function(context) {
+                        const value = context.raw;
+                        if (value < 0) {
+                            return `已逾期: ${Math.abs(value)}%`;
+                        } else {
+                            return `剩余: ${value}%`;
+                        }
+                    };
+                }
+                
+                // 更新图表
+                averageRemainingTimeChart.update();
+            });
+        });
+        
+        // 图表4: 各车辆型号平均每车维护次数 (柱状图)
+        const maintenanceFrequencyCtx = document.getElementById('maintenanceFrequencyChart').getContext('2d');
+        
+        // 解析从后端传递的数据
+        const modelMaintenanceFrequencyData = JSON.parse('{{ model_maintenance_frequency_data|safe }}');
+        
+        // 创建渐变色
+        const frequencyGradient = maintenanceFrequencyCtx.createLinearGradient(0, 400, 0, 0);
+        frequencyGradient.addColorStop(0, 'rgba(54, 162, 235, 0.5)');
+        frequencyGradient.addColorStop(1, 'rgba(54, 162, 235, 0.9)');
+        
+        maintenanceFrequencyChart = new Chart(maintenanceFrequencyCtx, {
+            type: 'bar',
+            data: {
+                labels: modelMaintenanceFrequencyData.models,
+                datasets: [{
+                    label: '平均维护次数',
+                    data: modelMaintenanceFrequencyData.frequencies,
+                    backgroundColor: frequencyGradient,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    barPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                return `平均每车: ${context.raw}次`;
+                            },
+                            afterLabel: function(context) {
+                                return '每两条维护记录计为一次完整维护';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#666',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            drawBorder: false,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        title: {
+                            display: true,
+                            text: '次数/车',
+                            color: '#666',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        ticks: {
+                            color: '#666'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+        
+        // 添加排序功能
+        document.querySelectorAll('.sort-chart[data-chart="maintenanceFrequencyChart"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sortType = this.getAttribute('data-sort');
+                
+                // 获取原始数据
+                const originalData = [...modelMaintenanceFrequencyData.frequencies];
+                const originalLabels = [...modelMaintenanceFrequencyData.models];
+                
+                // 创建数据和标签的配对数组，以便一起排序
+                const combinedData = originalLabels.map((label, index) => ({
+                    label: label,
+                    value: originalData[index]
+                }));
+                
+                // 根据排序类型进行排序
+                if (sortType === 'asc') {
+                    // 从少到多排序
+                    combinedData.sort((a, b) => a.value - b.value);
+                } else if (sortType === 'desc') {
+                    // 从多到少排序
+                    combinedData.sort((a, b) => b.value - a.value);
+                } else if (sortType === 'alpha') {
+                    // 按车型名称排序
+                    combinedData.sort((a, b) => a.label.localeCompare(b.label));
+                }
+                
+                // 更新图表数据
+                maintenanceFrequencyChart.data.labels = combinedData.map(item => item.label);
+                maintenanceFrequencyChart.data.datasets[0].data = combinedData.map(item => item.value);
+                
+                // 更新图表
+                maintenanceFrequencyChart.update();
+                
+                // 更新下拉菜单按钮文字
+                let buttonText = "排序方式";
+                if (sortType === 'asc') buttonText = "次数从少到多";
+                else if (sortType === 'desc') buttonText = "次数从多到少";
+                else if (sortType === 'alpha') buttonText = "按车型名称";
+                
+                this.closest('.dropdown').querySelector('.dropdown-toggle').textContent = buttonText;
+            });
+        });
+        
+        // 图表5: 车辆年龄分布图
+        const vehicleAgeDistributionCtx = document.getElementById('vehicleAgeDistributionChart').getContext('2d');
+        
+        // 解析从后端传递的数据
+        const vehicleAgeData = JSON.parse('{{ vehicle_age_distribution_data|safe }}');
+        
+        // 创建总数数据集
+        const totalDataset = {
+            label: '总数',
+            data: vehicleAgeData.datasets.length > 0 ? vehicleAgeData.labels.map((_, i) => {
+                return vehicleAgeData.datasets.reduce((sum, dataset) => sum + dataset.data[i], 0);
+            }) : [],
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            borderColor: 'rgba(0, 0, 0, 0.6)',
+            borderWidth: 2,
+            type: 'line',
+            order: 0
+        };
+        
+        // 默认显示总数数据集
+        const allDatasets = [...vehicleAgeData.datasets];
+        if (totalDataset.data.length > 0) {
+            allDatasets.push(totalDataset);
+        }
+        
+        // 创建图表
+        vehicleAgeDistributionChart = new Chart(vehicleAgeDistributionCtx, {
+            type: 'bar',
+            data: {
+                labels: vehicleAgeData.labels,
+                datasets: allDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                return `${label}: ${context.raw} 台`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '车辆年龄',
+                            color: '#666',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            display: false,
+                            drawBorder: true
+                        },
+                        ticks: {
+                            color: '#666'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '车辆数量',
+                            color: '#666',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            drawBorder: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            precision: 0,
+                            color: '#666'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+        
+        // 显示/隐藏总数
+        document.getElementById('showTotal').addEventListener('change', function() {
+            if (this.checked) {
+                // 添加总数数据集（如果不存在）
+                const hasTotal = vehicleAgeDistributionChart.data.datasets.some(ds => ds.label === '总数');
+                if (!hasTotal && totalDataset.data.length > 0) {
+                    vehicleAgeDistributionChart.data.datasets.push(totalDataset);
+                }
+            } else {
+                // 移除总数数据集
+                const totalIndex = vehicleAgeDistributionChart.data.datasets.findIndex(ds => ds.label === '总数');
+                if (totalIndex !== -1) {
+                    vehicleAgeDistributionChart.data.datasets.splice(totalIndex, 1);
+                }
+            }
+            vehicleAgeDistributionChart.update();
+        });
+        
+        // 切换图表类型
+        document.querySelector('.chart-type-selector').addEventListener('change', function() {
+            const chartType = this.value;
+            
+            // 更新所有数据集的类型
+            vehicleAgeDistributionChart.data.datasets.forEach((dataset, i) => {
+                // 总数数据集始终保持为线图
+                if (dataset.label === '总数') {
+                    dataset.type = 'line';
+                } else {
+                    if (chartType === 'stacked') {
+                        dataset.type = 'bar';
+                    } else {
+                        dataset.type = chartType;
+                    }
+                }
+            });
+            
+            // 更新堆叠选项
+            if (chartType === 'stacked') {
+                vehicleAgeDistributionChart.options.scales.x.stacked = true;
+                vehicleAgeDistributionChart.options.scales.y.stacked = true;
+            } else {
+                vehicleAgeDistributionChart.options.scales.x.stacked = false;
+                vehicleAgeDistributionChart.options.scales.y.stacked = false;
+            }
+            
+            vehicleAgeDistributionChart.update();
+        });
+        
+        // 图表下载功能 - 修复版本
+        document.querySelectorAll('.download-chart').forEach(button => {
+            button.addEventListener('click', function() {
+                const chartId = this.getAttribute('data-chart');
+                const chartCanvas = document.getElementById(chartId);
+                const chartName = chartCanvas.closest('.card').querySelector('.card-title').textContent.trim();
+                
+                try {
+                    // 获取当前图表对象
+                    let chart;
+                    switch(chartId) {
+                        case 'maintenanceStatusChart':
+                            chart = maintenanceStatusChart;
+                            break;
+                        case 'upcomingMaintenanceChart':
+                            chart = upcomingMaintenanceChart;
+                            break;
+                        case 'averageRemainingTimeChart':
+                            chart = averageRemainingTimeChart;
+                            break;
+                        case 'maintenanceFrequencyChart':
+                            chart = maintenanceFrequencyChart;
+                            break;
+                        case 'vehicleAgeDistributionChart':
+                            chart = vehicleAgeDistributionChart;
+                            break;
+                    }
+                    
+                    if (!chart) {
+                        console.error('找不到图表对象:', chartId);
+                        return;
+                    }
+                    
+                    // 直接使用现有画布导出图片
+                    const link = document.createElement('a');
+                    link.download = `${chartName.replace(/\s+/g, '_')}.png`;
+                    
+                    // 创建临时高分辨率画布
+                    const tempCanvas = document.createElement('canvas');
+                    const scale = 3; // 3倍分辨率
+                    tempCanvas.width = chartCanvas.width * scale;
+                    tempCanvas.height = chartCanvas.height * scale;
+                    
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.scale(scale, scale);
+                    tempCtx.fillStyle = '#ffffff';
+                    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    
+                    // 绘制图表到高分辨率画布
+                    tempCtx.drawImage(chartCanvas, 0, 0);
+                    
+                    // 转换为数据URL并触发下载
+                    link.href = tempCanvas.toDataURL('image/png');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                } catch (err) {
+                    console.error('导出图表错误:', err);
+                    alert('导出图表失败，请重试');
+                }
+            });
+        });
+        
+        // 清除所有已存在的图表实例，防止重复创建
+        window.addEventListener('beforeunload', function() {
+            maintenanceStatusChart.destroy();
+            upcomingMaintenanceChart.destroy();
+            averageRemainingTimeChart.destroy();
+            maintenanceFrequencyChart.destroy();
+            vehicleAgeDistributionChart.destroy();
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,643 @@
+{% extends "finance/analysis_base.html" %}
+
+{% block title %}收入分析 - 财务管理{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    /* 使用固定高度确保卡片一致 */
+    .first-row-card {
+        height: 400px !important;
+    }
+    
+    .second-row-card {
+        height: 380px !important;
+    }
+    
+    .third-row-card {
+        height: 380px !important;
+    }
+    
+    .chart-container {
+        height: 320px !important;
+        position: relative;
+    }
+    
+    .table-container {
+        height: 320px !important;
+        overflow-y: auto;
+    }
+    
+    /* 确保卡片内部内容适应高度 */
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    /* 确保标题不占太多空间 */
+    .analysis-title {
+        margin-bottom: 15px;
+    }
+    
+    /* 提示图标样式 */
+    .info-tooltip .bi-info-circle-fill {
+        font-size: 1rem;
+        vertical-align: middle;
+        color: #007bff;
+    }
+    
+    .analysis-title {
+        display: flex;
+        align-items: center;
+    }
+    
+    .analysis-title .info-tooltip {
+        margin-left: 8px;
+        text-decoration: none;
+    }
+    
+    .bs-tooltip-auto[data-popper-placement^=top] .tooltip-inner, 
+    .bs-tooltip-top .tooltip-inner {
+        max-width: 300px;
+        text-align: left;
+        padding: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block analysis_content %}
+
+
+
+<div class="row">
+    <!-- 收入趋势图 -->
+    <div class="col-lg-8">
+        <div class="card analysis-card" style="height: 400px; margin-bottom: 20px;">
+            <div class="card-header">
+                <i class="fas fa-chart-line me-1"></i>
+                收入趋势分析
+                <a href="javascript:void(0);" class="info-tooltip" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       data-bs-html="true"
+                       title="{{ _("<div style='text-align:left'>展示特定时间段内的日收入变化情况。<br/>数据来源：已完成订单的收入总和。<br/>参考区间：所选日期范围内的每日数据。</div>") }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </a>
+            </div>
+            <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
+               
+                <div style="flex: 1; position: relative;">
+                    <canvas id="incomeChart" style="width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 收入总计 -->
+    <div class="col-lg-4">
+        <div class="card analysis-card" style="height: 400px; margin-bottom: 20px;">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                收入概览
+                <a href="javascript:void(0);" class="info-tooltip" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       data-bs-html="true"
+                       title="{{ _("<div style='text-align:left'>汇总展示当前选定时间区间内的总收入及相关统计数据。<br/>总收入：所选日期范围内所有收入的累计总和。<br/>日均收入：总收入除以天数。<br/>同比增长：与上一个相同长度时间段的收入比较。</div>") }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </a>
+            </div>
+            <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
+                
+                <div class="row" style="flex: 1;">
+                    <div class="col-md-12 mb-3">
+                        <div class="alert alert-primary text-center">
+                            <h3 id="totalIncome">¥0.00</h3>
+                            <p class="mb-0">{{ _("总收入") }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-success text-center">
+                            <h4 id="avgDailyIncome">¥0.00</h4>
+                            <p class="mb-0">{{ _("日均收入") }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-info text-center">
+                            <h4 id="incomeGrowth">0%</h4>
+                            <p class="mb-0">{{ _("同比增长") }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 收入来源分布 -->
+    <div class="col-lg-6">
+        <div class="card analysis-card" style="height: 380px; margin-bottom: 20px;">
+            <div class="card-header">
+                <i class="fas fa-chart-pie me-1"></i>
+                收入来源分布
+                <a href="javascript:void(0);" class="info-tooltip" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       data-bs-html="true"
+                       title="{{ _("<div style='text-align:left'>展示不同类型收入来源的占比分布。<br/>数据来源：按收入类型分类统计的金额。<br/>计算方式：各类型收入金额占总收入的百分比。</div>") }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </a>
+            </div>
+            <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
+          
+                <div style="flex: 1; position: relative;">
+                    <canvas id="incomeSourceChart" style="width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 时段收入分布 -->
+    <div class="col-lg-6">
+        <div class="card analysis-card" style="height: 380px; margin-bottom: 20px;">
+            <div class="card-header">
+                <i class="bi bi-bar-chart me-1"></i>
+                时段收入分布
+                <a href="javascript:void(0);" class="info-tooltip" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       data-bs-html="true"
+                       title="{{ _("<div style='text-align:left'>展示24小时内不同时段的收入情况。<br/>数据来源：按小时分组的订单收入。<br/>统计口径：统计所选时间范围内各小时段的平均收入。</div>") }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </a>
+            </div>
+            <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
+        
+                <div style="flex: 1; position: relative;">
+                    <canvas id="hourlyIncomeChart" style="width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 付款方式分布 -->
+    <div class="col-lg-6">
+        <div class="card analysis-card" style="height: 380px; margin-bottom: 20px;">
+            <div class="card-header">
+                <i class="fas fa-chart-pie me-1"></i>
+                付款方式分布
+                <a href="javascript:void(0);" class="info-tooltip" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       data-bs-html="true"
+                       title="{{ _("<div style='text-align:left'>展示不同付款方式的使用情况。<br/>数据来源：按支付渠道分类的订单金额。<br/>统计范围：包括微信支付、支付宝、余额支付等渠道的累计金额。</div>") }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </a>
+            </div>
+            <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
+              
+                <div style="flex: 1; position: relative;">
+                    <canvas id="paymentMethodChart" style="width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 收入详细数据表 -->
+    <div class="col-lg-6">
+        <div class="card analysis-card" style="height: 380px; margin-bottom: 20px;">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                日收入明细
+                <a href="javascript:void(0);" class="info-tooltip" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       data-bs-html="true"
+                       title="{{ _("<div style='text-align:left'>展示每日收入的详细数据。<br/>包含信息：日期、订单数、收入金额、环比变化。<br/>环比变化：与前一日相比的收入变化百分比。</div>") }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </a>
+            </div>
+            <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
+    
+                <div style="flex: 1; overflow-y: auto;">
+                    <table class="table table-sm table-hover" id="incomeDetailTable">
+                        <thead>
+                            <tr>
+                                <th>{{ _("日期") }}</th>
+                                <th>{{ _("订单数") }}</th>
+                                <th>{{ _("收入金额") }}</th>
+                                <th>{{ _("日环比") }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 数据将由JavaScript填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block analysis_scripts %}
+<!-- 直接在当前页面添加Chart.js CDN引用 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    // 确保DOM加载完成后调整卡片高度
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl, {
+                html: true,
+                container: 'body'
+            });
+        });
+        
+        // 检查Chart是否已定义
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js未能正确加载，尝试重新加载...');
+            // 动态加载Chart.js
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js';
+            script.onload = function() {
+                console.log('Chart.js已成功加载');
+                // Chart.js加载完成后立即刷新数据
+                const dateRangeSelect = document.getElementById('date-range');
+                if (dateRangeSelect) {
+                    dateRangeSelect.dispatchEvent(new Event('change'));
+                    document.getElementById('apply-filter').click();
+                }
+            };
+            document.head.appendChild(script);
+        }
+    });
+
+    // 全局变量存储图表实例
+    let incomeChart = null;
+    let incomeSourceChart = null;
+    let hourlyIncomeChart = null;
+    let paymentMethodChart = null;
+    
+    // 刷新数据分析
+    function refreshAnalysisData(startDate, endDate) {
+        console.log(`开始刷新收入分析数据，日期范围: ${startDate} 至 ${endDate}`);
+        
+        // 显示加载中状态
+        document.querySelectorAll('.chart-container').forEach(container => {
+            const loader = document.createElement('div');
+            loader.className = 'text-center loading-indicator';
+            loader.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("加载中...") }}</span></div>';
+            
+            // 清除容器现有内容并添加加载指示器
+            container.innerHTML = '';
+            container.appendChild(loader);
+            
+            // 重置容器尺寸，确保不会超出其父元素
+            container.style.height = '300px';
+            container.style.overflow = 'hidden';
+        });
+        
+        // 清空数据表格
+        document.getElementById('incomeDetailTable').querySelector('tbody').innerHTML = 
+            '<tr><td colspan="4" class="text-center">加载中...</td></tr>';
+        
+        fetch(`/finance/api/income_data?start_date=${startDate}&end_date=${endDate}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 清除所有加载指示器
+                document.querySelectorAll('.loading-indicator').forEach(loader => loader.remove());
+                
+                // 重置图表容器，准备渲染新图表
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    // 清除容器，准备新图表
+                    container.innerHTML = '';
+                    
+                    // 根据容器ID创建新的canvas元素
+                    const canvasId = container.dataset.chartId || container.querySelector('canvas')?.id;
+                    if (canvasId) {
+                        const canvas = document.createElement('canvas');
+                        canvas.id = canvasId;
+                        container.appendChild(canvas);
+                    }
+                });
+                
+                // 更新统计指标
+                updateIncomeStats(data);
+                
+                // 初始化各图表
+                initIncomeChart(data);
+                initIncomeSourceChart(data);
+                initHourlyIncomeChart(data);
+                initPaymentMethodChart(data);
+                
+                // 更新数据表格
+                updateIncomeDetailTable(data);
+                
+                console.log('收入分析数据刷新完成');
+            })
+            .catch(error => {
+                console.error('获取数据失败:', error);
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.innerHTML = `<div class="alert alert-danger">加载数据失败: ${error.message}</div>`;
+                });
+                document.getElementById('incomeDetailTable').querySelector('tbody').innerHTML = 
+                    `<tr><td colspan="4" class="text-center text-danger">加载数据失败: ${error.message}</td></tr>`;
+            });
+    }
+    
+    // 更新收入统计信息
+    function updateIncomeStats(data) {
+        document.getElementById('totalIncome').textContent = `¥${data.total_income.toFixed(2)}`;
+        document.getElementById('avgDailyIncome').textContent = `¥${data.avg_daily_income.toFixed(2)}`;
+        
+        // 设置增长率样式
+        const growthElement = document.getElementById('incomeGrowth');
+        const growthRate = data.income_growth;
+        growthElement.textContent = `${growthRate >= 0 ? '+' : ''}${growthRate.toFixed(1)}%`;
+        growthElement.parentElement.className = growthRate >= 0 ? 'alert alert-success' : 'alert alert-danger';
+    }
+    
+    // 初始化收入趋势图
+    function initIncomeChart(data) {
+        // 确保Chart对象已定义
+        if (typeof Chart === 'undefined') {
+            console.error('图表库未加载，无法创建收入趋势图');
+            return;
+        }
+        
+        const canvas = document.getElementById('incomeChart');
+        if (!canvas) {
+            console.error('找不到收入趋势图canvas元素');
+            return;
+        }
+        
+        // 确保canvas元素尺寸正确
+        const container = canvas.parentElement;
+        if (container) {
+            // 重置canvas元素大小
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        // 销毁可能存在的旧图表实例
+        if (window.incomeChart instanceof Chart) {
+            window.incomeChart.destroy();
+        }
+        
+        // 创建新图表
+        window.incomeChart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: data.dates,
+                datasets: [{
+                    label: '日收入(元)',
+                    data: data.daily_income,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => `¥${value}`
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: context => `收入: ¥${context.raw.toFixed(2)}`
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 初始化收入来源分布图
+    function initIncomeSourceChart(data) {
+        // 确保Chart对象已定义
+        if (typeof Chart === 'undefined') {
+            console.error('图表库未加载，无法创建收入来源分布图');
+            return;
+        }
+        
+        const canvas = document.getElementById('incomeSourceChart');
+        if (!canvas) {
+            console.error('找不到收入来源分布图canvas元素');
+            return;
+        }
+        
+        // 确保canvas元素尺寸正确
+        const container = canvas.parentElement;
+        if (container) {
+            // 重置canvas元素大小
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        // 销毁可能存在的旧图表实例
+        if (window.incomeSourceChart instanceof Chart) {
+            window.incomeSourceChart.destroy();
+        }
+        
+        // 创建新图表
+        window.incomeSourceChart = new Chart(canvas, {
+            type: 'pie',
+            data: {
+                labels: data.income_sources.map(item => item.name),
+                datasets: [{
+                    data: data.income_sources.map(item => item.value),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: context => {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                const percentage = ((value / total) * 100).toFixed(2);
+                                return `${label}: ¥${value.toFixed(2)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 初始化时段收入分布图
+    function initHourlyIncomeChart(data) {
+        // 确保Chart对象已定义
+        if (typeof Chart === 'undefined') {
+            console.error('图表库未加载，无法创建时段收入分布图');
+            return;
+        }
+        
+        const canvas = document.getElementById('hourlyIncomeChart');
+        if (!canvas) {
+            console.error('找不到时段收入分布图canvas元素');
+            return;
+        }
+        
+        // 确保canvas元素尺寸正确
+        const container = canvas.parentElement;
+        if (container) {
+            // 重置canvas元素大小
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        // 销毁可能存在的旧图表实例
+        if (window.hourlyIncomeChart instanceof Chart) {
+            window.hourlyIncomeChart.destroy();
+        }
+        
+        // 创建新图表
+        window.hourlyIncomeChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: data.hourly_stats.map(item => `${item.hour}:00`),
+                datasets: [{
+                    label: '时段收入(元)',
+                    data: data.hourly_stats.map(item => item.income),
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => `¥${value}`
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: context => `收入: ¥${context.raw.toFixed(2)}`
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 初始化付款方式分布图
+    function initPaymentMethodChart(data) {
+        // 确保Chart对象已定义
+        if (typeof Chart === 'undefined') {
+            console.error('图表库未加载，无法创建付款方式分布图');
+            return;
+        }
+        
+        const canvas = document.getElementById('paymentMethodChart');
+        if (!canvas) {
+            console.error('找不到付款方式分布图canvas元素');
+            return;
+        }
+        
+        // 确保canvas元素尺寸正确
+        const container = canvas.parentElement;
+        if (container) {
+            // 重置canvas元素大小
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        // 销毁可能存在的旧图表实例
+        if (window.paymentMethodChart instanceof Chart) {
+            window.paymentMethodChart.destroy();
+        }
+        
+        // 创建新图表
+        window.paymentMethodChart = new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: data.payment_methods.map(item => item.name),
+                datasets: [{
+                    data: data.payment_methods.map(item => item.value),
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 206, 86, 0.7)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: context => {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                const percentage = ((value / total) * 100).toFixed(2);
+                                return `${label}: ¥${value.toFixed(2)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 更新收入详细数据表
+    function updateIncomeDetailTable(data) {
+        const tableBody = document.getElementById('incomeDetailTable').querySelector('tbody');
+        tableBody.innerHTML = '';
+        
+        // 填充表格数据
+        data.daily_details.forEach(detail => {
+            const row = document.createElement('tr');
+            
+            // 设置日环比的样式
+            const changeClass = detail.daily_change >= 0 ? 'text-success' : 'text-danger';
+            const changeIcon = detail.daily_change >= 0 ? '↑' : '↓';
+            
+            row.innerHTML = `
+                <td>${detail.date}</td>
+                <td>${detail.order_count}</td>
+                <td>¥${detail.income.toFixed(2)}</td>
+                <td class="${changeClass}">${changeIcon} ${Math.abs(detail.daily_change).toFixed(2)}%</td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+    }
+</script>
+{% endblock %} 

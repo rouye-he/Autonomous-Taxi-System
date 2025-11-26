@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+
+{% block title %}订单详情 - {{ order.order_number }}{% endblock %}
+
+{% block styles %}
+<style>
+    :root {
+        --card-border-radius: 10px;
+        --primary-color: #0d6efd;
+        --success-color: #198754;
+        --warning-color: #ffc107;
+        --info-color: #0dcaf0;
+        --secondary-color: #6c757d;
+        --dark-color: #212529;
+    }
+    
+    .order-details-card {
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: var(--card-border-radius);
+        overflow: hidden;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .order-details-card.primary-card {
+        border: 2px solid var(--primary-color);
+    }
+    
+    .order-details-card.success-card {
+        border: 2px solid var(--success-color);
+    }
+    
+    .order-details-card.info-card {
+        border: 2px solid var(--info-color);
+    }
+    
+    .order-details-card.secondary-card {
+        border: 2px solid var(--secondary-color);
+    }
+    
+    .order-details-card.warning-card {
+        border: 2px solid var(--warning-color);
+    }
+    
+    .order-details-card.dark-card {
+        border: 2px solid var(--dark-color);
+    }
+    
+    .order-details-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-header {
+        border-bottom: none;
+        padding: 15px 20px;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .card-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 30%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.1));
+    }
+    
+    .card-body {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .detail-section {
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px dashed rgba(0,0,0,0.08);
+    }
+    
+    .detail-section:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        font-weight: 700;
+        color: #343a40;
+        font-size: 0.9rem;
+        width: 40%;
+        display: inline-block;
+    }
+    
+    .detail-value {
+        color: #212529;
+        font-size: 1rem;
+        width: 60%;
+        text-align: right;
+        display: inline-block;
+    }
+    
+    .timeline {
+        position: relative;
+        padding: 1rem 0;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        height: 100%;
+        width: 2px;
+        background: #e9ecef;
+        left: 15px;
+        top: 0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 40px;
+        padding-bottom: 1.5rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        left: 9px;
+        top: 5px;
+    }
+    
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    
+    .timeline-date {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    
+    .amount-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--success-color);
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.35em 0.8em;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 50rem;
+    }
+    
+    .status-badge.completed {
+        background-color: rgba(25, 135, 84, 0.15);
+        color: #155724;
+    }
+    
+    .status-badge.in-progress {
+        background-color: rgba(13, 110, 253, 0.15);
+        color: #004085;
+    }
+    
+    .status-badge.waiting {
+        background-color: rgba(255, 193, 7, 0.15);
+        color: #856404;
+    }
+    
+    .payment-method-icon {
+        width: 36px;
+        height: 36px;
+        margin-right: 12px;
+        vertical-align: middle;
+        border-radius: 4px;
+        object-fit: cover;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .location-badge {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 5px 10px;
+        margin-top: 5px;
+        display: inline-block;
+    }
+    
+    .coord-text {
+        font-family: monospace;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .breadcrumb {
+        background-color: transparent;
+        padding-left: 0;
+    }
+    
+    .action-btn {
+        min-width: 120px;
+        border-radius: 50rem;
+        font-weight: 500;
+        padding: 0.5rem 1.25rem;
+    }
+    
+    .action-btn i {
+        margin-right: 8px;
+    }
+    
+    .detail-grid {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .status-icon {
+        font-size: 2.5rem;
+        margin-right: 15px;
+    }
+    
+    .order-header {
+        background-color: #f8f9fa;
+        border-radius: var(--card-border-radius);
+        padding: 20px;
+        margin-bottom: 25px;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .card-title i {
+        margin-right: 8px;
+    }
+    
+    .row-eq-height {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .row-eq-height > [class*='col-'] {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .row-eq-height .card {
+        height: 100%;
+    }
+    
+    .location-info {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: var(--card-border-radius);
+        margin-top: 10px;
+    }
+    
+    .location-item {
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+    }
+    
+    .location-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .payment-info {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        background-color: rgba(25, 135, 84, 0.05);
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid rgba(25, 135, 84, 0.1);
+    }
+    
+    .payment-icon {
+        font-size: 1.75rem;
+        margin-right: 12px;
+        color: var(--success-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-3">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('orders.index') }}">订单管理</a></li>
+                    <li class="breadcrumb-item active">订单详情</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- 订单头部信息 -->
+    <div class="order-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            {% if order.order_status == '已结束' or order.order_status == '已完成' %}
+            <div class="status-icon text-success"><i class="bi bi-check-circle-fill"></i></div>
+            {% elif order.order_status == '进行中' %}
+            <div class="status-icon text-primary"><i class="bi bi-car-front-fill"></i></div>
+            {% else %}
+            <div class="status-icon text-warning"><i class="bi bi-hourglass-split"></i></div>
+            {% endif %}
+            
+            <div>
+                <h2 class="mb-0">订单 #{{ order.order_number }}</h2>
+                <div class="text-muted mt-1">
+                    创建于 {{ order.create_time }}
+                    {% if order.arrival_time %}
+                    • 到达于 {{ order.arrival_time }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            {% if order.order_status == '已结束' or order.order_status == '已完成' %}
+            <span class="status-badge completed">{{ order.order_status }}</span>
+            {% elif order.order_status == '进行中' %}
+            <span class="status-badge in-progress">{{ order.order_status }}</span>
+            {% else %}
+            <span class="status-badge waiting">{{ order.order_status }}</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 基本信息和费用信息 -->
+    <div class="row row-eq-height mb-4">
+        <div class="col-md-6">
+            <div class="card order-details-card primary-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-info-circle"></i>订单基本信息</h5>
+                </div>
+                <div class="card-body">
+                    <div class="detail-grid">
+                        <div class="detail-section">
+                            <div class="detail-label">订单ID: {{ order.order_id }}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">订单编号: {{ order.order_number }}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">用户ID: {{ order.user_id }}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">车辆ID: {{ order.vehicle_id or '未分配' }}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">订单状态:
+                                {% if order.order_status == '已结束' or order.order_status == '已完成' %}
+                                <span class="status-badge completed">{{ order.order_status }}</span>
+                                {% elif order.order_status == '进行中' %}
+                                <span class="status-badge in-progress">{{ order.order_status }}</span>
+                                {% else %}
+                                <span class="status-badge waiting">{{ order.order_status }}</span>
+                                {% endif %}
+                            </div>
+                            
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">城市:{{ order.city_code }}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">创建时间:{{ order.create_time }}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">到达时间:{{ order.arrival_time or '尚未到达' }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card order-details-card success-card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-currency-yen"></i>费用详情</h5>
+                </div>
+                <div class="card-body">
+                    {% if details %}
+                        {% set latest = details[0] %}
+                        <div class="text-center my-4">
+                            <div class="fs-6 text-muted">总金额: ¥{{ latest.amount }}</div>
+                        
+                            <div class="badge bg-light text-dark">
+                                <i class="bi bi-speedometer2 me-1"></i>行驶距离: {{ latest.distance }} 公里
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="payment-info">
+                            <div class="payment-icon">
+                                {% if latest.payment_method == '微信支付' %}
+                                <img src="{{ url_for('static', filename='images/wechat_pay.jpg') }}" alt="微信支付" class="payment-method-icon">
+                                {% elif latest.payment_method == '支付宝' %}
+                                <img src="{{ url_for('static', filename='images/alipay.jpg') }}" alt="支付宝" class="payment-method-icon">
+                                {% elif latest.payment_method == '余额支付' %}
+                                <img src="{{ url_for('static', filename='images/bank_card.jpg') }}" alt="余额支付" class="payment-method-icon">
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="detail-label">支付方式: {{ latest.payment_method }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <div class="detail-label">详情记录ID: #{{ latest.id }}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">创建时间: {{ latest.created_at }}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">更新时间: {{ latest.updated_at }}</div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            没有找到此订单的费用详情记录
+                        </div>
+                        {% if order.order_status == '已结束' or order.order_status == '已完成' %}
+                            <button type="button" id="generateDetailsBtn" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-circle"></i>生成订单详情
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 位置信息和用户信息 -->
+    <div class="row row-eq-height mb-4">
+        <div class="col-md-6">
+            <div class="card order-details-card info-card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-geo-alt"></i>位置信息</h5>
+                </div>
+                <div class="card-body">
+                    <div class="location-info">
+                        <div class="location-item">
+                            <div class="d-flex justify-content-between">
+                                <div class="detail-label"><i class="bi bi-box-arrow-up-right text-primary me-1"></i>上车地点</div>
+                                <div class="location-badge">
+                                    <span class="coord-text">X: {{ order.pickup_location_x }}</span> | 
+                                    <span class="coord-text">Y: {{ order.pickup_location_y }}</span>
+                                </div>
+                            </div>
+                            <div class="detail-value mt-2">{{ order.pickup_location }}</div>
+                        </div>
+                        <div class="location-item">
+                            <div class="d-flex justify-content-between">
+                                <div class="detail-label"><i class="bi bi-box-arrow-in-down-right text-danger me-1"></i>下车地点</div>
+                                <div class="location-badge">
+                                    <span class="coord-text">X: {{ order.dropoff_location_x }}</span> | 
+                                    <span class="coord-text">Y: {{ order.dropoff_location_y }}</span>
+                                </div>
+                            </div>
+                            <div class="detail-value mt-2">{{ order.dropoff_location }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card order-details-card secondary-card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-person"></i>乘客信息</h5>
+                </div>
+                <div class="card-body">
+                    <div class="detail-section">
+                        <div class="detail-label">用户ID: {{ order.user_id }}</div>
+                    </div>
+                    {% if order.username %}
+                    <div class="detail-section">
+                        <div class="detail-label">用户名: {{ order.username }}</div>
+                    </div>
+                    {% endif %}
+                    {% if order.real_name %}
+                    <div class="detail-section">
+                        <div class="detail-label">姓名: {{ order.real_name }}</div>
+                    </div>
+                    {% endif %}
+                    {% if order.phone %}
+                    <div class="detail-section">
+                        <div class="detail-label">手机号: {{ order.phone }}</div>
+                    </div>
+                    {% endif %}
+                    {% if order.email %}
+                    <div class="detail-section">
+                        <div class="detail-label">邮箱: {{ order.email }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 车辆信息和操作按钮 -->
+    <div class="row row-eq-height mb-4">
+        <div class="col-md-6">
+            <div class="card order-details-card warning-card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0"><i class="bi bi-car-front"></i>车辆信息</h5>
+                </div>
+                <div class="card-body">
+                    {% if order.vehicle_id %}
+                    <div class="detail-section">
+                        <div class="detail-label">车辆ID: {{ order.vehicle_id }}</div>
+                    
+                    </div>
+                    {% if order.plate_number %}
+                    <div class="detail-section">
+                        <div class="detail-label">车牌号: {{ order.plate_number }}</div>
+                    </div>
+                    {% endif %}
+                    {% if order.model %}
+                    <div class="detail-section">
+                        <div class="detail-label">车型: {{ order.model }}</div>
+                    </div>
+                    {% endif %}
+                    {% if order.current_location_name %}
+                    <div class="detail-section">
+                        <div class="detail-label">当前位置: {{ order.current_location_name }}</div>
+                    </div>
+                    {% if order.current_location_x and order.current_location_y %}
+                    <div class="location-badge">
+                        <span class="coord-text">X: {{ order.current_location_x }}</span> | 
+                        <span class="coord-text">Y: {{ order.current_location_y }}</span>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% else %}
+                    <div class="alert alert-light" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        此订单尚未分配车辆
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card order-details-card primary-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-tools"></i>订单操作</h5>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('orders.index') }}" class="btn btn-secondary action-btn">
+                            <i class="bi bi-arrow-left"></i>返回列表
+                        </a>
+                        {% if details %}
+                            <button type="button" id="printDetailsBtn" class="btn btn-info action-btn">
+                                <i class="bi bi-printer"></i>打印详情
+                            </button>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 订单详情历史记录 -->
+    {% if details and details|length > 1 %}
+    <div class="row row-eq-height">
+        <div class="col-12">
+            <div class="card order-details-card dark-card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-clock-history"></i>详情历史记录</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for detail in details %}
+                            <div class="timeline-item">
+                                <div class="timeline-date">{{ detail.created_at }}</div>
+                                <div class="fw-bold">订单详情 #{{ detail.id }}</div>
+                                <div>金额: ¥{{ detail.amount }} | 距离: {{ detail.distance }}公里 | 支付方式: {{ detail.payment_method }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Toast容器 -->
+<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // 生成订单详情按钮点击事件
+        $('#generateDetailsBtn').on('click', function() {
+            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 正在生成...');
+            
+            $.ajax({
+                url: '{{ url_for("order_details.generate_order_details_api", order_id=order.order_id) }}',
+                method: 'POST',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        showToast('订单详情生成成功', 'success');
+                        // 重新加载页面以显示新生成的详情
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showToast('订单详情生成失败: ' + response.message, 'danger');
+                        $('#generateDetailsBtn').prop('disabled', false).html('<i class="bi bi-plus-circle me-1"></i>生成订单详情');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('生成订单详情出错', xhr);
+                    let errorMsg = '生成订单详情出错';
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            errorMsg += ': ' + response.message;
+                        }
+                    } catch (e) {
+                        // 解析错误，使用默认错误消息
+                    }
+                    showToast(errorMsg, 'danger');
+                    $('#generateDetailsBtn').prop('disabled', false).html('<i class="bi bi-plus-circle me-1"></i>生成订单详情');
+                }
+            });
+        });
+        
+        // 打印详情按钮点击事件
+        $('#printDetailsBtn').on('click', function() {
+            window.print();
+        });
+        
+        // 辅助函数：显示Toast提示
+        function showToast(message, type = 'info', duration = 3000) {
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                const container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(container);
+            }
+            
+            $('#toastContainer').append(toastHtml);
+            const toast = $('#toastContainer .toast:last');
+            const bsToast = new bootstrap.Toast(toast, { delay: duration });
+            bsToast.show();
+            
+            // 自动清除toast元素
+            setTimeout(() => {
+                toast.remove();
+            }, duration + 500);
+        }
+    });
+</script>
+{% endblock %} 

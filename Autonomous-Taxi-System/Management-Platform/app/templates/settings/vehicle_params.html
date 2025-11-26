@@ -1,0 +1,498 @@
+<!-- 车辆参数设置 -->
+<div class="tab-pane fade show active" id="vehicle-params">
+    <!-- 加载指示器 -->
+    <div id="vehicle-params-loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">{{ _("加载中...") }}</span>
+        </div>
+        <p class="mt-2">{{ _("加载系统参数...") }}</p>
+    </div>
+    
+    <div id="vehicle-params-content" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>{{ _("车辆参数设置") }}</h4>
+            <button type="button" class="btn btn-outline-secondary" id="refreshParams"><i class="bi bi-arrow-repeat me-1"></i> {{ _("刷新参数") }}</button>
+        </div>
+    
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ _("车辆运行参数") }}</h5>
+            </div>
+            <div class="card-body">
+                <form id="vehicleRunningForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="vehicleSpeed" class="form-label">{{ _("车辆移动速度（像素/秒）") }}</label>
+                                <input type="number" class="form-control" id="VEHICLE_MOVEMENT_SPEED" name="VEHICLE_MOVEMENT_SPEED" step="50" min="100" max="2000">
+                                <div class="form-text">控制地图上车辆图标移动的速度</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="batteryConsumption" class="form-label">{{ _("电量消耗速率（%%/秒）") }}</label>
+                                <input type="number" class="form-control" id="BATTERY_CONSUMPTION_RATE" name="BATTERY_CONSUMPTION_RATE" step="0.01" min="0.01" max="10">
+                                <div class="form-text">车辆运行时电量的消耗速度</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="lowBatteryThreshold" class="form-label">{{ _("电量低阈值（%%）") }}</label>
+                                <input type="number" class="form-control" id="LOW_BATTERY_THRESHOLD" name="LOW_BATTERY_THRESHOLD" step="1" min="1" max="95">
+                                <div class="form-text">低于此值时车辆将前往充电</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="pickupWaitingTime" class="form-label">{{ _("乘客等待时间（秒）") }}</label>
+                                <input type="number" class="form-control" id="PICKUP_WAITING_TIME" name="PICKUP_WAITING_TIME" step="0.5" min="0">
+                                <div class="form-text">车辆在上车点等待乘客的时间</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="positionMovementInterval" class="form-label">{{ _("位置移动频率（秒）") }}</label>
+                                <input type="number" class="form-control" id="POSITION_MOVEMENT_INTERVAL" name="POSITION_MOVEMENT_INTERVAL" step="0.1" min="0.1">
+                                <div class="form-text">控制车辆实际移动的频率</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="batteryUpdateInterval" class="form-label">{{ _("电量更新频率（秒）") }}</label>
+                                <input type="number" class="form-control" id="BATTERY_UPDATE_INTERVAL" name="BATTERY_UPDATE_INTERVAL" step="0.1" min="0.1">
+                                <div class="form-text">控制车辆电量实际更新的频率</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="positionUpdateInterval" class="form-label">{{ _("位置数据库更新频率（秒）") }}</label>
+                                <input type="number" class="form-control" id="POSITION_UPDATE_INTERVAL" name="POSITION_UPDATE_INTERVAL" step="0.1" min="0.1">
+                                <div class="form-text">控制数据库中位置更新的频率</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="runningBatteryUpdateInterval" class="form-label">{{ _("运行中电量更新频率（秒）") }}</label>
+                                <input type="number" class="form-control" id="RUNNING_BATTERY_UPDATE_INTERVAL" name="RUNNING_BATTERY_UPDATE_INTERVAL" step="0.1" min="0.1">
+                                <div class="form-text">运行中状态电量更新频率</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary" onclick="saveParamsGroup('vehicleRunningForm')">{{ _("保存设置") }}</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 车辆维护参数 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ _("车辆维护参数") }}</h5>
+            </div>
+            <div class="card-body">
+                <form id="maintenanceForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="BASE_MAINTENANCE_COST" class="form-label">{{ _("基础维护费用（元/次）") }}</label>
+                                <input type="number" class="form-control" id="BASE_MAINTENANCE_COST" name="BASE_MAINTENANCE_COST" step="0.01" min="0">
+                                <div class="form-text">每辆车每次的基本维护费用</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="MAINTENANCE_INTERVAL" class="form-label">{{ _("维护间隔（天）") }}</label>
+                                <input type="number" class="form-control" id="MAINTENANCE_INTERVAL" name="MAINTENANCE_INTERVAL" step="1" min="1">
+                                <div class="form-text">车辆定期维护的时间间隔</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center border rounded p-3 mb-3">
+                                <div>
+                                    <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                                    <span class="text-muted">{{ _("车辆维护费用 = 基础维护费用 × 车型维护系数 × 城市系数") }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <div class="d-flex">
+                                    <i class="bi bi-tools me-3 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-1">{{ _("维护费用说明") }}</h6>
+                                        <p class="mb-0">{{ _("规律性的维护可以保障车辆的安全性，减少故障的发生。基础维护费用将根据不同车型和所在城市进行调整。各车型有特定的维护系数，反映其维护复杂性和零部件成本。不同城市的维护费用因人工成本和零配件价格也会有所差异。") }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="saveParamsGroup('maintenanceForm')">{{ _("保存设置") }}</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ _("车型价格设置") }}</h5>
+            </div>
+            <div class="card-body">
+                <form id="vehiclePriceForm">
+                    <div class="row mb-4">
+                        <!-- Alpha系列 蓝色边框 -->
+                        <div class="col-md-4">
+                            <div class="card border-primary h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0 fw-bold">{{ _("Alpha系列") }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="Alpha_X1_PRICE" class="form-label">{{ _("Alpha X1（元）") }}</label>
+                                        <input type="number" class="form-control" id="Alpha_X1_PRICE" name="Alpha_X1_PRICE" step="0.01" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Alpha_Nexus_PRICE" class="form-label">{{ _("Alpha Nexus（元）") }}</label>
+                                        <input type="number" class="form-control" id="Alpha_Nexus_PRICE" name="Alpha_Nexus_PRICE" step="0.01" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Alpha_Voyager_PRICE" class="form-label">{{ _("Alpha Voyager（元）") }}</label>
+                                        <input type="number" class="form-control" id="Alpha_Voyager_PRICE" name="Alpha_Voyager_PRICE" step="0.01" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Nova系列 绿色边框 -->
+                        <div class="col-md-4">
+                            <div class="card border-success h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0 fw-bold">{{ _("Nova系列") }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="Nova_S1_PRICE" class="form-label">{{ _("Nova S1（元）") }}</label>
+                                        <input type="number" class="form-control" id="Nova_S1_PRICE" name="Nova_S1_PRICE" step="0.01" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Nova_Quantum_PRICE" class="form-label">{{ _("Nova Quantum（元）") }}</label>
+                                        <input type="number" class="form-control" id="Nova_Quantum_PRICE" name="Nova_Quantum_PRICE" step="0.01" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Nova_Pulse_PRICE" class="form-label">{{ _("Nova Pulse（元）") }}</label>
+                                        <input type="number" class="form-control" id="Nova_Pulse_PRICE" name="Nova_Pulse_PRICE" step="0.01" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Neon系列 红色边框 -->
+                        <div class="col-md-4">
+                            <div class="card border-danger h-100">
+                                <div class="card-header bg-danger text-white">
+                                    <h6 class="mb-0 fw-bold">{{ _("Neon系列") }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="Neon_500_PRICE" class="form-label">{{ _("Neon 500（元）") }}</label>
+                                        <input type="number" class="form-control" id="Neon_500_PRICE" name="Neon_500_PRICE" step="0.01" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Neon_Zero_PRICE" class="form-label">{{ _("Neon Zero（元）") }}</label>
+                                        <input type="number" class="form-control" id="Neon_Zero_PRICE" name="Neon_Zero_PRICE" step="0.01" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="saveParamsGroup('vehiclePriceForm')">{{ _("保存设置") }}</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 车型系列参数设置 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ _("车型系列详细参数") }}</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">{{ _("选择车型系列查看并设置详细性能参数，包括订单价格系数、速度系数、电池容量系数等。") }}</p>
+                
+                <!-- 车型系列主卡片区域 -->
+                <div class="row mb-4">
+                    <!-- Alpha系列卡片 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">{{ _("Alpha系列") }}</h5>
+                                <span class="badge bg-light text-primary">{{ _("高端豪华型") }}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-car-side fa-4x text-primary"></i>
+                                </div>
+                                <p class="card-text">{{ _("Alpha系列是我们的旗舰高端系列，专注于豪华体验、卓越性能和尖端技术，价格较高但提供极致用户体验。") }}</p>
+                            </div>
+                            <div class="card-footer text-center">
+                                <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#alphaSeriesDetails" aria-expanded="false" aria-controls="alphaSeriesDetails"><i class="fas fa-chevron-down ms-1"></i> {{ _("查看3款车型") }}</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nova系列卡片 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-success">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">{{ _("Nova系列") }}</h5>
+                                <span class="badge bg-light text-success">{{ _("中端实用型") }}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-car-alt fa-4x text-success"></i>
+                                </div>
+                                <p class="card-text">{{ _("Nova系列是我们的主力市场产品，追求性价比、实用性和可靠性，价格适中，满足大多数家庭和个人用户需求。") }}</p>
+                            </div>
+                            <div class="card-footer text-center">
+                                <button class="btn btn-outline-success" type="button" data-bs-toggle="collapse" data-bs-target="#novaSeriesDetails" aria-expanded="false" aria-controls="novaSeriesDetails"><i class="fas fa-chevron-down ms-1"></i> {{ _("查看3款车型") }}</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Neon系列卡片 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">{{ _("Neon系列") }}</h5>
+                                <span class="badge bg-light text-danger">{{ _("年轻运动型") }}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-car-side fa-4x text-danger"></i>
+                                </div>
+                                <p class="card-text">{{ _("Neon系列面向追求个性与驾驶乐趣的年轻用户，强调动感设计、驾驶体验和科技感，价格中高但提供差异化体验。") }}</p>
+                            </div>
+                            <div class="card-footer text-center">
+                                <button class="btn btn-outline-danger" type="button" data-bs-toggle="collapse" data-bs-target="#neonSeriesDetails" aria-expanded="false" aria-controls="neonSeriesDetails"><i class="fas fa-chevron-down ms-1"></i> {{ _("查看2款车型") }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alpha系列车型详情 -->
+                <div class="collapse mb-5" id="alphaSeriesDetails">
+                    <div class="card border-primary">
+                        <div class="card-header bg-light">
+                            <h4 class="text-primary mb-0">{{ _("Alpha系列车型") }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-3 g-4">
+                                <!-- Alpha X1 -->
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Alpha X1</h5>
+                                            <span class="badge bg-primary" id="alpha_x1_price_badge">¥<span id="alpha_x1_price_value">235,000</span></span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ _("入门级豪华车型，结合了卓越性能与舒适体验，定位于追求品质的年轻精英客户。") }}</p>
+                                            <ul class="small">
+                                                <li>高密度智能电池组</li>
+                                                <li>碳纤维车身</li>
+                                                <li>高强度铝合金底盘</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#alphaX1Modal">{{ _("查看详情与参数设置") }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Alpha Nexus -->
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Alpha Nexus</h5>
+                                            <span class="badge bg-primary" id="alpha_nexus_price_badge">¥<span id="alpha_nexus_price_value">245,000</span></span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ _("面向科技爱好者的智能豪华车型，集成了最新自动驾驶辅助系统和增强现实导航。") }}</p>
+                                            <ul class="small">
+                                                <li>石墨烯增强复合电极技术</li>
+                                                <li>超长续航里程</li>
+                                                <li>增强现实导航</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#alphaNexusModal">{{ _("查看详情与参数设置") }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Alpha Voyager -->
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Alpha Voyager</h5>
+                                            <span class="badge bg-primary" id="alpha_voyager_price_badge">¥<span id="alpha_voyager_price_value">260,000</span></span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ _("顶级豪华SUV，为追求极致体验的商务精英打造。搭载双层大容量智能电池阵列。") }}</p>
+                                            <ul class="small">
+                                                <li>同级最佳续航能力</li>
+                                                <li>豪华全套设备</li>
+                                                <li>双层大容量智能电池阵列</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#alphaVoyagerModal">{{ _("查看详情与参数设置") }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nova系列车型详情 -->
+                <div class="collapse mb-5" id="novaSeriesDetails">
+                    <div class="card border-success">
+                        <div class="card-header bg-light">
+                            <h4 class="text-success mb-0">{{ _("Nova系列车型") }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-3 g-4">
+                                <!-- Nova S1 -->
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Nova S1</h5>
+                                            <span class="badge bg-success" id="nova_s1_price_badge">¥<span id="nova_s1_price_value">160,000</span></span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ _("经济实惠的家用车型，专为城市通勤设计。采用紧凑型高效磷酸铁锂电池。") }}</p>
+                                            <ul class="small">
+                                                <li>紧凑型高效磷酸铁锂电池</li>
+                                                <li>重量轻、寿命长，安全性高</li>
+                                                <li>城市通勤最佳选择</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-success w-100" data-bs-toggle="modal" data-bs-target="#novaS1Modal">{{ _("查看详情与参数设置") }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Nova Quantum -->
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Nova Quantum</h5>
+                                            <span class="badge bg-success" id="nova_quantum_price_badge">¥<span id="nova_quantum_price_value">175,000</span></span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ _("面向高效商务人士的智能中端轿车，强调驾驶辅助与工作便利性。") }}</p>
+                                            <ul class="small">
+                                                <li>优化的三元锂电池组</li>
+                                                <li>均衡的容量与充电性能</li>
+                                                <li>智能电池管理系统</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-success w-100" data-bs-toggle="modal" data-bs-target="#novaQuantumModal">{{ _("查看详情与参数设置") }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Nova Pulse -->
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Nova Pulse</h5>
+                                            <span class="badge bg-success" id="nova_pulse_price_badge">¥<span id="nova_pulse_price_value">190,000</span></span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ _("面向年轻家庭的多功能中端SUV，兼顾空间与动力。配备可扩展模块化电池系统。") }}</p>
+                                            <ul class="small">
+                                                <li>可扩展模块化电池系统</li>
+                                                <li>可选装增程电池包</li>
+                                                <li>灵活适应不同场景</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-success w-100" data-bs-toggle="modal" data-bs-target="#novaPulseModal">{{ _("查看详情与参数设置") }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Neon系列车型详情 -->
+                <div class="collapse mb-5" id="neonSeriesDetails">
+                    <div class="card border-danger">
+                        <div class="card-header bg-light">
+                            <h4 class="text-danger mb-0">{{ _("Neon系列车型") }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-2 g-4">
+                                <!-- Neon 500 -->
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Neon 500</h5>
+                                            <span class="badge bg-danger" id="neon_500_price_badge">¥<span id="neon_500_price_value">220,000</span></span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ _("面向年轻精英的运动轿跑，标志性的流线型设计与双色车身彰显个性。") }}</p>
+                                            <ul class="small">
+                                                <li>高输出密度性能电池</li>
+                                                <li>赛车技术加持的散热系统</li>
+                                                <li>持续高功率输出不衰减</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-danger w-100" data-bs-toggle="modal" data-bs-target="#neon500Modal">{{ _("查看详情与参数设置") }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Neon Zero -->
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Neon Zero</h5>
+                                            <span class="badge bg-danger" id="neon_zero_price_badge">¥<span id="neon_zero_price_value">250,000</span></span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ _("顶级电动跑车，零百加速仅需3.5秒，为速度爱好者打造。") }}</p>
+                                            <ul class="small">
+                                                <li>赛车级固态电池技术</li>
+                                                <li>超高功率密度与充电速度</li>
+                                                <li>极致性能表现</li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-danger w-100" data-bs-toggle="modal" data-bs-target="#neonZeroModal">{{ _("查看详情与参数设置") }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

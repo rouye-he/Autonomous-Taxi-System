@@ -1,0 +1,20 @@
+<!--
+此文件为开发者工具生成，生成时间: 2025/5/27上午11:44:38
+使用方法：
+在 C:\Users\54356\Desktop\无人驾驶出租车打车平台\miniprogram\pages\login\login.wxml 引入模板
+
+```
+<import src="login.skeleton.wxml"/>
+<template is="skeleton" wx:if="{{loading}}" />
+```
+
+在 C:\Users\54356\Desktop\无人驾驶出租车打车平台\miniprogram\pages\login\login.wxss 中引入样式
+```
+@import "./login.skeleton.wxss";
+```
+
+更多详细信息可以参考文档：https://developers.weixin.qq.com/miniprogram/dev/devtools/skeleton.html
+-->
+<template name="skeleton">
+  <view class="sk-container"></view>
+</template>

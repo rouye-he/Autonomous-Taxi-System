@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "通知功能演示",
+  "usingComponents": {
+    "notification": "../../components/notification/notification"
+  }
+} 

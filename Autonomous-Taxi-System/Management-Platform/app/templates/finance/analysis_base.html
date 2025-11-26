@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}财务分析{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .analysis-card {
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .analysis-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+    .filter-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    .analysis-nav {
+        margin-bottom: 20px;
+    }
+    .analysis-nav .nav-link {
+        color: #495057;
+        font-weight: 500;
+    }
+    .analysis-nav .nav-link.active {
+        color: #007bff;
+        background-color: #e9f0f8;
+        border-color: #007bff;
+    }
+    
+    .analysis-content {
+        margin-top: 10px !important;
+    }
+    
+    /* 表格滚动和固定表头样式 */
+    .table-responsive .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: #f8f9fa;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .table-responsive {
+        scrollbar-width: thin;
+        scrollbar-color: #6c757d #f8f9fa;
+    }
+    
+    .table-responsive::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f8f9fa;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb {
+        background-color: #6c757d;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mt-4">{{ _("财务分析") }}</h1>
+        <a href="{{ url_for('finance.index') }}" class="btn btn-outline-primary"><i class="fas fa-arrow-left mr-1"></i> {{ _("返回财务管理") }}</a>
+    </div>
+    
+    <!-- 分析页面导航 -->
+    <div class="analysis-nav">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == url_for('finance.income_analysis') %}active{% endif %}" 
+                   href="{{ url_for('finance.income_analysis') }}">{{ _("收入分析") }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == url_for('finance.expense_analysis') %}active{% endif %}" 
+                   href="{{ url_for('finance.expense_analysis') }}">{{ _("支出分析") }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == url_for('finance.profit_analysis') %}active{% endif %}" 
+                   href="{{ url_for('finance.profit_analysis') }}">{{ _("利润分析") }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == url_for('finance.user_consumption_analysis') %}active{% endif %}" 
+                   href="{{ url_for('finance.user_consumption_analysis') }}">{{ _("用户消费分析") }}</a>
+            </li>
+            
+        </ul>
+    </div>
+    
+    <!-- 筛选条件 -->
+    <div class="filter-section card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="date-range">{{ _("日期范围") }}</label>
+                        <select class="form-control" id="date-range">
+                            <option value="0">{{ _("当日") }}</option>
+                            <option value="7">{{ _("最近7天") }}</option>
+                            <option value="30" selected>{{ _("最近30天") }}</option>
+                            <option value="90">{{ _("最近90天") }}</option>
+                            <option value="180">{{ _("最近180天") }}</option>
+                            <option value="365">{{ _("最近一年") }}</option>
+                            <option value="custom">{{ _("自定义") }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="custom-date-from">{{ _("开始日期") }}</label>
+                        <input type="date" class="form-control" id="custom-date-from" disabled>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="custom-date-to">{{ _("结束日期") }}</label>
+                        <input type="date" class="form-control" id="custom-date-to" disabled>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group" style="margin-top: 24px;">
+                        <button id="apply-filter" class="btn btn-primary">{{ _("应用筛选") }}</button>
+                        <button id="reset-filter" class="btn btn-secondary ml-2">{{ _("重置") }}</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- 分析内容 -->
+    <div class="analysis-content" style="margin-top: 20px;">
+        {% block analysis_content %}
+        <!-- 具体分析内容将由子模板提供 -->
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- 图表库脚本 - 重要：确保这些脚本在body末尾加载 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
+<script>
+    // 筛选条件相关的通用JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateRangeSelect = document.getElementById('date-range');
+        const customDateFrom = document.getElementById('custom-date-from');
+        const customDateTo = document.getElementById('custom-date-to');
+        const applyFilterBtn = document.getElementById('apply-filter');
+        const resetFilterBtn = document.getElementById('reset-filter');
+        
+        // 设置默认日期
+        const today = new Date();
+        
+        // 从localStorage中加载上次保存的设置
+        function loadSavedDateSettings() {
+            try {
+                const savedSettings = JSON.parse(localStorage.getItem('financeAnalysisDateSettings'));
+                if (savedSettings) {
+                    // 恢复日期范围选择
+                    dateRangeSelect.value = savedSettings.rangeType;
+                    
+                    // 恢复自定义日期
+                    customDateFrom.value = savedSettings.startDate;
+                    customDateTo.value = savedSettings.endDate;
+                    
+                    // 根据日期范围类型启用/禁用自定义日期输入
+                    const isCustom = savedSettings.rangeType === 'custom';
+                    customDateFrom.disabled = !isCustom;
+                    customDateTo.disabled = !isCustom;
+                    
+                    console.log("已从localStorage恢复日期筛选设置");
+                    return true;
+                }
+            } catch (e) {
+                console.error("加载保存的日期设置失败:", e);
+            }
+            return false;
+        }
+        
+        // 保存当前设置到localStorage
+        function saveDateSettings() {
+            try {
+                const settings = {
+                    rangeType: dateRangeSelect.value,
+                    startDate: customDateFrom.value,
+                    endDate: customDateTo.value
+                };
+                localStorage.setItem('financeAnalysisDateSettings', JSON.stringify(settings));
+                console.log("日期筛选设置已保存到localStorage");
+            } catch (e) {
+                console.error("保存日期设置失败:", e);
+            }
+        }
+        
+        // 尝试加载保存的设置，如果没有保存的设置则使用默认设置
+        if (!loadSavedDateSettings()) {
+            // 默认选择"最近30天"
+            // 计算开始日期：今天减去29天(共30天，包含今天)
+            const defaultStartDate = new Date(today);
+            defaultStartDate.setDate(today.getDate() - 29);
+            
+            customDateFrom.valueAsDate = defaultStartDate;
+            customDateTo.valueAsDate = today;
+            
+            // 确保下拉菜单选择与设置的日期一致
+            dateRangeSelect.value = '30';
+        }
+        
+        // 日期范围选择事件
+        dateRangeSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateFrom.disabled = false;
+                customDateTo.disabled = false;
+            } else {
+                customDateFrom.disabled = true;
+                customDateTo.disabled = true;
+                
+                // 设置相应的日期范围
+                const endDate = new Date(); // 今天作为结束日期
+                const startDate = new Date(); // 创建新日期对象
+                
+                if (this.value === '0') {
+                    // 当日: 开始日期和结束日期都设为今天
+                    // 不做任何改变，保持startDate和endDate都是今天
+                } else {
+                    // 其他日期范围: 开始日期设为今天减去(指定天数-1)
+                    // 这样"最近7天"就是今天和前6天，共7天
+                    // "最近30天"就是今天和前29天，共30天，依此类推
+                    const daysToSubtract = parseInt(this.value) - 1;
+                    startDate.setDate(endDate.getDate() - daysToSubtract);
+                }
+                
+                customDateFrom.valueAsDate = startDate;
+                customDateTo.valueAsDate = endDate;
+            }
+            
+            // 保存设置
+            saveDateSettings();
+        });
+        
+        // 日期输入框更改时保存设置
+        customDateFrom.addEventListener('change', saveDateSettings);
+        customDateTo.addEventListener('change', saveDateSettings);
+        
+        // 应用筛选
+        applyFilterBtn.addEventListener('click', function() {
+            saveDateSettings();
+            loadAnalysisData();
+        });
+        
+        // 重置筛选
+        resetFilterBtn.addEventListener('click', function() {
+            dateRangeSelect.value = '30';
+            dateRangeSelect.dispatchEvent(new Event('change'));
+            loadAnalysisData();
+        });
+        
+        // 初始加载数据
+        function loadAnalysisData() {
+            // 获取日期范围参数
+            const startDate = customDateFrom.value;
+            let endDate = customDateTo.value;
+            
+            // 处理日期以确保包含结束日期当天的所有数据
+            // 当查询时不改变原始endDate的值，只在API调用中使用增加一天的日期
+            let queryEndDate = endDate;
+            try {
+                // 将结束日期加一天，确保SQL的<=查询能包含整个结束日期的数据
+                const endDateObj = new Date(endDate);
+                endDateObj.setDate(endDateObj.getDate() + 1);
+                queryEndDate = endDateObj.toISOString().split('T')[0];
+                
+                // 添加调试信息
+                console.log(`数据加载 - 调整后的查询日期范围: ${startDate} 至 ${queryEndDate} (确保包含结束日期当天的数据)`);
+            } catch (e) {
+                console.error("日期转换错误:", e);
+                // 如果日期转换失败，使用原始日期
+                queryEndDate = endDate;
+            }
+            
+            // 显示当前选择的日期范围
+            let rangeDescription = '';
+            if (dateRangeSelect.value === '0') {
+                rangeDescription = '当日数据';
+            } else if (dateRangeSelect.value === 'custom') {
+                rangeDescription = `${startDate} 至 ${endDate}`;
+            } else {
+                const days = parseInt(dateRangeSelect.value);
+                rangeDescription = `最近${days}天 (含今日)`;
+            }
+            
+            // 如果页面中有显示日期范围的元素，可以更新它
+            const dateRangeDisplay = document.getElementById('date-range-display');
+            if (dateRangeDisplay) {
+                dateRangeDisplay.textContent = rangeDescription;
+            }
+            
+            // 添加调试信息
+            console.log(`数据加载 - 原始日期范围: ${startDate} 至 ${endDate}`);
+            
+            // 触发子模板中的数据加载函数
+            if (typeof refreshAnalysisData === 'function') {
+                // 使用调整后的查询结束日期（加一天），确保包含完整的结束日期数据
+                refreshAnalysisData(startDate, queryEndDate);
+            }
+
+            // 创建提示元素
+            const alertContainer = document.createElement('div');
+            alertContainer.className = 'alert alert-success alert-dismissible fade show';
+            alertContainer.role = 'alert';
+            alertContainer.innerHTML = `
+                <strong>筛选已应用!</strong> 当前显示: ${rangeDescription}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            // 找到一个适合放置提示的位置
+            const filterSection = document.querySelector('.filter-section');
+            if (filterSection) {
+                // 先移除可能存在的旧提示
+                const oldAlert = filterSection.querySelector('.alert-success');
+                if (oldAlert) {
+                    oldAlert.remove();
+                }
+                
+     
+                
+                // 5秒后自动关闭提示
+                setTimeout(() => {
+                    alertContainer.classList.remove('show');
+                    setTimeout(() => alertContainer.remove(), 150);
+                }, 5000);
+            }
+        }
+        
+        // 初始加载数据
+        loadAnalysisData();
+    });
+</script>
+
+{% block analysis_scripts %}
+<!-- 具体分析脚本将由子模板提供 -->
+{% endblock %}
+{% endblock %} 

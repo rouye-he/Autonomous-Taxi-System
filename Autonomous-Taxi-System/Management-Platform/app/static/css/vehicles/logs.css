@@ -1,0 +1,219 @@
+/* 车辆操作日志管理样式 */
+
+/* 搜索区域样式 */
+.search-section {
+    margin-bottom: 20px;
+}
+
+.search-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+.search-toggle i {
+    transition: transform 0.3s;
+}
+
+.search-toggle.collapsed i {
+    transform: rotate(-90deg);
+}
+
+.search-form {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-tags {
+    margin-bottom: 10px;
+}
+
+.search-tag {
+    display: inline-block;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.search-tag .badge {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+/* 统计卡片样式 */
+.stat-card {
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    margin-bottom: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    font-size: 24px;
+    color: white;
+}
+
+/* 表格样式 */
+.table th {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.table .col-log-id {
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+}
+
+.table .col-vehicle-id {
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+}
+
+.table .col-plate-number {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+}
+
+.table .col-log-type {
+    width: 90px;
+    min-width: 90px;
+    max-width: 90px;
+    text-align: center;
+}
+
+.table .col-created-at {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.table .col-action {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.table .col-log-content {
+    min-width: 200px;
+    max-width: 400px;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 确保表格在小屏幕上能够滚动 */
+.log-table-container {
+    overflow-x: auto;
+    min-height: 300px; /* 最小高度防止表格太空 */
+}
+
+.action-btn {
+    margin: 0 2px; /* 增加按钮之间的间距 */
+}
+
+/* 卡片视图样式 */
+.log-card {
+    height: 100%;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.log-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.log-card .card-header {
+    padding: 10px 15px;
+    font-weight: 600;
+}
+
+.log-info-item {
+    margin-bottom: 8px;
+    display: flex;
+}
+
+.log-info-item .label {
+    font-weight: 600;
+    width: 80px;
+    color: #6c757d;
+}
+
+/* 页码跳转 */
+.page-jump {
+    display: inline-flex;
+}
+
+/* Toast消息 */
+.toast-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 500;
+    z-index: 1050;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.3s;
+}
+
+.toast-info {
+    background-color: #17a2b8;
+}
+
+.toast-success {
+    background-color: #28a745;
+}
+
+.toast-warning {
+    background-color: #ffc107;
+    color: #343a40;
+}
+
+.toast-error {
+    background-color: #dc3545;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 15px;
+    }
+    
+    .table .col-log-content {
+        max-width: 150px;
+    }
+}

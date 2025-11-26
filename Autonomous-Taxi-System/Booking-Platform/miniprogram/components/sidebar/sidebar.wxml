@@ -1,0 +1,49 @@
+<view class="sidebar {{show ? 'show' : ''}}">
+  <view class="sidebar-mask" bindtap="closeSidebar"></view>
+  <view class="sidebar-content">
+    <view class="sidebar-header">
+      <view class="user-profile">
+        <image class="user-avatar" src="{{userInfo.avatarUrl || '/static/images/user-default.png'}}"></image>
+        <view class="user-name">{{userInfo.nickName || '未登录'}}</view>
+      </view>
+    </view>
+    <view class="sidebar-menu">
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/user-profile/user-profile">
+        <view class="menu-icon">👤</view>
+        <view class="menu-text">个人信息</view>
+      </view>
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/my-orders/my-orders">
+        <view class="menu-icon">🚗</view>
+        <view class="menu-text">我的订单</view>
+      </view>
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/my-evaluations/my-evaluations">
+        <view class="menu-icon">⭐</view>
+        <view class="menu-text">我的评价</view>
+      </view>
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/wallet/wallet">
+        <view class="menu-icon">💰</view>
+        <view class="menu-text">我的钱包</view>
+      </view>
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/my-notification/my-notification">
+        <view class="menu-icon">📨</view>
+        <view class="menu-text">我的通知</view>
+      </view>
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/coupons/coupons">
+        <view class="menu-icon">🎟️</view>
+        <view class="menu-text">优惠券</view>
+      </view>
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/my-credit/my-credit">
+        <view class="menu-icon">📊</view>
+        <view class="menu-text">我的信用</view>
+      </view>
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/statistics/statistics">
+        <view class="menu-icon">📈</view>
+        <view class="menu-text">数据统计</view>
+      </view>
+      <view class="menu-item" bindtap="navigateTo" data-url="/pages/customer-service/customer-service">
+        <view class="menu-icon">🤖</view>
+        <view class="menu-text">智能客服</view>
+      </view>
+    </view>
+  </view>
+</view> 

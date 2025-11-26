@@ -1,0 +1,176 @@
+<navigation-bar title="数据统计" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<view class="container">
+  <!-- 内容区域容器 -->
+  <view class="content-area">
+    <!-- 导航栏 -->
+    <view class="tab-navigation">
+      <view 
+        class="tab-navigation-item tab-orders {{currentTab === 0 ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="0"
+      >
+        订单分析
+      </view>
+      <view 
+        class="tab-navigation-item tab-spending {{currentTab === 1 ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="1"
+      >
+        消费分析
+      </view>
+      <view 
+        class="tab-navigation-item tab-habits {{currentTab === 2 ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="2"
+      >
+        出行分析
+      </view>
+    </view>
+
+    <!-- 统计内容 -->
+    <view class="statistics-content">
+      <!-- 订单分析页面 -->
+      <view class="orders-content" wx:if="{{currentTab === 0}}">
+        <!-- 订单趋势统计 -->
+        <view class="stats-section">
+          <view class="section-title">📈 订单趋势统计</view>
+          <view class="stats-grid">
+            <view class="stat-card-mini">
+              <view class="stat-number">{{orderAnalysis.trendData.length || 0}}</view>
+              <view class="stat-desc">统计天数</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">{{orderAnalysis.totalOrders || 0}}</view>
+              <view class="stat-desc">总订单数</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">{{orderAnalysis.avgDaily || '0.0'}}</view>
+              <view class="stat-desc">日均订单</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">{{orderAnalysis.maxDaily || 0}}</view>
+              <view class="stat-desc">单日最高</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 订单状态分布 -->
+        <view class="stats-section">
+          <view class="section-title">📊 订单状态分布</view>
+          <view class="status-list">
+            <view class="status-item" wx:for="{{orderAnalysis.statusStats}}" wx:key="status">
+              <view class="status-info">
+                <view class="status-name">{{item.status}}</view>
+                <view class="status-count">{{item.count}}单</view>
+              </view>
+              <view class="status-percent">{{item.percentage}}%</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 消费分析页面 -->
+      <view class="spending-content" wx:if="{{currentTab === 1}}">
+        <!-- 消费趋势统计 -->
+        <view class="stats-section">
+          <view class="section-title">💰 消费趋势统计</view>
+          <view class="stats-grid">
+            <view class="stat-card-mini">
+              <view class="stat-number">¥{{spendingAnalysis.totalAmount || '0.00'}}</view>
+              <view class="stat-desc">总消费金额</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">¥{{spendingAnalysis.avgOrderAmount || '0.00'}}</view>
+              <view class="stat-desc">平均单价</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">¥{{spendingAnalysis.maxOrderAmount || '0.00'}}</view>
+              <view class="stat-desc">最高单价</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">¥{{spendingAnalysis.minOrderAmount || '0.00'}}</view>
+              <view class="stat-desc">最低单价</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 支付方式分布 -->
+        <view class="stats-section">
+          <view class="section-title">💳 支付方式分布</view>
+          <view class="payment-list">
+            <view class="payment-item" wx:for="{{spendingAnalysis.paymentMethods}}" wx:key="method">
+              <view class="payment-info">
+                <view class="payment-name">{{item.method}}</view>
+                <view class="payment-count">{{item.count}}次</view>
+              </view>
+              <view class="payment-percent">{{item.percentage}}%</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 出行习惯页面 -->
+      <view class="habits-content" wx:if="{{currentTab === 2}}">
+        <!-- 出行时间统计 -->
+        <view class="stats-section">
+          <view class="section-title">🕐 出行时间统计</view>
+          <view class="stats-grid">
+            <view class="stat-card-mini">
+              <view class="stat-number">{{travelHabits.peakHour || '暂无'}}</view>
+              <view class="stat-desc">高峰时段</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">{{travelHabits.totalTrips || 0}}</view>
+              <view class="stat-desc">总出行次数</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">{{travelHabits.avgDistance || '0.0'}}km</view>
+              <view class="stat-desc">平均距离</view>
+            </view>
+            <view class="stat-card-mini">
+              <view class="stat-number">{{travelHabits.favoriteCity || '暂无'}}</view>
+              <view class="stat-desc">常用城市</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 城市分布 -->
+        <view class="stats-section">
+          <view class="section-title">🏙️ 城市分布</view>
+          <view class="city-list">
+            <view class="city-item" wx:for="{{travelHabits.cityDistribution}}" wx:key="city">
+              <view class="city-info">
+                <view class="city-name">{{item.city}}</view>
+                <view class="city-count">{{item.count}}次</view>
+              </view>
+              <view class="city-percent">{{item.percentage}}%</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 时间分布详情 -->
+        <view class="stats-section">
+          <view class="section-title">⏰ 时间分布详情</view>
+          <view class="time-grid">
+            <view class="time-item" wx:for="{{travelHabits.timeDistribution}}" wx:key="hour" wx:if="{{item.count > 0}}">
+              <view class="time-hour">{{item.hour}}:00</view>
+              <view class="time-count">{{item.count}}次</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 加载状态 -->
+      <view class="loading-state" wx:if="{{loading}}">
+        <view class="loading-text">加载中...</view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{!loading && isEmpty}}">
+        <view class="empty-icon">📊</view>
+        <view class="empty-text">暂无统计数据</view>
+        <view class="empty-desc">完成更多订单后查看详细统计</view>
+      </view>
+    </view>
+  </view>
+</view> 

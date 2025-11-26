@@ -1,0 +1,90 @@
+<navigation-bar title="优惠券商城" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<view class="profile-container">
+  <!-- 套餐列表 -->
+  <view class="package-list" wx:if="{{packages.length > 0}}">
+    <view class="package-item" wx:for="{{packages}}" wx:key="id" bindtap="onPackageClick" data-package="{{item}}">
+      <!-- 套餐头部 -->
+      <view class="package-header">
+        <view class="package-name">{{item.name}}</view>
+        <view class="package-discount" wx:if="{{item.discount > 0}}">{{item.discount}}折</view>
+      </view>
+      
+      <!-- 套餐描述 -->
+      <view class="package-desc">{{item.description}}</view>
+      
+      <!-- 优惠券详情 -->
+      <view class="coupon-details">
+        <view class="detail-item" wx:for="{{item.coupon_details}}" wx:key="type_name" wx:for-item="coupon">
+          <view class="coupon-badge">
+            <text class="coupon-value">{{coupon.category === '折扣券' ? (coupon.value * 10) + '折' : '¥' + coupon.value}}</text>
+            <text class="coupon-count">×{{coupon.count}}</text>
+          </view>
+          <view class="coupon-info">
+            <text class="coupon-name">{{coupon.type_name}}</text>
+            <text class="coupon-limit">{{coupon.min_amount == 0 ? '无门槛' : '满' + coupon.min_amount + '元可用'}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 价格和购买 -->
+      <view class="package-footer">
+        <view class="price-section">
+          <text class="current-price">¥{{item.price}}</text>
+          <text class="original-price" wx:if="{{item.original_price > item.price}}">¥{{item.original_price}}</text>
+        </view>
+        <view class="package-info">
+          <text class="validity">有效期{{item.validity_days}}天</text>
+          <text class="sale-count">已售{{item.sale_count}}份</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空状态 -->
+  <view class="empty-container" wx:else>
+    <view class="empty-icon">🎫</view>
+    <text class="empty-text">暂无优惠券包</text>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>
+
+<!-- 购买确认弹窗 -->
+<view class="modal-overlay" wx:if="{{showPurchaseModal}}" bindtap="onModalClose">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">确认购买</text>
+      <text class="modal-close" bindtap="onModalClose">×</text>
+    </view>
+    
+    <view class="modal-body">
+      <view class="selected-package">
+        <view class="package-name">{{selectedPackage.name}}</view>
+        <view class="package-price">¥{{selectedPackage.price}}</view>
+      </view>
+      
+      <view class="payment-section">
+        <view class="section-title">支付方式</view>
+        <view class="payment-options">
+          <view class="payment-option {{paymentMethod === '余额支付' ? 'selected' : ''}}" bindtap="onPaymentMethodChange" data-method="余额支付">
+            <text class="payment-name">余额支付</text>
+            <text class="payment-balance">余额：¥{{userBalance}}</text>
+          </view>
+          <view class="payment-option {{paymentMethod === '微信支付' ? 'selected' : ''}}" bindtap="onPaymentMethodChange" data-method="微信支付">
+            <text class="payment-name">微信支付</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <view class="modal-footer">
+      <button class="cancel-btn" bindtap="onModalClose" hover-class="button-hover">取消</button>
+      <button class="confirm-btn {{purchasing ? 'disabled' : ''}}" bindtap="onConfirmPurchase" disabled="{{purchasing}}" hover-class="button-hover">
+        {{purchasing ? '购买中...' : '确认购买'}}
+      </button>
+    </view>
+  </view>
+</view> 

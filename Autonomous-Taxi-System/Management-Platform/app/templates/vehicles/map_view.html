@@ -1,0 +1,3616 @@
+{% extends "base.html" %}
+
+{% block title %}车辆地图视图 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vehicles/map_view.css') }}">
+<style>
+    /* 隐藏进度条中的原始文本 */
+    .progress-bar {
+        color: transparent !important;
+        font-size: 0 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>{{ _("车辆地图视图") }}</h2>
+            <p class="text-muted">{{ _("查看各城市车辆的实时位置分布") }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('vehicles.real_map_view') }}" class="btn btn-primary me-2">
+                <i class="bi bi-map"></i> {{ _("真实地图视图") }}
+            </a>
+            <a href="{{ url_for('vehicles.index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> {{ _("返回车辆管理") }}
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-geo-alt me-2"></i> 
+                            <div class="city-selector mb-0 me-3">
+                                <select class="form-select form-select-sm" id="citySelector">
+                                    <option value="沈阳市">{{ _("沈阳市") }}</option>
+                                    <option value="上海市">{{ _("上海市") }}</option>
+                                    <option value="北京市">{{ _("北京市") }}</option>
+                                    <option value="广州市">{{ _("广州市") }}</option>
+                                    <option value="深圳市">{{ _("深圳市") }}</option>
+                                    <option value="杭州市">{{ _("杭州市") }}</option>
+                                    <option value="南京市">{{ _("南京市") }}</option>
+                                    <option value="成都市">{{ _("成都市") }}</option>
+                                    <option value="重庆市">{{ _("重庆市") }}</option>
+                                    <option value="武汉市">{{ _("武汉市") }}</option>
+                                    <option value="西安市">{{ _("西安市") }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex">
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-filter"></i> {{ _("地标类型") }}
+                                </button>
+                                <div class="dropdown-menu p-2 shadow" style="width: 220px; z-index: 1200; inset: 100% auto auto 0px !important; transform: translateY(5px) !important; margin-top: 0 !important;">
+                                    <div class="landmark-filter border-0 shadow-none m-0" id="landmarkFilter">
+                                        <div class="filter-content p-0">
+                                            <div class="filter-actions mb-2">
+                                                <div class="btn-group btn-group-sm w-100">
+                                                    <button type="button" class="btn btn-outline-secondary" id="selectAllTypes" style="flex: 1; border-radius: 4px 0 0 4px;">{{ _("全选") }}</button>
+                                                    <button type="button" class="btn btn-outline-secondary" id="clearAllTypes" style="flex: 1; border-radius: 0 4px 4px 0;">{{ _("清除") }}</button>
+                                                </div>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="all" id="filter-all" checked>
+                                                    <label class="form-check-label" for="filter-all">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background: #f8f9fa;">
+                                                            <i class="bi bi-check-all" style="font-size: 0.7rem; color: #495057;"></i>
+                                                        </span>
+                                                        <span>{{ _("全部显示") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-all">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="center" id="filter-center">
+                                                    <label class="form-check-label" for="filter-center">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(248, 215, 218, 0.9);">
+                                                            <i class="bi bi-star-fill" style="font-size: 0.7rem; color: #721c24;"></i>
+                                                        </span>
+                                                        <span>{{ _("政府部门") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-center">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="transport" id="filter-transport">
+                                                    <label class="form-check-label" for="filter-transport">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(214, 216, 217, 0.8);">
+                                                            <i class="bi-taxi-front-fill" style="font-size: 0.7rem; color: #1b1e21;"></i>
+                                                        </span>
+                                                        <span>{{ _("交通枢纽") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-transport">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="commercial" id="filter-commercial">
+                                                    <label class="form-check-label" for="filter-commercial">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(209, 236, 241, 0.8);">
+                                                            <i class="bi bi-shop" style="font-size: 0.7rem; color: #0c5460;"></i>
+                                                        </span>
+                                                        <span>{{ _("商业区域") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-commercial">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="scenic" id="filter-scenic">
+                                                    <label class="form-check-label" for="filter-scenic">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(212, 237, 218, 0.8);">
+                                                            <i class="bi bi-image-alt" style="font-size: 0.7rem; color: #155724;"></i>
+                                                        </span>
+                                                        <span>{{ _("景点名胜") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-scenic">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="historic" id="filter-historic">
+                                                    <label class="form-check-label" for="filter-historic">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(255, 243, 205, 0.8);">
+                                                            <i class="bi bi-bank" style="font-size: 0.7rem; color: #856404;"></i>
+                                                        </span>
+                                                        <span>{{ _("历史古迹") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-historic">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="education" id="filter-education">
+                                                    <label class="form-check-label" for="filter-education">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(204, 229, 255, 0.8);">
+                                                            <i class="bi bi-mortarboard" style="font-size: 0.7rem; color: #004085;"></i>
+                                                        </span>
+                                                        <span>{{ _("教育机构") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-education">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="park" id="filter-park">
+                                                    <label class="form-check-label" for="filter-park">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(212, 237, 218, 0.8);">
+                                                            <i class="bi bi-tree" style="font-size: 0.7rem; color: #155724;"></i>
+                                                        </span>
+                                                        <span>{{ _("公园绿地") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-park">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="culture" id="filter-culture">
+                                                    <label class="form-check-label" for="filter-culture">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(248, 215, 218, 0.8);">
+                                                            <i class="bi bi-music-note" style="font-size: 0.7rem; color: #721c24;"></i>
+                                                        </span>
+                                                        <span>{{ _("文化娱乐") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-culture">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="industry" id="filter-industry">
+                                                    <label class="form-check-label" for="filter-industry">
+                                                        <span class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(233, 236, 239, 0.8);">
+                                                            <i class="bi bi-buildings" style="font-size: 0.7rem; color: #383d41;"></i>
+                                                        </span>
+                                                        <span>{{ _("产业园区") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-industry">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-filter"></i> {{ _("车辆状态") }}
+                                </button>
+                                <div class="dropdown-menu p-2 shadow" style="width: 220px; z-index: 1200; inset: 100% auto auto 0px !important; transform: translateY(5px) !important; margin-top: 0 !important;">
+                                    <div class="landmark-filter border-0 shadow-none m-0" id="vehicleFilter">
+                                        <div class="filter-content p-0">
+                                            <div class="filter-actions mb-2">
+                                                <div class="btn-group btn-group-sm w-100">
+                                                    <button type="button" class="btn btn-outline-secondary" id="selectAllVehicles" style="flex: 1; border-radius: 4px 0 0 4px;">{{ _("全选") }}</button>
+                                                    <button type="button" class="btn btn-outline-secondary" id="clearAllVehicles" style="flex: 1; border-radius: 0 4px 4px 0;">{{ _("清除") }}</button>
+                                                </div>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="all" id="filter-vehicle-all" checked>
+                                                    <label class="form-check-label" for="filter-vehicle-all">
+                                                        <span class="type-indicator" style="background: #f8f9fa;"></span>
+                                                        <span>{{ _("全部状态") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-vehicle-all">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="idle" id="filter-vehicle-idle">
+                                                    <label class="form-check-label" for="filter-vehicle-idle">
+                                                        <span class="vehicle-status-indicator" style="background-color: #28a745;"></span>
+                                                        <span>{{ _("空闲中") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-vehicle-idle">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="busy" id="filter-vehicle-busy">
+                                                    <label class="form-check-label" for="filter-vehicle-busy">
+                                                        <span class="vehicle-status-indicator" style="background-color: #007bff;"></span>
+                                                        <span>{{ _("运行中") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-vehicle-busy">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="charging" id="filter-vehicle-charging">
+                                                    <label class="form-check-label" for="filter-vehicle-charging">
+                                                        <span class="vehicle-status-indicator" style="background-color: #17a2b8;"></span>
+                                                        <span>{{ _("充电中") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-vehicle-charging">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="maintenance" id="filter-vehicle-maintenance">
+                                                    <label class="form-check-label" for="filter-vehicle-maintenance">
+                                                        <span class="vehicle-status-indicator" style="background-color: #6c757d;"></span>
+                                                        <span>{{ _("电量不足") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-vehicle-maintenance">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="low-battery" id="filter-vehicle-low-battery">
+                                                    <label class="form-check-label" for="filter-vehicle-low-battery">
+                                                        <span class="vehicle-status-indicator" style="background-color: #dc3545;"></span>
+                                                        <span>{{ _("等待充电") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-vehicle-low-battery">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="waiting-charging" id="filter-vehicle-waiting-charging">
+                                                    <label class="form-check-label" for="filter-vehicle-waiting-charging">
+                                                        <span class="vehicle-status-indicator" style="background-color: #6f42c1;"></span>
+                                                        <span>{{ _("前往充电") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-vehicle-waiting-charging">0</span>
+                                            </div>
+                                            <div class="form-check">
+                                                <div class="landmark-type-group">
+                                                    <input class="form-check-input" type="checkbox" value="need-maintenance" id="filter-vehicle-need-maintenance">
+                                                    <label class="form-check-label" for="filter-vehicle-need-maintenance">
+                                                        <span class="vehicle-status-indicator" style="background-color: #ffc107;"></span>
+                                                        <span>{{ _("维护中") }}</span>
+                                                    </label>
+                                                </div>
+                                                <span class="badge bg-secondary" id="count-vehicle-need-maintenance">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="refreshMapBtn" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-arrow-clockwise"></i> {{ _("刷新数据") }}
+                            </button>
+       
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="map-container">
+                        <div class="map-grid" id="mapGrid">
+                            <!-- 地图标记点将动态添加 -->
+                        </div>
+                        
+                        <!-- 添加坐标显示元素 -->
+                        <div class="coordinates-display" id="coordinatesDisplay">坐标: (0, 0)</div>
+                        
+                        <div class="map-info">
+                            <div>地图大小: 1000 × 1000</div>
+                            <div>每格: 20px (共50×50格)</div>
+                            <div>每大格: 100px (共10×10大格)</div>
+                        </div>
+                        
+                        <div class="legend" id="legend">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="fw-bold">图例说明</div>
+                                <div class="legend-toggle" id="legendToggle">
+                                    <i class="bi bi-chevron-up"></i>
+                                </div>
+                            </div>
+                            <div class="legend-content">
+                                <!-- 车辆状态图例 -->
+                                <div class="mb-2">
+                                    <div class="small fw-bold text-muted mb-1">车辆状态</div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #28a745;"></div>
+                                        <div>空闲中</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #007bff;"></div>
+                                        <div>运行中</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #17a2b8;"></div>
+                                        <div>充电中</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #6c757d;"></div>
+                                        <div>电量不足</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #dc3545;"></div>
+                                        <div>等待充电</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #6f42c1;"></div>
+                                        <div>前往充电</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #ffc107;"></div>
+                                        <div>维护中</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 待分配订单图例 -->
+                                <div class="mb-2">
+                                    <div class="small fw-bold text-muted mb-1">订单状态</div>
+                                    <div class="legend-item">
+                                        <div style="width: 14px; height: 14px; border-radius: 50%; background-color: rgba(255, 193, 7, 0.8); border: 1.5px solid #fd7e14; display: flex; justify-content: center; align-items: center; margin-right: 5px;">
+                                            <i class="bi bi-geo-alt-fill" style="color: #fd7e14; font-size: 8px;"></i>
+                                        </div>
+                                        <div>待分配订单</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 充电站图例 -->
+                                <div class="mb-2">
+                                    <div class="small fw-bold text-muted mb-1">充电设施</div>
+                                    <div class="legend-item">
+                                        <div style="width: 14px; height: 14px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.7); border: 1.5px solid #17a2b8; display: flex; justify-content: center; align-items: center; margin-right: 5px;">
+                                            <i class="bi bi-lightning-charge-fill" style="color: #17a2b8; font-size: 8px;"></i>
+                                        </div>
+                                        <div>充电站</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 地标类型图例 -->
+                                <div>
+                                    <div class="small fw-bold text-muted mb-1">地标类型</div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(248, 215, 218, 0.9);">
+                                            <i class="bi bi-star-fill" style="font-size: 0.7rem; color: #721c24;"></i>
+                                        </div>
+                                        <div>政府部门</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(214, 216, 217, 0.8);">
+                                            <i class="bi-taxi-front-fill" style="font-size: 0.7rem; color: #1b1e21;"></i>
+                                        </div>
+                                        <div>交通枢纽</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(209, 236, 241, 0.8);">
+                                            <i class="bi bi-shop" style="font-size: 0.7rem; color: #0c5460;"></i>
+                                        </div>
+                                        <div>商业区域</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(204, 229, 255, 0.8);">
+                                            <i class="bi bi-mortarboard" style="font-size: 0.7rem; color: #004085;"></i>
+                                        </div>
+                                        <div>教育机构</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(212, 237, 218, 0.8);">
+                                            <i class="bi bi-image-alt" style="font-size: 0.7rem; color: #155724;"></i>
+                                        </div>
+                                        <div>景点名胜</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(255, 243, 205, 0.8);">
+                                            <i class="bi bi-bank" style="font-size: 0.7rem; color: #856404;"></i>
+                                        </div>
+                                        <div>历史古迹</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(212, 237, 218, 0.8);">
+                                            <i class="bi bi-tree" style="font-size: 0.7rem; color: #155724;"></i>
+                                        </div>
+                                        <div>公园绿地</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(248, 215, 218, 0.8);">
+                                            <i class="bi bi-music-note" style="font-size: 0.7rem; color: #721c24;"></i>
+                                        </div>
+                                        <div>文化娱乐</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="type-indicator d-flex justify-content-center align-items-center" style="background-color: rgba(233, 236, 239, 0.8);">
+                                            <i class="bi bi-buildings" style="font-size: 0.7rem; color: #383d41;"></i>
+                                        </div>
+                                        <div>产业园区</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 地标筛选器已移至顶部导航栏，此处已移除 -->
+                        
+                        <div class="map-controls" id="mapControls">
+                            <div class="map-controls-icon">
+                                <i class="bi bi-search"></i>
+                            </div>
+                            <div class="map-controls-content">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="fw-bold small">地图控制</div>
+                                    <div class="map-controls-toggle" id="mapControlsToggle">
+                                        <i class="bi bi-x-lg"></i>
+                                    </div>
+                                </div>
+                                <button id="zoomIn" class="btn btn-sm btn-outline-secondary mb-2 w-100">
+                                    <i class="bi bi-zoom-in"></i> {{ _("放大") }}
+                                </button>
+                                <button id="zoomOut" class="btn btn-sm btn-outline-secondary mb-2 w-100">
+                                    <i class="bi bi-zoom-out"></i> {{ _("缩小") }}
+                                </button>
+                                <button id="resetZoom" class="btn btn-sm btn-outline-secondary w-100">
+                                    <i class="bi bi-arrows-angle-contract"></i> {{ _("重置") }}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="display-options" id="displayOptions">
+                            <div class="display-options-icon">
+                                <i class="bi bi-gear-fill"></i>
+                            </div>
+                            <div class="display-options-content">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="fw-bold">显示选项</div>
+                                    <div class="display-options-toggle" id="displayOptionsToggle">
+                                        <i class="bi bi-x-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="showLandmarks" checked>
+                                    <label class="form-check-label" for="showLandmarks">{{ _("显示地标") }}</label>
+                                </div>
+                                <div id="landmarkOptions" class="ps-2 pt-1">
+                                    <div class="form-check form-switch mb-1">
+                                        <input class="form-check-input" type="checkbox" id="showLandmarkNames" checked>
+                                        <label class="form-check-label" for="showLandmarkNames">{{ _("显示地标名称") }}</label>
+                                    </div>
+                                </div>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="showChargingStations" checked>
+                                    <label class="form-check-label" for="showChargingStations">{{ _("显示充电站") }}</label>
+                                </div>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="showVehicles" checked>
+                                    <label class="form-check-label" for="showVehicles">{{ _("显示车辆") }}</label>
+                                </div>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="showPendingOrders" checked>
+                                    <label class="form-check-label" for="showPendingOrders">{{ _("显示待分配订单") }}</label>
+                                </div>
+                         
+                            </div>
+                        </div>
+                        
+                       
+                        
+                        <div class="vehicle-info" id="vehicleInfo">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 id="vehicleTitle">{{ _("车辆信息") }}</h5>
+                                <button type="button" class="btn-close" id="closeVehicleInfo"></button>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge" id="vehicleStatus">{{ _("状态") }}</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>车辆ID:</strong> <span id="vehicleId"></span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>当前位置:</strong> <span id="vehicleLocation"></span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>电量:</strong> 
+                                <div class="progress" style="height: 10px; position: relative;">
+                                    <div class="progress-bar" id="vehicleBattery" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <span style="color: #000; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 11px;" id="batteryText">0%</span>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <strong>累计距离(公里):</strong> <span id="vehicleMileage"></span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>上次维护:</strong> <span id="vehicleMaintenance"></span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>车辆评分:</strong> <span id="vehicleRating"></span>
+                            </div>
+                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vehicles/landmarks.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vehicles/roadmap.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化变量
+        const mapGrid = document.getElementById('mapGrid');
+        const citySelector = document.getElementById('citySelector');
+        const vehicleInfo = document.getElementById('vehicleInfo');
+        const closeVehicleInfo = document.getElementById('closeVehicleInfo');
+        const refreshMapBtn = document.getElementById('refreshMapBtn');
+        const showPendingOrders = document.getElementById('showPendingOrders');
+        
+        // 道路地图数据
+        let roadMap = null;
+        
+        // 添加自动刷新功能
+        let autoRefreshInterval = null;
+        let vehiclePositions = {};  // 存储车辆位置信息的缓存
+        
+        // 开始自动刷新
+        function startAutoRefresh() {
+            if (!autoRefreshInterval) {
+                autoRefreshInterval = setInterval(() => {
+                    // 静默刷新地图，不显示提示，使用优化的更新方法
+                    updateVehiclesData(citySelector.value);
+                    // 同时更新待分配订单
+                    updatePendingOrdersData(citySelector.value, true);
+                }, 500); // 每0.5秒刷新一次
+            }
+        }
+        
+        // 停止自动刷新
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+        
+        // 只更新车辆数据而不重新创建所有元素
+        function updateVehiclesData(cityCode) {
+            // 从API获取真实车辆数据
+            fetch(`/vehicles/api/city_vehicles?city=${cityCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 更新现有车辆标记或添加新车辆
+                        data.data.forEach(vehicle => {
+                            updateOrCreateVehicleMarker(vehicle);
+                        });
+                        
+                        // 应用当前的筛选设置
+                        applyVehicleFilter();
+                    } else {
+                        console.error('更新车辆数据失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('更新车辆API错误:', error);
+                });
+        }
+        
+        // 更新或创建车辆标记
+        function updateOrCreateVehicleMarker(vehicle) {
+            const vehicleId = vehicle.vehicle_id;
+            const existingMarker = document.querySelector(`.vehicle-marker[data-vehicle-id="${vehicleId}"]`);
+            
+            if (existingMarker) {
+                // 更新现有标记
+                updateVehicleMarker(existingMarker, vehicle);
+            } else {
+                // 创建新标记
+                addVehicleMarkerFromDb(vehicle);
+            }
+        }
+        
+        // 为车辆计算固定的偏移量
+        function calculateFixedOffset(vehicleId) {
+            // 将车辆ID转换为数字
+            let vehicleIdNum;
+            if (typeof vehicleId === 'number') {
+                vehicleIdNum = vehicleId;
+            } else {
+                // 将字符串ID转换为数字（简单的哈希算法）
+                vehicleIdNum = 0;
+                const idStr = String(vehicleId);
+                for (let i = 0; i < idStr.length; i++) {
+                    vehicleIdNum += idStr.charCodeAt(i);
+                }
+            }
+            
+            // 生成固定的偏移量
+            const xOffset = (vehicleIdNum % 10) - 5; // -5到4之间的偏移
+            const yOffset = ((vehicleIdNum * 13) % 10) - 5; // 使用不同的乘数避免偏移相同
+            
+            return {x: xOffset, y: yOffset};
+        }
+        
+        // 应用固定偏移量并确保坐标在有效范围内
+        function applyFixedOffset(coords, vehicleId) {
+            const offset = calculateFixedOffset(vehicleId);
+            
+            // 添加偏移量
+            let x = coords.x + offset.x;
+            let y = coords.y + offset.y;
+            
+            // 确保不会超出边界
+            x = Math.max(0, Math.min(x, 1200));
+            y = Math.max(0, Math.min(y, 1200));
+            
+            return {x, y};
+        }
+        
+        // 更新现有车辆标记
+        function updateVehicleMarker(marker, vehicle) {
+            // 车辆状态对应的CSS类名
+            const statusClasses = {
+                '空闲中': 'status-idle',
+                '运行中': 'status-busy',
+                '充电中': 'status-charging',
+                '电量不足': 'status-maintenance',
+                '等待充电': 'status-low-battery',
+                '前往充电': 'status-waiting-charging',
+                '维护中': 'status-need-maintenance'
+            };
+            
+            // 状态对应的徽章样式
+            const statusBadges = {
+                '空闲中': 'bg-success',
+                '运行中': 'bg-primary',
+                '充电中': 'bg-info',
+                '电量不足': 'bg-secondary',
+                '等待充电': 'bg-danger',
+                '前往充电': 'bg-purple',
+                '维护中': 'bg-warning text-dark'
+            };
+            
+            // 更新位置
+            if (vehicle.current_location_x !== undefined && vehicle.current_location_y !== undefined) {
+                // 应用相同的基于ID的固定偏移算法
+                const offsetCoords = applyFixedOffset(
+                    {x: vehicle.current_location_x, y: vehicle.current_location_y}, 
+                    vehicle.vehicle_id
+                );
+                
+                marker.style.left = `${offsetCoords.x}px`;
+                marker.style.top = `${offsetCoords.y}px`;
+            }
+            
+            // 更新状态和电量
+            if (vehicle.current_status !== undefined) {
+                // 检查有没有状态变化
+                const currentStatusClass = Array.from(marker.classList).find(cls => cls.startsWith('status-'));
+                
+                if (currentStatusClass && currentStatusClass !== statusClasses[vehicle.current_status]) {
+                    marker.classList.remove(currentStatusClass);
+                    marker.classList.add(statusClasses[vehicle.current_status] || 'status-idle');
+                }
+            }
+            
+            // 更新标题
+            marker.title = `${vehicle.plate_number} - ${vehicle.current_status}`;
+            
+            // 更新数据属性
+            marker.setAttribute('data-status', vehicle.current_status);
+            marker.setAttribute('data-status-badge', statusBadges[vehicle.current_status] || 'bg-secondary');
+            marker.setAttribute('data-location', vehicle.current_location_name || '未知位置');
+            
+            // 更新电量数据属性
+            if (vehicle.battery_level !== undefined) {
+                marker.setAttribute('data-battery', vehicle.battery_level);
+            }
+            
+            // 更新信息面板（如果正在显示此车辆）
+            const activeVehicleId = document.getElementById('vehicleId').textContent;
+            if (marker.getAttribute('data-plate-number') === activeVehicleId && vehicleInfo.style.display !== 'none') {
+                updateVehicleInfoPanel(marker);
+            }
+        }
+        
+        // 更新车辆信息面板
+        function updateVehicleInfoPanel(marker) {
+            const vehicleInfo = document.getElementById('vehicleInfo');
+            const isDisplayed = vehicleInfo.style.display === 'block';
+            const displayedId = document.getElementById('dispatchBtn')?.getAttribute('data-vehicle-id');
+            const markerId = marker.getAttribute('data-vehicle-id');
+            
+            if (isDisplayed && displayedId === markerId) {
+                // 更新位置信息
+                document.getElementById('vehicleLocation').textContent = marker.getAttribute('data-location');
+                
+                // 更新电量信息
+                const battery = marker.getAttribute('data-battery');
+                const batteryBar = document.getElementById('vehicleBattery');
+                
+                // 更新电量百分比值和进度条宽度
+                batteryBar.style.width = `${battery}%`;
+                document.getElementById('batteryText').textContent = `${battery}%`;
+                
+                // 根据电量设置进度条颜色
+                if (battery < 20) {
+                    batteryBar.className = 'progress-bar bg-danger';
+                } else if (battery < 50) {
+                    batteryBar.className = 'progress-bar bg-warning';
+                } else {
+                    batteryBar.className = 'progress-bar bg-success';
+                }
+                
+                // 如果需要也可以更新状态
+                const status = marker.getAttribute('data-status');
+                const statusBadge = marker.getAttribute('data-status-badge');
+                if (status) {
+                    document.getElementById('vehicleStatus').textContent = status;
+                    document.getElementById('vehicleStatus').className = `badge ${statusBadge}`;
+                }
+            }
+        }
+        
+        // 启动自动刷新
+        startAutoRefresh();
+        
+        // 车辆模拟相关变量
+        let simulationRunning = false;
+        let simulationInterval = null;
+        const toggleSimulationBtn = document.getElementById('toggleSimulation');
+        const simulationButtonText = document.getElementById('simulationButtonText');
+        const simulationSpeed = document.getElementById('simulationSpeed');
+        const speedValue = document.getElementById('speedValue');
+        const moveDistance = document.getElementById('moveDistance');
+        const distanceValue = document.getElementById('distanceValue');
+        const simulationControls = document.getElementById('simulationControls');
+        const simulationControlsToggle = document.getElementById('simulationControlsToggle');
+        
+        // 车辆模拟控制面板折叠/展开
+        if (simulationControlsToggle) {
+            simulationControlsToggle.addEventListener('click', function() {
+                collapseSimulationControls();
+            });
+        }
+        
+        // 点击图标展开面板
+        const simulationControlsIcon = document.getElementById('simulationControlsIcon');
+        if (simulationControlsIcon) {
+            simulationControlsIcon.addEventListener('click', function() {
+                expandSimulationControls();
+            });
+        }
+        
+        // 折叠模拟控制面板
+        function collapseSimulationControls() {
+            if (!simulationControls) return;
+            
+            simulationControls.classList.add('collapsed');
+            localStorage.setItem('simulationControlsCollapsed', 'true');
+        }
+        
+        // 展开模拟控制面板
+        function expandSimulationControls() {
+            if (!simulationControls) return;
+            
+            simulationControls.classList.remove('collapsed');
+            localStorage.setItem('simulationControlsCollapsed', 'false');
+        }
+        
+        // 从localStorage恢复显示状态
+        if (simulationControls) {
+            const savedSimulationState = localStorage.getItem('simulationControlsCollapsed');
+            if (savedSimulationState === 'true') {
+                collapseSimulationControls();
+            }
+        }
+        
+        // 更新速度显示
+        if (simulationSpeed) {
+            simulationSpeed.addEventListener('input', function() {
+                const speed = parseInt(this.value);
+                let speedText = '';
+                
+                if (speed < 300) speedText = '极快';
+                else if (speed < 500) speedText = '快速';
+                else if (speed < 1000) speedText = '中等';
+                else if (speed < 1500) speedText = '缓慢';
+                else speedText = '极慢';
+                
+                speedValue.textContent = speedText;
+                
+                // 如果模拟正在运行，则重新启动定时器
+                if (simulationRunning) {
+                    clearInterval(simulationInterval);
+                    simulationInterval = setInterval(randomVehicleMovement, speed);
+                }
+            });
+        }
+        
+        // 更新距离显示
+        if (moveDistance) {
+            moveDistance.addEventListener('change', function() {
+                const distance = this.value;
+                
+                switch(distance) {
+                    case 'small':
+                        distanceValue.textContent = '5-20';
+                        break;
+                    case 'medium':
+                        distanceValue.textContent = '20-80';
+                        break;
+                    case 'large':
+                        distanceValue.textContent = '50-150';
+                        break;
+                    default:
+                        distanceValue.textContent = '20-80';
+                }
+            });
+        }
+        
+        // 模拟控制按钮
+        if (toggleSimulationBtn) {
+            toggleSimulationBtn.addEventListener('click', function() {
+                if (simulationRunning) {
+                    stopSimulation();
+                } else {
+                    startSimulation();
+                }
+            });
+        }
+        
+        // 启动模拟
+        function startSimulation() {
+            if (simulationRunning) return;
+            
+            simulationRunning = true;
+            simulationButtonText.textContent = '停止模拟';
+            toggleSimulationBtn.classList.remove('btn-primary');
+            toggleSimulationBtn.classList.add('btn-danger');
+            toggleSimulationBtn.querySelector('i').classList.remove('bi-play-circle');
+            toggleSimulationBtn.querySelector('i').classList.add('bi-stop-circle');
+            
+            // 获取当前设置的间隔时间
+            const interval = parseInt(simulationSpeed.value);
+            
+            // 启动模拟
+            simulationInterval = setInterval(randomVehicleMovement, interval);
+            
+            showToast('已启动车辆位置模拟', 'success');
+        }
+        
+        // 停止模拟
+        function stopSimulation() {
+            if (!simulationRunning) return;
+            
+            simulationRunning = false;
+            simulationButtonText.textContent = '启动模拟';
+            toggleSimulationBtn.classList.remove('btn-danger');
+            toggleSimulationBtn.classList.add('btn-primary');
+            toggleSimulationBtn.querySelector('i').classList.remove('bi-stop-circle');
+            toggleSimulationBtn.querySelector('i').classList.add('bi-play-circle');
+            
+            // 清除定时器
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+            
+            showToast('已停止车辆位置模拟', 'info');
+        }
+        
+        // 快速随机移动所有车辆的函数
+        function randomVehicleMovement() {
+            const vehicles = document.querySelectorAll('.vehicle-marker');
+            
+            // 如果没有车辆，则不进行更新
+            if (vehicles.length === 0) {
+                return;
+            }
+            
+            // 批量处理需要更新的操作，减少DOM回流
+            const positionUpdates = [];
+            
+            // 获取当前设置的移动距离范围
+            let minDistance = 20;
+            let maxDistance = 80;
+            
+            const distanceOption = moveDistance.value;
+            if (distanceOption === 'small') {
+                minDistance = 5;
+                maxDistance = 20;
+            } else if (distanceOption === 'large') {
+                minDistance = 50;
+                maxDistance = 150;
+            }
+            
+            // 更新每个车辆的位置
+            vehicles.forEach(vehicle => {
+                // 获取当前车辆状态
+                const status = vehicle.getAttribute('data-status');
+                const vehicleCity = vehicle.getAttribute('data-city') || citySelector.value || 'default';
+                
+                // 跳过正在维修或维护中的车辆
+                if (status === '电量不足' || status === '维护中') {
+                    return;
+                }
+                
+                // 获取当前电池电量并根据状态更新
+                let battery = parseInt(vehicle.getAttribute('data-battery') || '100');
+                
+                // 充电中的车辆增加电量
+                if (status === '充电中') {
+                    // 电量增加1-3%
+                    const chargeAmount = Math.floor(Math.random() * 3) + 1;
+                    battery = Math.min(100, battery + chargeAmount);
+                    vehicle.setAttribute('data-battery', battery);
+                    
+                    const currentX = parseInt(vehicle.style.left);
+                    const currentY = parseInt(vehicle.style.top);
+                    
+                    // 微小随机移动
+                    const moveDistance = Math.random() * 10 - 5; // -5到5之间的随机值
+                    const newX = Math.max(0, Math.min(1000, currentX + moveDistance));
+                    const newY = Math.max(0, Math.min(1000, currentY + moveDistance));
+                    
+                    positionUpdates.push({
+                        vehicle,
+                        x: newX,
+                        y: newY,
+                        needsDistanceCheck: true,
+                        city: vehicleCity,
+                        battery: battery
+                    });
+                    
+                    return;
+                }
+                
+                // 其他状态的车辆消耗电量
+                if (status !== '等待充电' && status !== '前往充电') {
+                    // 电量减少0-2%
+                    const consumeAmount = Math.floor(Math.random() * 3);
+                    battery = Math.max(0, battery - consumeAmount);
+                    vehicle.setAttribute('data-battery', battery);
+                }
+                
+                // 其他状态的车辆随机大幅移动
+                const currentX = parseInt(vehicle.style.left);
+                const currentY = parseInt(vehicle.style.top);
+                
+                // 随机生成新位置（不再受限于路网）
+                const moveDistance = Math.random() * (maxDistance - minDistance) + minDistance;
+                const moveAngle = Math.random() * 2 * Math.PI; // 0-2π弧度，覆盖所有方向
+                
+                // 计算新位置
+                const newX = Math.round(Math.max(0, Math.min(1000, currentX + moveDistance * Math.cos(moveAngle))));
+                const newY = Math.round(Math.max(0, Math.min(1000, currentY + moveDistance * Math.sin(moveAngle))));
+                
+                positionUpdates.push({
+                    vehicle,
+                    x: newX,
+                    y: newY,
+                    needsDistanceCheck: true,
+                    city: vehicleCity,
+                    battery: battery
+                });
+            });
+            
+            // 执行位置更新，一次性进行DOM操作
+            requestAnimationFrame(() => {
+                positionUpdates.forEach(update => {
+                    // 更新DOM元素位置
+                    update.vehicle.style.left = `${update.x}px`;
+                    update.vehicle.style.top = `${update.y}px`;
+                    
+                    // 对于需要计算最近位置的车辆，更新位置名称
+                    if (update.needsDistanceCheck) {
+                        updateNearestLocationName(update.vehicle, update.x, update.y);
+                    }
+                    
+                    // 强制更新已显示的车辆信息电量
+                    const activeVehicleId = document.getElementById('dispatchBtn')?.getAttribute('data-vehicle-id');
+                    if (activeVehicleId === update.vehicle.getAttribute('data-vehicle-id')) {
+                        const batteryBar = document.getElementById('vehicleBattery');
+                        if (batteryBar) {
+                            const battery = update.battery;
+                            batteryBar.style.width = `${battery}%`;
+                            document.getElementById('batteryText').textContent = `${battery}%`;
+                            
+                            // 根据电量设置进度条颜色
+                            if (battery < 20) {
+                                batteryBar.className = 'progress-bar bg-danger';
+                            } else if (battery < 50) {
+                                batteryBar.className = 'progress-bar bg-warning';
+                            } else {
+                                batteryBar.className = 'progress-bar bg-success';
+                            }
+                        }
+                    }
+                    
+                    // 更新详情面板
+                    updateVehicleInfoPanel(update.vehicle);
+                    
+                    // 将电量变化添加到更新队列
+                    const vehicleId = update.vehicle.getAttribute('data-vehicle-id');
+                    if (vehicleId) {
+                        // 每次位置更新时也更新电量到数据库
+                        locationUpdateQueue.push({
+                            vehicleId,
+                            locationName: update.vehicle.getAttribute('data-location'),
+                            x: update.x,
+                            y: update.y,
+                            city: update.city,
+                            battery: update.battery
+                        });
+                        
+                        // 如果不在更新中且超过最小间隔，则处理队列
+                        const now = Date.now();
+                        if (!isUpdatingLocations && now - lastLocationUpdateTime >= LOCATION_UPDATE_INTERVAL) {
+                            processLocationUpdateQueue();
+                        }
+                    }
+                });
+            });
+        }
+        
+        // 查找可能的移动方向 - 不再需要检查道路
+        function findPossibleMoveDirections(x, y, minDist, maxDist) {
+            const possibleDirections = [];
+            const numAttempts = 10; // 尝试10个随机方向
+            
+            for (let i = 0; i < numAttempts; i++) {
+                // 生成随机移动方向和距离
+                const moveDistance = Math.random() * (maxDist - minDist) + minDist;
+                const moveAngle = Math.random() * 2 * Math.PI; // 0-2π弧度，覆盖所有方向
+                
+                // 计算新位置
+                const newX = Math.round(x + moveDistance * Math.cos(moveAngle));
+                const newY = Math.round(y + moveDistance * Math.sin(moveAngle));
+                
+                // 确保新位置在地图范围内
+                if (newX >= 0 && newX < 1000 && newY >= 0 && newY < 1000) {
+                    possibleDirections.push({ x: newX, y: newY });
+                }
+            }
+            
+            return possibleDirections;
+        }
+        
+        // 检查是否有一条连续的路可以到达目标位置 - 不再需要检查道路
+        function hasPathToDestination(startX, startY, endX, endY) {
+            // 不再检查路径是否连通，直接返回true
+            return true;
+        }
+        
+        // 初始化地图
+        function initMap() {
+            const selectedCity = citySelector.value;
+            
+            // 加载道路地图
+            loadRoadMap(selectedCity);
+            
+            // 直接调用loadVehiclesForCity来加载城市数据
+            loadVehiclesForCity(selectedCity);
+        }
+        
+        // 当DOM内容加载完成后，启动地图初始化
+        setTimeout(function() {
+            // 初始化地图
+            initMap();
+            
+            // 位置缓存
+            updateLocationCache();
+            
+            // 显示提示信息
+            showToast('已加载道路地图', 'info');
+        }, 1000);
+        
+        // 缩放控制
+        const zoomIn = document.getElementById('zoomIn');
+        const zoomOut = document.getElementById('zoomOut');
+        const resetZoom = document.getElementById('resetZoom');
+        
+        let currentScale = 1;
+        let isDragging = false;
+        let lastX = 0;
+        let lastY = 0;
+        let translateX = 0;
+        let translateY = 0;
+        
+        // 修改地图移动事件，准确计算坐标
+        mapGrid.addEventListener('mousemove', function(e) {
+            // 获取地图容器的位置和大小
+            const mapContainer = document.querySelector('.map-container');
+            const containerRect = mapContainer.getBoundingClientRect();
+            
+            // 计算鼠标相对于容器的位置
+            const mouseX = e.clientX - containerRect.left;
+            const mouseY = e.clientY - containerRect.top;
+            
+            // 计算地图的实际可见区域（应用缩放和平移后）
+            const mapRect = mapGrid.getBoundingClientRect();
+            
+            // 计算地图原点在视口中的位置
+            const originX = mapRect.left - containerRect.left;
+            const originY = mapRect.top - containerRect.top;
+            
+            // 计算鼠标相对于地图原点的位置
+            const relativeX = mouseX - originX;
+            const relativeY = mouseY - originY;
+            
+            // 将相对位置转换为1000×1000网格坐标（考虑缩放）
+            const gridX = Math.round(relativeX / currentScale);
+            const gridY = Math.round(relativeY / currentScale);
+            
+            // 检查鼠标是否在地图范围内
+            if (gridX >= 0 && gridX < 1000 && gridY >= 0 && gridY < 1000) {
+                // 格式化坐标以保持一致的宽度
+                const formattedX = gridX.toString().padStart(3, ' ');
+                const formattedY = gridY.toString().padStart(3, ' ');
+                
+                // 更新坐标显示
+                document.getElementById('coordinatesDisplay').textContent = `坐标: (${formattedX}, ${formattedY})`;
+                document.getElementById('coordinatesDisplay').style.display = 'block';
+            } else {
+                // 鼠标不在地图有效范围内，显示为"超出范围"
+                document.getElementById('coordinatesDisplay').textContent = `坐标: (超出范围)`;
+                document.getElementById('coordinatesDisplay').style.display = 'block';
+            }
+        });
+        
+        // 鼠标离开地图时隐藏坐标显示
+        mapGrid.addEventListener('mouseleave', function() {
+            // 等待一小段时间后隐藏坐标显示，避免闪烁
+            setTimeout(function() {
+                document.getElementById('coordinatesDisplay').style.display = 'none';
+            }, 100);
+        });
+
+        // 鼠标进入地图时显示坐标
+        mapGrid.addEventListener('mouseenter', function() {
+            document.getElementById('coordinatesDisplay').style.display = 'block';
+        });
+        
+        // 地图控制事件
+        zoomIn.addEventListener('click', function() {
+            currentScale += 0.1;
+            updateMapTransform();
+        });
+        
+        zoomOut.addEventListener('click', function() {
+            currentScale = Math.max(0.5, currentScale - 0.1);
+            updateMapTransform();
+        });
+        
+        resetZoom.addEventListener('click', function() {
+            currentScale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateMapTransform();
+        });
+        
+        // 更新地图变换
+        function updateMapTransform() {
+            mapGrid.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+        }
+        
+        // 地图拖动
+        mapGrid.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+            mapGrid.style.cursor = 'grabbing';
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - lastX;
+            const deltaY = e.clientY - lastY;
+            
+            translateX += deltaX;
+            translateY += deltaY;
+            
+            updateMapTransform();
+            
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+        
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            mapGrid.style.cursor = 'grab';
+        });
+        
+        // 关闭车辆信息面板
+        closeVehicleInfo.addEventListener('click', function() {
+            vehicleInfo.style.display = 'none';
+        });
+        
+        // 地标筛选功能
+        const filterAll = document.getElementById('filter-all');
+        const landmarkFilters = document.querySelectorAll('.landmark-filter input[type="checkbox"]:not(#filter-all)');
+        const landmarkFilter = document.getElementById('landmarkFilter');
+        
+        // 全选按钮点击事件
+        document.getElementById('selectAllTypes').addEventListener('click', function() {
+            document.getElementById('filter-all').checked = false;
+            document.getElementById('filter-center').checked = true;
+            document.getElementById('filter-transport').checked = true;
+            document.getElementById('filter-commercial').checked = true;
+            document.getElementById('filter-scenic').checked = true;
+            document.getElementById('filter-historic').checked = true;
+            document.getElementById('filter-education').checked = true;
+            document.getElementById('filter-park').checked = true;
+            document.getElementById('filter-culture').checked = true;
+            document.getElementById('filter-industry').checked = true;
+            // 只应用地标筛选
+            applyLandmarkFilter();
+        });
+        
+        // 清除按钮点击事件
+        document.getElementById('clearAllTypes').addEventListener('click', function() {
+            document.getElementById('filter-all').checked = false;
+            document.getElementById('filter-center').checked = false;
+            document.getElementById('filter-transport').checked = false;
+            document.getElementById('filter-commercial').checked = false;
+            document.getElementById('filter-scenic').checked = false;
+            document.getElementById('filter-historic').checked = false;
+            document.getElementById('filter-education').checked = false;
+            document.getElementById('filter-park').checked = false;
+            document.getElementById('filter-culture').checked = false;
+            document.getElementById('filter-industry').checked = false;
+            // 只应用地标筛选
+            applyLandmarkFilter();
+        });
+        
+        // 全部复选框变更事件
+        document.getElementById('filter-all').addEventListener('change', function() {
+            // 移除禁用逻辑，让用户可以随时点击各个类型
+            // 如果全选被勾选，则将所有类型设为选中状态
+            if (this.checked) {
+                document.getElementById('filter-center').checked = true;
+                document.getElementById('filter-transport').checked = true;
+                document.getElementById('filter-commercial').checked = true;
+                document.getElementById('filter-scenic').checked = true;
+                document.getElementById('filter-historic').checked = true;
+                document.getElementById('filter-education').checked = true;
+                document.getElementById('filter-park').checked = true;
+                document.getElementById('filter-culture').checked = true;
+                document.getElementById('filter-industry').checked = true;
+            }
+            // 只应用地标筛选
+            applyLandmarkFilter();
+        });
+        
+        // 各类型复选框变更事件
+        document.querySelectorAll('.landmark-filter input[type="checkbox"]:not(#filter-all)').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // 当取消任一类型选中状态时，也取消"全部"的选中状态
+                if (!this.checked) {
+                    document.getElementById('filter-all').checked = false;
+                }
+                
+                // 如果所有类型都被选中，则自动选中"全部"
+                const allSelected = Array.from(document.querySelectorAll('.landmark-filter input[type="checkbox"]:not(#filter-all)')).every(cb => cb.checked);
+                if (allSelected) {
+                    document.getElementById('filter-all').checked = true;
+                }
+                
+                // 只应用地标筛选
+                applyLandmarkFilter();
+            });
+        });
+        
+        // 应用地标筛选
+        function applyLandmarkFilter() {
+            console.log("执行地标筛选");
+            const allChecked = document.getElementById('filter-all').checked;
+            const filters = {
+                center: document.getElementById('filter-center').checked,
+                transport: document.getElementById('filter-transport').checked,
+                commercial: document.getElementById('filter-commercial').checked,
+                scenic: document.getElementById('filter-scenic').checked,
+                historic: document.getElementById('filter-historic').checked,
+                education: document.getElementById('filter-education').checked,
+                park: document.getElementById('filter-park').checked,
+                culture: document.getElementById('filter-culture').checked,
+                industry: document.getElementById('filter-industry').checked
+            };
+            
+            // 获取所有地标，确保仅处理地标元素
+            const landmarks = document.querySelectorAll('.city-landmark');
+            console.log(`找到 ${landmarks.length} 个地标元素`);
+            
+            // 设置计数器对象
+            const counts = {
+                all: landmarks.length,
+                center: 0,
+                transport: 0,
+                commercial: 0,
+                scenic: 0,
+                historic: 0,
+                education: 0,
+                park: 0,
+                culture: 0,
+                industry: 0
+            };
+            
+            // 遍历所有地标
+            landmarks.forEach(landmark => {
+                // 获取地标类型
+                const type = landmark.getAttribute('data-landmark-type');
+                
+                // 计数器增加
+                if (counts[type] !== undefined) {
+                    counts[type]++;
+                }
+                
+                // 如果"全部"选中或者该类型选中，则显示
+                if (allChecked || filters[type]) {
+                    landmark.style.display = '';
+                } else {
+                    landmark.style.display = 'none';
+                }
+            });
+            
+            // 更新计数显示
+            document.getElementById('count-all').textContent = counts.all;
+            document.getElementById('count-center').textContent = counts.center;
+            document.getElementById('count-transport').textContent = counts.transport;
+            document.getElementById('count-commercial').textContent = counts.commercial;
+            document.getElementById('count-scenic').textContent = counts.scenic;
+            document.getElementById('count-historic').textContent = counts.historic;
+            document.getElementById('count-education').textContent = counts.education;
+            document.getElementById('count-park').textContent = counts.park;
+            document.getElementById('count-culture').textContent = counts.culture;
+            document.getElementById('count-industry').textContent = counts.industry;
+            
+            // 确保地标显示受到"显示地标"开关控制
+            const showLandmarksChecked = document.getElementById('showLandmarks').checked;
+            if (!showLandmarksChecked) {
+                landmarks.forEach(landmark => {
+                    landmark.style.display = 'none';
+                });
+            }
+            
+            // 地标筛选不应该影响车辆显示
+            // 在此处不再添加额外的车辆显示逻辑，完全分离两种筛选
+        }
+        
+        // 刷新地图按钮事件
+        refreshMapBtn.addEventListener('click', function() {
+            // 停止自动刷新
+            stopAutoRefresh();
+            
+            // 完全重新加载
+            loadVehiclesForCity(citySelector.value);
+            // 加载待分配订单
+            updatePendingOrdersData(citySelector.value);
+            showToast('地图已刷新', 'success');
+            
+            // 启动自动刷新
+            setTimeout(startAutoRefresh, 2000);
+        });
+        
+        // 城市选择变更事件
+        citySelector.addEventListener('change', function() {
+            const selectedCity = this.value;
+            
+            // 停止自动刷新
+            stopAutoRefresh();
+            
+            // 清除地图上所有元素
+            clearMap();
+            
+            // 加载道路地图
+            loadRoadMap(selectedCity);
+            
+            // 更新城市数据，直接调用loadVehiclesForCity函数
+            loadVehiclesForCity(selectedCity);
+            
+            // 加载待分配订单
+            updatePendingOrdersData(selectedCity);
+            
+            // 显示更新提示
+            showToast(`已切换到${selectedCity}地图`, 'success');
+            
+            // 重新启动自动刷新
+            setTimeout(startAutoRefresh, 2000);
+        });
+        
+        // 清空地图上的所有元素
+        function clearMap() {
+            // 保留地图网格，但移除所有子元素
+            const elements = mapGrid.querySelectorAll('div:not(.map-coordinates)');
+            elements.forEach(element => {
+                element.remove();
+            });
+            
+            // 清空待分配订单标记数组
+            pendingOrderMarkers = [];
+        }
+        
+        // 加载道路地图
+        function loadRoadMap(cityCode) {
+            // 清除现有的道路元素
+            const roadElements = mapGrid.querySelectorAll('.road-cell, .landmark-cell');
+            roadElements.forEach(element => element.remove());
+            
+            // 设置对应的城市背景图
+            const cityCodeMap = {
+                '沈阳市': 'shenyang',
+                '北京市': 'beijing',
+                '上海市': 'shanghai',
+                '广州市': 'guangzhou',
+                '深圳市': 'shenzhen',
+                '杭州市': 'hangzhou',
+                '南京市': 'nanjing',
+                '成都市': 'chengdu',
+                '重庆市': 'chongqing',
+                '武汉市': 'wuhan',
+                '西安市': 'xian'
+            };
+            
+            // 获取城市代码
+            const cityImgCode = cityCodeMap[cityCode] || 'shenyang';
+            
+            // 检查该城市图片文件是否存在
+            const img = new Image();
+            img.onload = function() {
+                // 图片存在，设置为背景
+                mapGrid.style.backgroundImage = `url('/static/images/${cityImgCode}.png'), 
+                                                 linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px), 
+                                                 linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px)`;
+                console.log(`已加载${cityCode}背景图片`);
+            };
+            
+            img.onerror = function() {
+                // 图片不存在，使用默认沈阳图片
+                mapGrid.style.backgroundImage = `url('/static/images/shenyang.png'), 
+                                                 linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px), 
+                                                 linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px)`;
+                console.log(`${cityCode}背景图片不存在，使用默认沈阳背景图`);
+                
+                // 显示提示信息
+                showToast(`${cityCode}背景图片未找到，使用默认沈阳地图`, 'warning');
+            };
+            
+            // 设置图片路径
+            img.src = `/static/images/${cityImgCode}.png`;
+            
+            // 根据城市代码生成对应的道路地图
+            if (cityCode === '沈阳市') {
+                roadMap = generateShenyangRoadMap();
+            } else if (cityCode === '北京市') {
+                roadMap = generateBeijingRoadMap();
+            } else if (cityCode === '上海市') {
+                roadMap = generateShanghaiRoadMap();
+            } else {
+                // 默认使用沈阳地图
+                roadMap = generateShenyangRoadMap();
+                console.log('未知城市代码，使用默认沈阳地图:', cityCode);
+            }
+            
+            // 不再绘制道路到地图上，只生成地图数据供地标和充电站使用
+            console.log(`已加载${cityCode}地图数据`);
+        }
+        
+        // 更新城市数据
+        function updateCityData(cityCode) {
+            // 加载城市的地标和充电站数据
+            loadLandmarks(cityCode);
+            loadChargingStations(cityCode);
+            loadVehicles(cityCode);
+        }
+        
+        // 显示选项卡片缩放功能
+        const displayOptions = document.getElementById('displayOptions');
+        const displayOptionsToggle = document.getElementById('displayOptionsToggle');
+        
+        // 切换显示/隐藏
+        function toggleDisplayOptions() {
+            displayOptions.classList.toggle('collapsed');
+            
+            // 更新显示状态
+            const isCollapsed = displayOptions.classList.contains('collapsed');
+            localStorage.setItem('displayOptionsCollapsed', isCollapsed);
+        }
+        
+        // 绑定点击事件
+        displayOptionsToggle.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            toggleDisplayOptions();
+        });
+        
+        // 在折叠状态下点击图标展开
+        displayOptions.addEventListener('click', function(e) {
+            if (displayOptions.classList.contains('collapsed')) {
+                toggleDisplayOptions();
+            }
+        });
+        
+        // 从localStorage恢复显示状态
+        const savedCollapsedState = localStorage.getItem('displayOptionsCollapsed');
+        if (savedCollapsedState === 'true') {
+            displayOptions.classList.add('collapsed');
+        }
+        
+        // 地标显示主开关控制
+        const showLandmarks = document.getElementById('showLandmarks');
+        const landmarkOptions = document.getElementById('landmarkOptions');
+        
+        // 地标显示/隐藏事件
+        showLandmarks.addEventListener('change', function() {
+            const isShowLandmarks = this.checked;
+            landmarkOptions.style.display = isShowLandmarks ? 'block' : 'none';
+            
+            // 隐藏所有地标
+            const landmarks = document.querySelectorAll('.city-landmark');
+            landmarks.forEach(landmark => {
+                landmark.style.display = isShowLandmarks ? '' : 'none';
+            });
+            
+            showToast(isShowLandmarks ? '已显示地标' : '已隐藏地标', 'info');
+        });
+        
+        // 初始化地标选项显示状态
+        landmarkOptions.style.display = showLandmarks.checked ? 'block' : 'none';
+        
+        // 地标名称显示/隐藏控制
+        const showLandmarkNames = document.getElementById('showLandmarkNames');
+        
+        // 地标名称显示/隐藏事件
+        showLandmarkNames.addEventListener('change', function() {
+            const isShowNames = this.checked;
+            const landmarks = document.querySelectorAll('.city-landmark');
+            
+            landmarks.forEach(landmark => {
+                if (isShowNames) {
+                    landmark.classList.remove('name-hidden');
+                } else {
+                    landmark.classList.add('name-hidden');
+                }
+            });
+            
+            showToast(isShowNames ? '已显示地标名称' : '已隐藏地标名称', 'info');
+        });
+        
+        // 充电站显示/隐藏控制
+        const showChargingStations = document.getElementById('showChargingStations');
+        
+        // 充电站显示/隐藏事件
+        showChargingStations.addEventListener('change', function() {
+            const isShowStations = this.checked;
+            const stations = document.querySelectorAll('.charging-station-marker');
+            
+            stations.forEach(station => {
+                station.style.display = isShowStations ? 'flex' : 'none';
+            });
+            
+            showToast(isShowStations ? '已显示充电站' : '已隐藏充电站', 'info');
+        });
+        
+        // 车辆显示控制
+        const showVehicles = document.getElementById('showVehicles');
+        
+        // 车辆显示/隐藏事件
+        showVehicles.addEventListener('change', function() {
+            const isShowVehicles = this.checked;
+            
+            // 隐藏所有车辆
+            const vehicles = document.querySelectorAll('.vehicle-marker');
+            vehicles.forEach(vehicle => {
+                vehicle.style.display = isShowVehicles ? '' : 'none';
+            });
+            
+            showToast(isShowVehicles ? '已显示车辆' : '已隐藏车辆', 'info');
+        });
+        
+        // 车辆状态全选按钮
+        document.getElementById('selectAllVehicles').addEventListener('click', function() {
+            document.getElementById('filter-vehicle-all').checked = false;
+            document.getElementById('filter-vehicle-idle').checked = true;
+            document.getElementById('filter-vehicle-busy').checked = true;
+            document.getElementById('filter-vehicle-charging').checked = true;
+            document.getElementById('filter-vehicle-maintenance').checked = true;
+            document.getElementById('filter-vehicle-low-battery').checked = true;
+            document.getElementById('filter-vehicle-waiting-charging').checked = true;
+            document.getElementById('filter-vehicle-need-maintenance').checked = true;
+            // 只应用车辆筛选
+            applyVehicleFilter();
+        });
+        
+        // 车辆状态清除按钮
+        document.getElementById('clearAllVehicles').addEventListener('click', function() {
+            document.getElementById('filter-vehicle-all').checked = false;
+            document.getElementById('filter-vehicle-idle').checked = false;
+            document.getElementById('filter-vehicle-busy').checked = false;
+            document.getElementById('filter-vehicle-charging').checked = false;
+            document.getElementById('filter-vehicle-maintenance').checked = false;
+            document.getElementById('filter-vehicle-low-battery').checked = false;
+            document.getElementById('filter-vehicle-waiting-charging').checked = false;
+            document.getElementById('filter-vehicle-need-maintenance').checked = false;
+            // 只应用车辆筛选
+            applyVehicleFilter();
+        });
+        
+        // 全部车辆状态复选框变更事件
+        document.getElementById('filter-vehicle-all').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('filter-vehicle-idle').checked = true;
+                document.getElementById('filter-vehicle-busy').checked = true;
+                document.getElementById('filter-vehicle-charging').checked = true;
+                document.getElementById('filter-vehicle-maintenance').checked = true;
+                document.getElementById('filter-vehicle-low-battery').checked = true;
+                document.getElementById('filter-vehicle-waiting-charging').checked = true;
+                document.getElementById('filter-vehicle-need-maintenance').checked = true;
+            }
+            // 只应用车辆筛选
+            applyVehicleFilter();
+        });
+        
+        // 单个车辆状态复选框变更事件
+        document.querySelectorAll('#vehicleFilter input[type="checkbox"]:not(#filter-vehicle-all)').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // 当取消任一状态选中时，也取消"全部"的选中状态
+                if (!this.checked) {
+                    document.getElementById('filter-vehicle-all').checked = false;
+                }
+                
+                // 如果所有状态都被选中，则自动选中"全部"
+                const allSelected = Array.from(
+                    document.querySelectorAll('#vehicleFilter input[type="checkbox"]:not(#filter-vehicle-all)')
+                ).every(cb => cb.checked);
+                
+                if (allSelected) {
+                    document.getElementById('filter-vehicle-all').checked = true;
+                }
+                
+                applyVehicleFilter();
+            });
+        });
+        
+        // 应用车辆状态筛选
+        function applyVehicleFilter() {
+            console.log("执行车辆筛选");
+            const allChecked = document.getElementById('filter-vehicle-all').checked;
+            const filters = {
+                'status-idle': document.getElementById('filter-vehicle-idle').checked,
+                'status-busy': document.getElementById('filter-vehicle-busy').checked,
+                'status-charging': document.getElementById('filter-vehicle-charging').checked, 
+                'status-maintenance': document.getElementById('filter-vehicle-maintenance').checked,
+                'status-low-battery': document.getElementById('filter-vehicle-low-battery').checked,
+                'status-waiting-charging': document.getElementById('filter-vehicle-waiting-charging').checked,
+                'status-need-maintenance': document.getElementById('filter-vehicle-need-maintenance').checked
+            };
+            
+            // 获取所有车辆，确保仅处理车辆元素
+            const vehicles = document.querySelectorAll('.vehicle-marker');
+            console.log(`找到 ${vehicles.length} 个车辆元素`);
+            
+            // 设置计数器对象
+            const counts = {
+                all: vehicles.length,
+                'status-idle': 0, 
+                'status-busy': 0,
+                'status-charging': 0,
+                'status-maintenance': 0,
+                'status-low-battery': 0,
+                'status-waiting-charging': 0,
+                'status-need-maintenance': 0
+            };
+            
+            // 遍历所有车辆
+            vehicles.forEach(vehicle => {
+                // 获取车辆的所有状态类
+                const classList = Array.from(vehicle.classList);
+                
+                // 找到状态类（以 status- 开头的类）
+                const statusClass = classList.find(cls => cls.startsWith('status-'));
+                
+                // 如果找到状态类，则增加对应的计数
+                if (statusClass && counts[statusClass] !== undefined) {
+                    counts[statusClass]++;
+                }
+                
+                // 如果"全部"选中或者该状态选中，且车辆显示开关已开启，则显示
+                const showVehiclesEnabled = document.getElementById('showVehicles').checked;
+                if (showVehiclesEnabled && (allChecked || (statusClass && filters[statusClass]))) {
+                    vehicle.style.display = '';
+                } else {
+                    vehicle.style.display = 'none';
+                }
+            });
+            
+            // 更新计数显示
+            document.getElementById('count-vehicle-all').textContent = counts.all;
+            document.getElementById('count-vehicle-idle').textContent = counts['status-idle'];
+            document.getElementById('count-vehicle-busy').textContent = counts['status-busy'];
+            document.getElementById('count-vehicle-charging').textContent = counts['status-charging'];
+            document.getElementById('count-vehicle-maintenance').textContent = counts['status-maintenance'];
+            document.getElementById('count-vehicle-low-battery').textContent = counts['status-low-battery'];
+            document.getElementById('count-vehicle-waiting-charging').textContent = counts['status-waiting-charging'];
+            document.getElementById('count-vehicle-need-maintenance').textContent = counts['status-need-maintenance'];
+            
+            // 删除这部分代码，不在车辆筛选中处理地标
+            // 车辆筛选不应影响地标显示
+        }
+        
+        // 在加载车辆数据后应用车辆筛选
+        const originalLoadVehiclesForCity = loadVehiclesForCity;
+        loadVehiclesForCity = function(cityCode, silent = false) {
+            originalLoadVehiclesForCity(cityCode);
+            // 延迟执行，等待车辆标记添加完成
+            setTimeout(applyVehicleFilter, 500);
+        };
+        
+        // 加载城市的车辆数据
+        function loadVehiclesForCity(cityCode, silent = false) {
+            // 清除现有标记
+            const vehicleMarkersToRemove = document.querySelectorAll('.vehicle-marker');
+            console.log(`准备移除 ${vehicleMarkersToRemove.length} 个旧车辆标记`); // 添加日志方便调试
+            vehicleMarkersToRemove.forEach(marker => marker.remove());
+                    
+            // 关闭车辆信息面板
+            vehicleInfo.style.display = 'none';
+            
+            // 添加城市地标 - 使用cityCode映射，支持中文
+            const cityCodeMap = {
+                '沈阳市': 'shenyang',
+                '北京市': 'beijing',
+                '上海市': 'shanghai',
+                '广州市': 'guangzhou',
+                '深圳市': 'shenzhen',
+                '杭州市': 'hangzhou',
+                '南京市': 'nanjing',
+                '成都市': 'chengdu',
+                '重庆市': 'chongqing',
+                '武汉市': 'wuhan',
+                '西安市': 'xian'
+            };
+            
+            // 为了兼容性，如果传入的是中文城市名，使用中文，否则尝试使用映射
+            const cityCodeForLandmarks = cityLandmarks[cityCode] ? cityCode : (cityLandmarks[cityCodeMap[cityCode]] ? cityCodeMap[cityCode] : 'default');
+            const landmarks = cityLandmarks[cityCodeForLandmarks] || cityLandmarks['default'];
+            addCityLandmarks(landmarks);
+            
+            // 加载充电站数据
+            loadChargingStations(cityCode);
+            
+            // 从API获取真实车辆数据
+            fetch(`/vehicles/api/city_vehicles?city=${cityCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const vehicleMarkers = [];
+                        
+                        // 添加车辆标记
+                        data.data.forEach(vehicle => {
+                            const marker = addVehicleMarkerFromDb(vehicle);
+                            vehicleMarkers.push(marker);
+                        });
+                        
+                        // 首先应用显示选项设置
+                        const showLandmarksChecked = document.getElementById('showLandmarks').checked;
+                        const showVehiclesChecked = document.getElementById('showVehicles').checked;
+                        
+                        // 现在单独应用地标和车辆筛选，确保它们不会互相影响
+                        if (showLandmarksChecked) {
+                            // 注意：applyLandmarkFilter只处理地标元素，不会影响车辆
+                            applyLandmarkFilter(); 
+                        } else {
+                            // 如果地标不显示，隐藏所有地标
+                            const landmarks = document.querySelectorAll('.city-landmark');
+                            landmarks.forEach(landmark => {
+                                landmark.style.display = 'none';
+                            });
+                        }
+                        
+                        if (showVehiclesChecked) {
+                            // 注意：applyVehicleFilter只处理车辆元素，不会影响地标
+                            applyVehicleFilter(); 
+                        } else {
+                            // 如果车辆不显示，隐藏所有车辆
+                            const vehicles = document.querySelectorAll('.vehicle-marker');
+                            vehicles.forEach(vehicle => {
+                                vehicle.style.display = 'none';
+                            });
+                        }
+                        
+                        const showChargingStationsChecked = document.getElementById('showChargingStations').checked;
+                        const stations = document.querySelectorAll('.charging-station-marker');
+                        stations.forEach(station => {
+                            station.style.display = showChargingStationsChecked ? 'flex' : 'none';
+                        });
+                        
+                        // 只在非静默模式下显示提示
+                        if (!silent) {
+                            showToast(`已加载 ${data.data.length} 辆车的数据`, 'success');
+                        }
+                        
+                        // 页面完全加载后，更新所有车辆的位置名称
+                        setTimeout(() => {
+                            vehicleMarkers.forEach(marker => {
+                                if (marker) {
+                                    const x = parseInt(marker.style.left);
+                                    const y = parseInt(marker.style.top);
+                                    updateNearestLocationName(marker, x, y);
+                                }
+                            });
+                        }, 1000);
+                    } else {
+                        if (!silent) {
+                            showToast('加载车辆数据失败', 'danger');
+                        }
+                        console.error('加载车辆数据失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    if (!silent) {
+                        showToast('加载车辆数据时发生错误', 'danger');
+                    }
+                    console.error('API错误:', error);
+                });
+        }
+        
+        // 加载充电站数据
+        function loadChargingStations(cityCode) {
+            fetch(`/vehicles/api/city_charging_stations?city=${cityCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 添加充电站标记
+                        data.data.forEach(station => {
+                            addChargingStationMarker(station);
+                        });
+                        console.log(`已加载 ${data.data.length} 个充电站`);
+                    } else {
+                        console.error('加载充电站数据失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('充电站API错误:', error);
+                });
+        }
+        
+        // 添加充电站标记
+        function addChargingStationMarker(station) {
+            const marker = document.createElement('div');
+            marker.className = 'charging-station-marker';
+            marker.style.left = `${station.location_x}px`;
+            marker.style.top = `${station.location_y}px`;
+            marker.style.position = 'absolute';
+            marker.style.width = '30px';
+            marker.style.height = '30px';
+            marker.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+            marker.style.border = '2px solid #17a2b8';
+            marker.style.borderRadius = '50%';
+            marker.style.zIndex = '150';
+            marker.style.display = 'flex';
+            marker.style.justifyContent = 'center';
+            marker.style.alignItems = 'center';
+            marker.style.cursor = 'pointer';
+            marker.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.3)';
+            marker.style.transform = 'translate(-50%, -50%)';
+            
+            // 使用Bootstrap图标表示充电站
+            marker.innerHTML = '<i class="bi bi-lightning-charge-fill" style="color: #17a2b8; font-size: 18px;"></i>';
+            
+            // 添加提示文本
+            marker.title = `充电站: ${station.station_code}`;
+            
+            // 存储充电站数据
+            marker.setAttribute('data-station-id', station.station_id);
+            marker.setAttribute('data-station-code', station.station_code);
+            marker.setAttribute('data-city-code', station.city_code);
+            marker.setAttribute('data-current-vehicles', station.current_vehicles);
+            marker.setAttribute('data-max-capacity', station.max_capacity);
+            marker.setAttribute('data-last-maintenance', station.last_maintenance_date || '暂无记录');
+            marker.setAttribute('data-next-maintenance', station.next_maintenance_date || '暂无记录');
+            
+            // 点击显示充电站详情
+            marker.addEventListener('click', function() {
+                showChargingStationInfo(this);
+            });
+            
+            // 添加到地图
+            mapGrid.appendChild(marker);
+        }
+        
+        // 显示充电站详情
+        function showChargingStationInfo(marker) {
+            const stationId = marker.getAttribute('data-station-id');
+            const stationCode = marker.getAttribute('data-station-code');
+            const cityCode = marker.getAttribute('data-city-code');
+            
+
+            
+            // 通过AJAX请求获取最新的充电站信息
+            fetch(`/vehicles/api/charging_station_info?station_code=${stationCode}&city_code=${cityCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const stationInfo = data.data;
+                        
+                        // 计算使用率
+                        const usageRate = Math.round((stationInfo.current_vehicles / stationInfo.max_capacity) * 100);
+                        
+                        // 显示充电站信息弹窗
+                        showToast(`
+                            <strong>充电站信息 (实时)</strong><br>
+                            编号: ${stationInfo.station_code}<br>
+                            当前充电车辆: ${stationInfo.current_vehicles}/${stationInfo.max_capacity} (${usageRate}%)<br>
+                            上次维护: ${stationInfo.last_maintenance_date || '暂无记录'}<br>
+                            下次维护: ${stationInfo.next_maintenance_date || '暂无记录'}
+                        `, 'info', 8000); // 显示8秒
+                        
+                        // 更新DOM元素上的数据（可选，用于保持UI一致性）
+                        marker.setAttribute('data-current-vehicles', stationInfo.current_vehicles);
+                        marker.setAttribute('data-max-capacity', stationInfo.max_capacity);
+                        marker.setAttribute('data-last-maintenance', stationInfo.last_maintenance_date || '暂无记录');
+                        marker.setAttribute('data-next-maintenance', stationInfo.next_maintenance_date || '暂无记录');
+                    } else {
+                        showToast(`
+                            <strong>充电站信息</strong><br>
+                            获取实时数据失败: ${data.message || '未知错误'}
+                        `, 'warning', 5000);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取充电站信息失败:', error);
+                    
+                    // 失败时回退到使用DOM数据
+                    const currentVehicles = marker.getAttribute('data-current-vehicles');
+                    const maxCapacity = marker.getAttribute('data-max-capacity');
+                    const lastMaintenance = marker.getAttribute('data-last-maintenance');
+                    const nextMaintenance = marker.getAttribute('data-next-maintenance');
+                    
+                    // 计算使用率
+                    const usageRate = Math.round((currentVehicles / maxCapacity) * 100);
+                    
+                    // 显示充电站信息弹窗（标明数据可能不是最新的）
+                    showToast(`
+                        <strong>充电站信息 (缓存)</strong><br>
+                        编号: ${stationCode}<br>
+                        当前充电车辆: ${currentVehicles}/${maxCapacity} (${usageRate}%)<br>
+                        上次维护: ${lastMaintenance}<br>
+                        下次维护: ${nextMaintenance}<br>
+                        <small class="text-muted">* 无法获取实时数据，显示的是缓存信息</small>
+                    `, 'info', 8000); // 显示8秒
+                });
+        }
+        
+        // 添加城市地标
+        function addCityLandmarks(landmarks) {
+            // 重置所有计数器
+            document.querySelectorAll('.landmark-filter .badge').forEach(badge => {
+                badge.textContent = '0';
+            });
+            
+            // 建立类型计数对象
+            const typeCounts = {};
+            
+            // 获取地标名称显示状态
+            const isShowNames = document.getElementById('showLandmarkNames').checked;
+            
+            // 为不同类型的地标定义唯一图标
+            const typeIcons = {
+                'center': 'bi-star-fill',          // 政府部门用星星
+                'transport': 'bi-hexagon',           // 交通枢纽用卡车图标
+                'commercial': 'bi-shop',            // 商业区域用商店
+                'scenic': 'bi-image-alt',           // 景点名胜用风景
+                'historic': 'bi-bank',              // 历史古迹用古建筑
+                'education': 'bi-mortarboard',      // 教育机构用学士帽
+                'park': 'bi-tree',                  // 公园绿地用树
+                'culture': 'bi-music-note',         // 文化娱乐用音符
+                'industry': 'bi-buildings'           // 产业园区用多个建筑图标
+            };
+            
+            landmarks.forEach(landmark => {
+                const el = document.createElement('div');
+                // 根据显示状态设置样式类
+                el.className = `city-landmark landmark-${landmark.type}${isShowNames ? '' : ' name-hidden'}`;
+                el.style.left = `${landmark.x}px`;
+                el.style.top = `${landmark.y}px`;
+                
+                // 根据地标类型使用对应图标，不再使用地标自带图标
+                const icon = typeIcons[landmark.type] || 'bi-geo-alt';
+                if (isShowNames) {
+                    el.innerHTML = `
+                        <i class="landmark-icon bi ${icon}"></i>
+                        <span class="landmark-name">${landmark.name}</span>
+                    `;
+                } else {
+                    // 在隐藏名称模式下，使用特殊结构来确保图标居中显示
+                    el.innerHTML = `<div class="icon-wrapper"><i class="landmark-icon bi ${icon}"></i></div>`;
+                }
+                
+                el.setAttribute('data-landmark-id', landmark.id);
+                el.setAttribute('data-landmark-type', landmark.type);
+                el.setAttribute('data-landmark-name', landmark.name);
+                
+                // 点击地标事件
+                el.addEventListener('click', function() {
+                    showToast(`选择了地标: ${landmark.name}`, 'info');
+                });
+                
+                mapGrid.appendChild(el);
+                
+                // 统计每种类型的数量
+                typeCounts[landmark.type] = (typeCounts[landmark.type] || 0) + 1;
+            });
+            
+            // 更新类型数量显示
+            for (const [type, count] of Object.entries(typeCounts)) {
+                const countElement = document.getElementById(`count-${type}`);
+                if (countElement) {
+                    countElement.textContent = count;
+                }
+            }
+            
+            // 更新总数
+            const allCountElement = document.getElementById('count-all');
+            if (allCountElement) {
+                allCountElement.textContent = landmarks.length;
+            }
+            
+            // 应用筛选器设置
+            applyLandmarkFilter();
+            
+            // 应用显示地标设置
+            const showLandmarksChecked = document.getElementById('showLandmarks').checked;
+            const landmarkElements = document.querySelectorAll('.city-landmark');
+            landmarkElements.forEach(landmark => {
+                landmark.style.display = showLandmarksChecked ? '' : 'none';
+            });
+        }
+        
+        // 从数据库数据创建车辆标记
+        function addVehicleMarkerFromDb(vehicle) {
+            // 使用车辆的精确坐标
+            let x = vehicle.current_location_x;
+            let y = vehicle.current_location_y;
+            
+            if (!x || !y) {
+                // 只在坐标为空时生成随机坐标
+                x = Math.random() * 600 + 200; // 200-800
+                y = Math.random() * 600 + 200; // 200-800
+            } else {
+                // 使用基于车辆ID的固定偏移量
+                const offsetCoords = applyFixedOffset({x, y}, vehicle.vehicle_id);
+                x = offsetCoords.x;
+                y = offsetCoords.y;
+            }
+            
+            // 车辆状态对应的CSS类名
+            const statusClasses = {
+                '空闲中': 'status-idle',
+                '运行中': 'status-busy',
+                '充电中': 'status-charging',
+                '电量不足': 'status-maintenance',
+                '等待充电': 'status-low-battery',
+                '前往充电': 'status-waiting-charging',
+                '维护中': 'status-need-maintenance'
+            };
+            
+            // 状态对应的徽章样式
+            const statusBadges = {
+                '空闲中': 'bg-success',
+                '运行中': 'bg-primary',
+                '充电中': 'bg-info',
+                '电量不足': 'bg-secondary',
+                '等待充电': 'bg-danger',
+                '前往充电': 'bg-purple',
+                '维护中': 'bg-warning text-dark'
+            };
+            
+            // 创建标记
+            const marker = document.createElement('div');
+            marker.className = `vehicle-marker ${statusClasses[vehicle.current_status] || 'status-idle'}`;
+            marker.style.left = `${x}px`;
+            marker.style.top = `${y}px`;
+            marker.title = `${vehicle.plate_number} - ${vehicle.current_status}`;
+            
+            // 存储车辆数据
+            marker.setAttribute('data-vehicle-id', vehicle.vehicle_id);
+            marker.setAttribute('data-plate-number', vehicle.plate_number);
+            marker.setAttribute('data-model', vehicle.model);
+            marker.setAttribute('data-status', vehicle.current_status);
+            marker.setAttribute('data-status-badge', statusBadges[vehicle.current_status] || 'bg-secondary');
+            marker.setAttribute('data-location', vehicle.current_location_name || '未知位置');
+            marker.setAttribute('data-battery', vehicle.battery_level);
+            marker.setAttribute('data-mileage', vehicle.mileage);
+            marker.setAttribute('data-maintenance', vehicle.last_maintenance_date || '暂无记录');
+            marker.setAttribute('data-rating', vehicle.rating);
+            marker.setAttribute('data-city', vehicle.operating_city || vehicle.current_city || 'default');
+            
+            // 添加订单起点和终点数据（如果存在）
+            if (vehicle.current_order) {
+                marker.setAttribute('data-pickup-x', vehicle.current_order.pickup_location_x || 0);
+                marker.setAttribute('data-pickup-y', vehicle.current_order.pickup_location_y || 0);
+                marker.setAttribute('data-dropoff-x', vehicle.current_order.dropoff_location_x || 0);
+                marker.setAttribute('data-dropoff-y', vehicle.current_order.dropoff_location_y || 0);
+                marker.setAttribute('data-pickup-name', vehicle.current_order.pickup_location_name || '未知上车点');
+                marker.setAttribute('data-dropoff-name', vehicle.current_order.dropoff_location_name || '未知下车点');
+            } else if (vehicle.current_status === '运行中' && vehicle.pickup_location_x && vehicle.dropoff_location_x) {
+                // 订单信息可能直接存储在车辆对象中
+                marker.setAttribute('data-pickup-x', vehicle.pickup_location_x || 0);
+                marker.setAttribute('data-pickup-y', vehicle.pickup_location_y || 0);
+                marker.setAttribute('data-dropoff-x', vehicle.dropoff_location_x || 0);
+                marker.setAttribute('data-dropoff-y', vehicle.dropoff_location_y || 0);
+                marker.setAttribute('data-pickup-name', vehicle.pickup_location_name || '未知上车点');
+                marker.setAttribute('data-dropoff-name', vehicle.dropoff_location_name || '未知下车点');
+            }
+            
+            // 点击显示车辆详情
+            marker.addEventListener('click', function() {
+                showVehicleInfoFromDb(this);
+            });
+            
+            mapGrid.appendChild(marker);
+            
+            // 保存到位置缓存
+            vehiclePositions[vehicle.vehicle_id] = {x, y};
+            
+            // 延迟更新位置名称，确保所有地标和充电站都已加载
+            return marker;
+        }
+
+        // 更新车辆当前位置信息
+        function updateVehicleLocation(vehicle, x, y) {
+            // 收集地标和充电站位置信息
+            const possibleLocations = [];
+            
+            // 从地标数据中获取位置点
+            const cityCode = citySelector.value || 'shenyang';
+            const landmarks = cityLandmarks[cityCode] || cityLandmarks['default'];
+            
+            // 添加地标位置
+            landmarks.forEach(landmark => {
+                possibleLocations.push({
+                    x: landmark.x,
+                    y: landmark.y,
+                    name: landmark.name,
+                    type: 'landmark'
+                });
+            });
+            
+            // 添加充电站位置 (从DOM获取)
+            const stationElements = document.querySelectorAll('.charging-station-marker');
+            stationElements.forEach(station => {
+                const stationX = parseInt(station.style.left);
+                const stationY = parseInt(station.style.top);
+                const stationCode = station.getAttribute('data-station-code') || '';
+                possibleLocations.push({
+                    x: stationX,
+                    y: stationY,
+                    name: `充电站 ${stationCode}`,
+                    type: 'charging-station'
+                });
+            });
+            
+            // 如果没有找到任何位置点，设置默认位置
+            if (possibleLocations.length === 0) {
+                vehicle.current_location_name = "未知位置";
+                return;
+            }
+            
+            // 计算到每个位置的距离
+            const locationsWithDistance = possibleLocations.map(loc => {
+                const distance = Math.sqrt(
+                    Math.pow(x - loc.x, 2) + 
+                    Math.pow(y - loc.y, 2)
+                );
+                return {...loc, distance};
+            });
+            
+            // 按距离排序
+            locationsWithDistance.sort((a, b) => a.distance - b.distance);
+            
+            // 获取最近的位置
+            const nearestLocation = locationsWithDistance[0];
+            
+            // 更新车辆位置名称
+            if (nearestLocation) {
+                // 如果车辆状态是"充电中"，优先选择最近的充电站
+                if (vehicle.current_status === '充电中') {
+                    const nearestStation = locationsWithDistance.find(loc => loc.type === 'charging-station');
+                    if (nearestStation) {
+                        vehicle.current_location_name = nearestStation.name;
+                        // 可选：移动车辆到充电站位置
+                        // vehicle.current_location_x = nearestStation.x;
+                        // vehicle.current_location_y = nearestStation.y;
+                        return;
+                    }
+                }
+                
+                // 其他情况使用最近的位置
+                vehicle.current_location_name = nearestLocation.name;
+            } else {
+                vehicle.current_location_name = "未知位置";
+            }
+        }
+        
+        // 显示数据库中车辆的详情
+        function showVehicleInfoFromDb(marker) {
+            console.group('车辆信息展示');
+            
+            const vehicleId = marker.getAttribute('data-vehicle-id');
+            const plateNumber = marker.getAttribute('data-plate-number');
+            const model = marker.getAttribute('data-model');
+            const status = marker.getAttribute('data-status');
+            const statusBadge = marker.getAttribute('data-status-badge');
+            const location = marker.getAttribute('data-location');
+            const battery = marker.getAttribute('data-battery');
+            const mileage = marker.getAttribute('data-mileage');
+            const maintenance = marker.getAttribute('data-maintenance');
+            const rating = marker.getAttribute('data-rating');
+            
+            console.log("显示车辆信息:", vehicleId, "状态:", status);
+            console.log("车辆完整数据:", { 
+                id: vehicleId, 
+                plate: plateNumber, 
+                model, 
+                status, 
+                location, 
+                battery 
+            });
+            
+            // 更新详情面板
+            document.getElementById('vehicleTitle').textContent = model;
+            document.getElementById('vehicleStatus').textContent = status;
+            document.getElementById('vehicleStatus').className = `badge ${statusBadge}`;
+            document.getElementById('vehicleId').textContent = plateNumber;
+            document.getElementById('vehicleLocation').textContent = location;
+            document.getElementById('vehicleBattery').style.width = `${battery}%`;
+            document.getElementById('batteryText').textContent = `${battery}%`;
+            document.getElementById('vehicleMileage').textContent = `${mileage}`;
+            document.getElementById('vehicleMaintenance').textContent = maintenance;
+            
+            // 添加评分显示（如果有评分字段）
+            const ratingElement = document.getElementById('vehicleRating');
+            if (ratingElement) {
+                ratingElement.textContent = rating ? `${rating}分` : '暂无评分';
+            }
+            
+            // 根据电量设置进度条颜色
+            const batteryBar = document.getElementById('vehicleBattery');
+            if (battery < 20) {
+                batteryBar.className = 'progress-bar bg-danger';
+            } else if (battery < 50) {
+                batteryBar.className = 'progress-bar bg-warning';
+            } else {
+                batteryBar.className = 'progress-bar bg-success';
+            }
+            
+            // 显示详情面板
+            vehicleInfo.style.display = 'block';
+            
+            // 给操作按钮添加车辆ID属性
+            const dispatchBtn = document.getElementById('dispatchBtn');
+            const trackBtn = document.getElementById('trackBtn');
+            
+            if (!dispatchBtn || !trackBtn) {
+                console.error("未找到操作按钮元素!", {
+                    dispatch: dispatchBtn,
+                    track: trackBtn
+                });
+                console.groupEnd();
+                return;
+            }
+            
+            dispatchBtn.setAttribute('data-vehicle-id', vehicleId);
+            trackBtn.setAttribute('data-vehicle-id', vehicleId);
+            
+            // 清除之前可能显示的起点和终点标记
+            try {
+                console.log("尝试清除当前路线标记");
+                const existingMarkers = document.querySelectorAll('.route-marker');
+                const routeLine = document.getElementById('route-line');
+                
+                // 清除所有路线标记
+                if (existingMarkers.length > 0) {
+                    existingMarkers.forEach(marker => marker.remove());
+                }
+                if (routeLine) routeLine.remove();
+            } catch (error) {
+                console.error("清除路线标记失败:", error);
+            }
+            
+            // 禁用路线显示功能：不再调用toggleRouteMarkers
+            // 原代码:
+            // if (status === '运行中') {
+            //    console.log("车辆状态为'运行中'，准备设置行程路线按钮");
+            //    toggleRouteMarkers(vehicleId);
+            // }
+            
+            console.groupEnd();
+        }
+        
+        // 显示提示信息
+        function showToast(message, type, duration = 3000) {
+            // 检查是否存在toast容器，没有则创建
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'position-fixed bottom-0 end-0 p-3';
+                toastContainer.style.zIndex = '5';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // 创建toast元素
+            const toastId = 'toast-' + Date.now();
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+            toastEl.id = toastId;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            
+            toastEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastEl);
+            
+            // 显示toast
+            const toast = new bootstrap.Toast(toastEl, {
+                animation: true,
+                autohide: true,
+                delay: duration
+            });
+            toast.show();
+            
+            // 自动移除
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastEl.remove();
+            });
+        }
+        
+        // 初始加载默认城市的车辆
+        loadVehiclesForCity('沈阳市');
+        
+        // 地图控制面板缩放功能
+        const mapControls = document.getElementById('mapControls');
+        const mapControlsToggle = document.getElementById('mapControlsToggle');
+        
+        // 切换显示/隐藏
+        function toggleMapControls() {
+            mapControls.classList.toggle('collapsed');
+            
+            // 更新显示状态
+            const isCollapsed = mapControls.classList.contains('collapsed');
+            localStorage.setItem('mapControlsCollapsed', isCollapsed);
+        }
+        
+        // 绑定点击事件
+        mapControlsToggle.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            toggleMapControls();
+        });
+        
+        // 在折叠状态下点击图标展开
+        mapControls.addEventListener('click', function(e) {
+            if (mapControls.classList.contains('collapsed')) {
+                toggleMapControls();
+            }
+        });
+        
+        // 从localStorage恢复显示状态
+        const savedMapControlsState = localStorage.getItem('mapControlsCollapsed');
+        if (savedMapControlsState === 'true') {
+            mapControls.classList.add('collapsed');
+        }
+        
+        // 图例展开/收起功能
+        const legend = document.getElementById('legend');
+        const legendToggle = document.getElementById('legendToggle');
+        const legendIcon = legendToggle.querySelector('i');
+        
+        // 切换显示/隐藏
+        function toggleLegend() {
+            legend.classList.toggle('collapsed');
+            legendIcon.classList.toggle('rotate');
+            
+            // 更新显示状态
+            const isCollapsed = legend.classList.contains('collapsed');
+            localStorage.setItem('legendCollapsed', isCollapsed);
+        }
+        
+        // 绑定点击事件
+        legendToggle.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            toggleLegend();
+        });
+        
+        // 在折叠状态下点击图标展开
+        legend.addEventListener('click', function(e) {
+            if (legend.classList.contains('collapsed')) {
+                toggleLegend();
+            }
+        });
+        
+        // 从localStorage恢复显示状态
+        const savedLegendState = localStorage.getItem('legendCollapsed');
+        if (savedLegendState === 'true') {
+            legend.classList.add('collapsed');
+        }
+        
+        // 实时位置更新函数
+        function startRealTimeLocationUpdates() {
+            // 更新位置缓存，确保使用最新的地标和充电站信息
+            updateLocationCache();
+            
+            // 启动快速随机移动（每0.5秒）
+            const fastMovementInterval = setInterval(function() {
+                // 随机快速移动所有车辆
+                randomVehicleMovement();
+            }, 500); // 每0.5秒更新一次
+            
+            // 每20秒更新一次车辆位置（减少更新频率以降低服务器负载）
+            setInterval(function() {
+                // 更新位置
+                updateVehiclesPositions();
+                
+                // 定期处理更新队列，即使车辆没有移动也确保队列中的项目被处理
+                if (locationUpdateQueue.length > 0 && 
+                    Date.now() - lastLocationUpdateTime >= LOCATION_UPDATE_INTERVAL) {
+                    processLocationUpdateQueue();
+                }
+            }, 20000); // 改为20秒
+            
+            // 用户交互时（如滚动或点击）更新缓存
+            mapGrid.addEventListener('mousedown', debounce(updateLocationCache, 1000));
+            window.addEventListener('resize', debounce(updateLocationCache, 1000));
+            citySelector.addEventListener('change', updateLocationCache);
+        }
+        
+        // 缓存地标和充电站位置信息，避免重复计算
+        let cachedLocations = [];
+        let locationUpdateQueue = [];
+        let isUpdatingLocations = false;
+        let lastLocationUpdateTime = Date.now();
+        const LOCATION_UPDATE_INTERVAL = 5000; // 位置更新到数据库的最小间隔(毫秒)
+        
+        // 更新缓存的位置信息
+        function updateLocationCache() {
+            const possibleLocations = [];
+            
+            // 获取当前城市的地标
+            const cityCode = citySelector.value || '沈阳市';
+            const cityCodeMap = {
+                '沈阳市': 'shenyang',
+                '北京市': 'beijing',
+                '上海市': 'shanghai',
+                '广州市': 'guangzhou',
+                '深圳市': 'shenzhen',
+                '杭州市': 'hangzhou',
+                '南京市': 'nanjing',
+                '成都市': 'chengdu',
+                '重庆市': 'chongqing',
+                '武汉市': 'wuhan',
+                '西安市': 'xian'
+            };
+            const cityCodeForLandmarks = cityLandmarks[cityCode] ? cityCode : (cityLandmarks[cityCodeMap[cityCode]] ? cityCodeMap[cityCode] : 'default');
+            const landmarks = cityLandmarks[cityCodeForLandmarks] || cityLandmarks['default'];
+            
+            // 添加地标
+            landmarks.forEach(landmark => {
+                possibleLocations.push({
+                    x: landmark.x,
+                    y: landmark.y,
+                    name: landmark.name,
+                    type: 'landmark'
+                });
+            });
+            
+            // 添加充电站
+            const stations = document.querySelectorAll('.charging-station-marker');
+            stations.forEach(station => {
+                const stationX = parseInt(station.style.left);
+                const stationY = parseInt(station.style.top);
+                const stationCode = station.getAttribute('data-station-code') || '';
+                
+                possibleLocations.push({
+                    x: stationX,
+                    y: stationY,
+                    name: `充电站 ${stationCode}`,
+                    type: 'charging-station'
+                });
+            });
+            
+            // 更新缓存
+            cachedLocations = possibleLocations;
+            
+            return possibleLocations;
+        }
+        
+        // 更新车辆对应的最近地标或充电站名称
+        function updateNearestLocationName(marker, x, y) {
+            // 获取车辆所在的城市
+            const vehicleCity = marker.getAttribute('data-city') || citySelector.value || '沈阳市';
+            
+            // 收集特定城市的地标和充电站信息
+            const possibleLocations = [];
+            
+            // 首先尝试从缓存获取该城市的位置数据
+            if (cachedLocations && cachedLocations.length === 0) {
+                updateLocationCache();
+            }
+            
+            // 确保cityLandmarks和对应城市的数据存在
+            if (!cityLandmarks) {
+                console.warn('cityLandmarks未定义');
+                marker.setAttribute('data-location', `${vehicleCity} 未知位置`);
+                return;
+            }
+            
+            // 仅过滤当前车辆所在城市的地标
+            const landmarks = cityLandmarks[vehicleCity] || cityLandmarks['default'] || [];
+            
+            // 添加地标
+            if (landmarks && Array.isArray(landmarks)) {
+                landmarks.forEach(landmark => {
+                    possibleLocations.push({
+                        x: landmark.x,
+                        y: landmark.y,
+                        name: landmark.name,
+                        type: 'landmark',
+                        city: vehicleCity
+                    });
+                });
+            }
+            
+            // 添加充电站 (仅该城市的)
+            const stations = document.querySelectorAll('.charging-station-marker');
+            stations.forEach(station => {
+                const stationCity = station.getAttribute('data-city-code');
+                
+                // 只添加与车辆同城市的充电站
+                if (stationCity === vehicleCity) {
+                    const stationX = parseInt(station.style.left);
+                    const stationY = parseInt(station.style.top);
+                    const stationCode = station.getAttribute('data-station-code') || '';
+                    
+                    possibleLocations.push({
+                        x: stationX,
+                        y: stationY,
+                        name: `充电站 ${stationCode}`,
+                        type: 'charging-station',
+                        city: stationCity
+                    });
+                }
+            });
+            
+            // 如果没有位置点，返回
+            if (possibleLocations.length === 0) {
+                marker.setAttribute('data-location', `${vehicleCity} 未知位置`);
+                return;
+            }
+            
+            // 计算距离并排序
+            const locationsWithDistance = possibleLocations.map(loc => {
+                const distance = Math.sqrt(
+                    Math.pow(x - loc.x, 2) + 
+                    Math.pow(y - loc.y, 2)
+                );
+                return {...loc, distance};
+            });
+            
+            locationsWithDistance.sort((a, b) => a.distance - b.distance);
+            
+            // 获取最近的位置
+            const nearestLocation = locationsWithDistance[0];
+            
+            // 更新位置名称
+            if (nearestLocation) {
+                const newLocationName = nearestLocation.name;
+                marker.setAttribute('data-location', newLocationName);
+                
+                // 将位置更新添加到队列
+                const vehicleId = marker.getAttribute('data-vehicle-id');
+                if (vehicleId) {
+                    // 添加到更新队列
+                    if (typeof locationUpdateQueue !== 'undefined') {
+                        locationUpdateQueue.push({
+                            vehicleId,
+                            locationName: newLocationName,
+                            x: x,
+                            y: y,
+                            city: vehicleCity
+                        });
+                        
+                        // 如果不在更新中且超过最小间隔，则处理队列
+                        const now = Date.now();
+                        if (!isUpdatingLocations && now - lastLocationUpdateTime >= LOCATION_UPDATE_INTERVAL) {
+                            processLocationUpdateQueue();
+                        }
+                    }
+                }
+            } else {
+                marker.setAttribute('data-location', `${vehicleCity} 未知位置`);
+            }
+        }
+        
+        // 批量处理位置更新队列
+        function processLocationUpdateQueue() {
+            if (locationUpdateQueue.length === 0 || isUpdatingLocations) {
+                return;
+            }
+            
+            isUpdatingLocations = true;
+            lastLocationUpdateTime = Date.now();
+            
+            // 最多处理20个更新，避免请求过大
+            const batch = locationUpdateQueue.splice(0, 20);
+            
+            // 批量更新到数据库，一次性发送多个车辆的位置更新
+            fetch('/vehicles/api/batch_update_locations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    updates: batch
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log(`批量更新了 ${data.updated_count} 辆车的位置信息`);
+                } else {
+                    console.warn(`位置批量更新警告: ${data.message}`);
+                }
+                isUpdatingLocations = false;
+                
+                // 如果队列中还有内容且已经过了足够间隔，继续处理
+                if (locationUpdateQueue.length > 0 && 
+                    Date.now() - lastLocationUpdateTime >= LOCATION_UPDATE_INTERVAL) {
+                    processLocationUpdateQueue();
+                }
+            })
+            .catch(error => {
+                console.error('批量更新位置错误:', error);
+                isUpdatingLocations = false;
+            });
+        }
+        
+        // 调用API更新数据库中的车辆位置（单个更新，作为批量更新的备用）
+        function updateVehicleLocationInDb(vehicleId, locationName, x, y) {
+            // 添加到更新队列
+            locationUpdateQueue.push({
+                vehicleId,
+                locationName,
+                x,
+                y
+            });
+            
+            // 如果队列较小，且不在更新中，则立即处理
+            if (locationUpdateQueue.length <= 5 && !isUpdatingLocations && 
+                Date.now() - lastLocationUpdateTime >= LOCATION_UPDATE_INTERVAL) {
+                processLocationUpdateQueue();
+            }
+        }
+        
+        // 更新车辆信息面板
+        function updateVehicleInfoPanel(marker) {
+            const vehicleInfo = document.getElementById('vehicleInfo');
+            const isDisplayed = vehicleInfo.style.display === 'block';
+            const displayedId = document.getElementById('dispatchBtn')?.getAttribute('data-vehicle-id');
+            const markerId = marker.getAttribute('data-vehicle-id');
+            
+            if (isDisplayed && displayedId === markerId) {
+                // 更新位置信息
+                document.getElementById('vehicleLocation').textContent = marker.getAttribute('data-location');
+                
+                // 更新电量信息
+                const battery = marker.getAttribute('data-battery');
+                const batteryBar = document.getElementById('vehicleBattery');
+                
+                // 更新电量百分比值和进度条宽度
+                batteryBar.style.width = `${battery}%`;
+                batteryBar.textContent = `${battery}%`;
+                
+                // 根据电量设置进度条颜色
+                if (battery < 20) {
+                    batteryBar.className = 'progress-bar bg-danger';
+                } else if (battery < 50) {
+                    batteryBar.className = 'progress-bar bg-warning';
+                } else {
+                    batteryBar.className = 'progress-bar bg-success';
+                }
+                
+                // 如果需要也可以更新状态
+                const status = marker.getAttribute('data-status');
+                const statusBadge = marker.getAttribute('data-status-badge');
+                if (status) {
+                    document.getElementById('vehicleStatus').textContent = status;
+                    document.getElementById('vehicleStatus').className = `badge ${statusBadge}`;
+                }
+            }
+        }
+        
+        // 防抖函数，减少高频事件触发的性能影响
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        
+        // 当DOM内容加载完成后，启动实时位置更新
+        document.addEventListener('DOMContentLoaded', function() {
+            // 辅助函数：检查样式是否正确加载
+            function checkStyles() {
+                console.group('CSS样式检查');
+                
+                // 检查地图网格元素
+                const mapGrid = document.getElementById('mapGrid');
+                console.log("mapGrid元素:", mapGrid);
+                
+                if (mapGrid) {
+                    // 检查计算样式
+                    const style = window.getComputedStyle(mapGrid);
+                    console.log("mapGrid尺寸:", {
+                        width: style.width,
+                        height: style.height,
+                        position: style.position
+                    });
+                }
+                
+                // 检查路线标记样式是否存在
+                let routeMarkerStyle = false;
+                const allStyles = document.styleSheets;
+                for (let i = 0; i < allStyles.length; i++) {
+                    try {
+                        const rules = allStyles[i].cssRules || allStyles[i].rules;
+                        for (let j = 0; j < rules.length; j++) {
+                            if (rules[j].selectorText && (
+                                rules[j].selectorText.includes('route-marker') ||
+                                rules[j].selectorText.includes('start-marker') ||
+                                rules[j].selectorText.includes('end-marker') ||
+                                rules[j].selectorText.includes('route-line')
+                            )) {
+                                routeMarkerStyle = true;
+                                console.log("找到路线标记样式:", rules[j].selectorText);
+                            }
+                        }
+                    } catch (e) {
+                        // 跨域样式表会抛出安全错误，忽略
+                    }
+                }
+                
+                if (!routeMarkerStyle) {
+                    console.warn("未找到路线标记样式，可能样式未正确加载");
+                }
+                
+                // 创建测试样式元素
+                console.log("创建样式测试元素");
+                const testMarker = document.createElement('div');
+                testMarker.className = 'route-marker start-marker __test-marker';
+                testMarker.style.position = 'fixed';
+                testMarker.style.left = '10px';
+                testMarker.style.top = '10px';
+                testMarker.style.zIndex = '9999';
+                testMarker.innerHTML = 'T';
+                testMarker.style.display = 'none'; // 不实际显示
+                document.body.appendChild(testMarker);
+                
+                // 检查测试元素的计算样式
+                const testStyle = window.getComputedStyle(testMarker);
+                console.log("测试标记样式:", {
+                    width: testStyle.width,
+                    height: testStyle.height,
+                    backgroundColor: testStyle.backgroundColor,
+                    borderRadius: testStyle.borderRadius
+                });
+                
+                // 如果样式未正确应用，尝试重新添加
+                if (testStyle.width === '0px' || testStyle.backgroundColor === 'rgba(0, 0, 0, 0)') {
+                    console.warn("路线标记样式未正确应用，尝试重新添加");
+                    document.head.insertAdjacentHTML('beforeend', `
+                        <style id="route-markers-style">
+                            .route-marker {
+                                position: absolute;
+                                width: 20px !important;
+                                height: 20px !important;
+                                background-color: #fff !important;
+                                border-radius: 50% !important;
+                                transform: translate(-50%, -50%);
+                                z-index: 200;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                font-size: 12px;
+                                font-weight: bold;
+                                box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+                            }
+                            .start-marker {
+                                background-color: #28a745 !important;
+                                color: white !important;
+                            }
+                            .end-marker {
+                                background-color: #dc3545 !important;
+                                color: white !important;
+                            }
+                            .route-line {
+                                position: absolute;
+                                height: 2px !important;
+                                background-color: #007bff !important;
+                                z-index: 150;
+                                transform-origin: 0 50%;
+                            }
+                        </style>
+                    `);
+                    console.log("已重新添加路线标记样式");
+                }
+                
+                // 清理测试元素
+                document.body.removeChild(testMarker);
+                console.log("样式检查完成");
+                console.groupEnd();
+            }
+
+            // 执行样式检查
+            setTimeout(checkStyles, 1000);
+            
+            // 确保cityLandmarks存在
+            if (!window.cityLandmarks) {
+                window.cityLandmarks = {
+                    'default': [],
+                    '沈阳市': [],
+                    'shenyang': [],
+                    '北京市': [],
+                    'beijing': [],
+                    '上海市': [],
+                    'shanghai': [],
+                    '广州市': [],
+                    'guangzhou': [],
+                    '深圳市': [],
+                    'shenzhen': [],
+                    '杭州市': [],
+                    'hangzhou': [],
+                    '南京市': [],
+                    'nanjing': [],
+                    '成都市': [],
+                    'chengdu': [],
+                    '重庆市': [],
+                    'chongqing': [],
+                    '武汉市': [],
+                    'wuhan': [],
+                    '西安市': [],
+                    'xian': []
+                };
+                console.log('已初始化默认cityLandmarks');
+            }
+            
+            // 确保cachedLocations存在
+            if (!window.cachedLocations) {
+                window.cachedLocations = [];
+            }
+            
+            // 确保位置更新队列存在
+            if (typeof window.locationUpdateQueue === 'undefined') {
+                window.locationUpdateQueue = [];
+                window.isUpdatingLocations = false;
+                window.lastLocationUpdateTime = Date.now();
+                console.log('已初始化位置更新队列');
+            }
+            
+            // 添加起点终点标记的样式
+            document.head.insertAdjacentHTML('beforeend', `
+                <style>
+                    .route-marker {
+                        position: absolute;
+                        width: 20px;
+                        height: 20px;
+                        background-color: #fff;
+                        border-radius: 50%;
+                        transform: translate(-50%, -50%);
+                        z-index: 200;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        font-size: 12px;
+                        font-weight: bold;
+                        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+                    }
+                    .start-marker {
+                        background-color: #28a745;
+                        color: white;
+                    }
+                    .end-marker {
+                        background-color: #dc3545;
+                        color: white;
+                    }
+                    .route-line {
+                        position: absolute;
+                        height: 2px;
+                        background-color: #007bff;
+                        z-index: 150;
+                        transform-origin: 0 50%;
+                    }
+                </style>
+            `);
+            
+            // 提供一个全局测试函数
+            window.testRouteMarkers = function() {
+                console.group('路线标记测试');
+                console.log('尝试创建测试路线标记');
+                
+                // 检查mapGrid是否存在
+                const mapGrid = document.getElementById('mapGrid');
+                if (!mapGrid) {
+                    console.error('mapGrid元素不存在，无法创建测试标记');
+                    console.groupEnd();
+                    return;
+                }
+                
+                // 获取地图中心点
+                const gridRect = mapGrid.getBoundingClientRect();
+                const centerX = 500;
+                const centerY = 500;
+                
+                // 创建测试起点和终点
+                const startX = centerX - 100;
+                const startY = centerY - 100;
+                const endX = centerX + 100;
+                const endY = centerY + 100;
+                
+                // 创建起点标记
+                const startMarker = document.createElement('div');
+                startMarker.className = 'route-marker start-marker';
+                startMarker.style.left = `${startX}px`;
+                startMarker.style.top = `${startY}px`;
+                startMarker.innerHTML = 'S';
+                startMarker.title = `测试起点`;
+                
+                // 创建终点标记
+                const endMarker = document.createElement('div');
+                endMarker.className = 'route-marker end-marker';
+                endMarker.style.left = `${endX}px`;
+                endMarker.style.top = `${endY}px`;
+                endMarker.innerHTML = 'E';
+                endMarker.title = `测试终点`;
+                
+                // 创建连接线
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                
+                const line = document.createElement('div');
+                line.className = 'route-line';
+                line.style.left = `${startX}px`;
+                line.style.top = `${startY}px`;
+                line.style.width = `${length}px`;
+                line.style.transform = `rotate(${angle}rad)`;
+                
+                // 添加到地图
+                try {
+                    mapGrid.appendChild(line);
+                    mapGrid.appendChild(startMarker);
+                    mapGrid.appendChild(endMarker);
+                    
+                    console.log('测试标记已添加到地图');
+                    
+                    // 5秒后自动清除
+                    setTimeout(() => {
+                        mapGrid.removeChild(line);
+                        mapGrid.removeChild(startMarker);
+                        mapGrid.removeChild(endMarker);
+                        console.log('测试标记已自动清除');
+                    }, 5000);
+                } catch (error) {
+                    console.error('添加测试标记失败:', error);
+                }
+                
+                console.groupEnd();
+            };
+            
+            // 等待一段时间让地图完全加载
+            setTimeout(function() {
+                // 初始化位置缓存
+                updateLocationCache();
+                
+                // 启动实时位置更新
+                startRealTimeLocationUpdates();
+                
+                // 显示提示信息
+                showToast('实时位置跟踪已启动，车辆位置将每20秒更新一次', 'info');
+            }, 3000);
+        });
+
+        // 存储当前显示的路线标记
+        let currentRouteMarkers = [];
+        let isRouteDisplayed = false;
+
+        // 清除所有路线标记
+        function clearRouteMarkers() {
+            console.log("执行清除路线标记，当前标记数量:", currentRouteMarkers.length);
+            currentRouteMarkers.forEach(marker => {
+                if (marker && marker.parentNode) {
+                    marker.parentNode.removeChild(marker);
+                }
+            });
+            currentRouteMarkers = [];
+            isRouteDisplayed = false;
+            console.log("路线标记已清除完毕");
+        }
+
+        // 显示或隐藏起点和终点标记
+        function toggleRouteMarkers(vehicleId) {
+            if (!mapGrid) {
+                console.error("无法找到地图网格元素");
+                return;
+            }
+            
+            const existingMarkers = document.querySelectorAll('.route-marker');
+            const routeLine = document.getElementById('route-line');
+            
+            // 如果已经有路径标记，则清除它们
+            if (existingMarkers.length > 0) {
+                console.log("清除现有路线标记");
+                existingMarkers.forEach(marker => marker.remove());
+                if (routeLine) routeLine.remove();
+                return; // 如果是清除操作，到此结束
+            }
+            
+            // 获取车辆标记元素
+            const vehicleMarker = document.querySelector(`.vehicle-marker[data-vehicle-id="${vehicleId}"]`);
+            if (!vehicleMarker) {
+                console.error(`找不到ID为 ${vehicleId} 的车辆标记`);
+                return;
+            }
+            
+            // 获取车辆位置
+            const vehicleX = parseInt(vehicleMarker.style.left);
+            const vehicleY = parseInt(vehicleMarker.style.top);
+            const cityCode = vehicleMarker.getAttribute('data-city');
+            
+            console.log(`车辆位置: (${vehicleX}, ${vehicleY})`);
+            
+            // 直接从API获取车辆订单信息，包括上车点和下车点
+            fetch(`/vehicles/api/vehicle_details/${vehicleId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 添加完整的API响应日志
+                    console.log("API返回的完整数据:", JSON.stringify(data));
+                    
+                    if (data.status === 'success' && data.data) {
+                        const vehicle = data.data;
+                        const vehicleStatus = vehicle.current_status || vehicleMarker.getAttribute('data-status');
+                        
+                        // 查看是否存在order_info字段而不是current_order
+                        console.log("检查车辆订单数据字段:", {
+                            has_current_order: !!vehicle.current_order,
+                            has_order_info: !!vehicle.order_info,
+                            has_order: !!vehicle.order
+                        });
+                        
+                        // 使用从API获取的车辆数据
+                        let pickupX = 0, pickupY = 0, dropoffX = 0, dropoffY = 0;
+                        let pickupName = '上车点', dropoffName = '下车点';
+                        let hasCompleteData = false;
+                        
+                        console.log("车辆状态:", vehicleStatus);
+                        console.log("车辆详情关键字段:", {
+                            id: vehicle.vehicle_id,
+                            status: vehicle.current_status,
+                            location: vehicle.current_location_name,
+                            has_pickup_coords: !!(vehicle.pickup_location_x && vehicle.pickup_location_y),
+                            has_dropoff_coords: !!(vehicle.dropoff_location_x && vehicle.dropoff_location_y)
+                        });
+                        
+                        // 检查所有可能包含订单数据的字段
+                        const orderData = vehicle.current_order || vehicle.order_info || vehicle.order || {};
+                        console.log("订单数据:", orderData);
+                        
+                        // 提取可能的坐标信息，尝试从所有可能的位置获取
+                        if (orderData && Object.keys(orderData).length > 0) {
+                            // 从订单数据中获取
+                            pickupX = orderData.pickup_location_x || 0;
+                            pickupY = orderData.pickup_location_y || 0;
+                            dropoffX = orderData.dropoff_location_x || 0;
+                            dropoffY = orderData.dropoff_location_y || 0;
+                            pickupName = orderData.pickup_location_name || '上车点';
+                            dropoffName = orderData.dropoff_location_name || '下车点';
+                            
+                            console.log("从订单数据中提取的坐标:", {
+                                pickup: { x: pickupX, y: pickupY, name: pickupName },
+                                dropoff: { x: dropoffX, y: dropoffY, name: dropoffName }
+                            });
+                        }
+                        
+                        // 如果订单数据不完整，直接从车辆对象中获取
+                        if (!(pickupX > 0 && pickupY > 0 && dropoffX > 0 && dropoffY > 0)) {
+                            pickupX = vehicle.pickup_location_x || 0;
+                            pickupY = vehicle.pickup_location_y || 0;
+                            dropoffX = vehicle.dropoff_location_x || 0;
+                            dropoffY = vehicle.dropoff_location_y || 0;
+                            pickupName = vehicle.pickup_location_name || '上车点';
+                            dropoffName = vehicle.dropoff_location_name || '下车点';
+                            
+                            console.log("从车辆对象中提取的坐标:", {
+                                pickup: { x: pickupX, y: pickupY, name: pickupName },
+                                dropoff: { x: dropoffX, y: dropoffY, name: dropoffName }
+                            });
+                        }
+                        
+                        // 检查是否有完整的上车点和下车点数据
+                        if (pickupX > 0 && pickupY > 0 && dropoffX > 0 && dropoffY > 0) {
+                            hasCompleteData = true;
+                        } else {
+                            // 根据车辆状态处理不完整的数据
+                            if (vehicleStatus.includes('前往上车点') || vehicleMarker.getAttribute('data-location').includes('上车点')) {
+                                // 如果车辆正在前往上车点，我们有上车点但可能没有下车点
+                                if (pickupX > 0 && pickupY > 0) {
+                                    console.log("前往上车点的车辆，有上车点坐标，需要推断下车点");
+                                    
+                                    // 获取下车点数据（可能需要从API获取或合理推断）
+                                    if (!(dropoffX > 0 && dropoffY > 0)) {
+                                        // 从上车点推断一个合理的下车点，在上车点右下方
+                                        const offsetX = 200 + Math.random() * 100;
+                                        const offsetY = 200 + Math.random() * 100;
+                                        dropoffX = Math.min(950, pickupX + offsetX);
+                                        dropoffY = Math.min(950, pickupY + offsetY);
+                                        dropoffName = '预计下车点';
+                                    }
+                                    hasCompleteData = true;
+                                }
+                            } else if (vehicleStatus.includes('前往下车点') || vehicleMarker.getAttribute('data-location').includes('下车点')) {
+                                // 如果车辆正在前往下车点，我们有下车点但可能没有上车点
+                                if (dropoffX > 0 && dropoffY > 0) {
+                                    console.log("前往下车点的车辆，有下车点坐标，需要推断上车点");
+                                    
+                                    // 获取上车点数据（可能需要从API获取或合理推断）
+                                    if (!(pickupX > 0 && pickupY > 0)) {
+                                        // 从下车点推断一个合理的上车点，在下车点左上方
+                                        const offsetX = 200 + Math.random() * 100;
+                                        const offsetY = 200 + Math.random() * 100;
+                                        pickupX = Math.max(50, dropoffX - offsetX);
+                                        pickupY = Math.max(50, dropoffY - offsetY);
+                                        pickupName = '已出发上车点';
+                                    }
+                                    hasCompleteData = true;
+                                }
+                            }
+                        }
+                        
+                        console.log("最终使用的坐标:", {
+                            pickup: { x: pickupX, y: pickupY, name: pickupName },
+                            dropoff: { x: dropoffX, y: dropoffY, name: dropoffName },
+                            hasCompleteData: hasCompleteData
+                        });
+                        
+                        // 如果有完整的坐标，显示路线
+                        if (hasCompleteData) {
+                            console.log("使用完整数据创建路线");
+                            createRouteElements(pickupX, pickupY, dropoffX, dropoffY, pickupName, dropoffName);
+                        } else {
+                            console.log("无法获取完整坐标，使用备用方法");
+                            generateRouteFromVehiclePosition(vehicleX, vehicleY, cityCode);
+                        }
+                    } else {
+                        console.log("API未返回有效数据，使用备用方法");
+                        fallbackRouteGeneration(vehicleMarker, vehicleX, vehicleY, cityCode);
+                    }
+                })
+                .catch(error => {
+                    console.error("获取车辆数据失败:", error);
+                    fallbackRouteGeneration(vehicleMarker, vehicleX, vehicleY, cityCode);
+                });
+        }
+        
+        // 备用路线生成方法
+        function fallbackRouteGeneration(vehicleMarker, vehicleX, vehicleY, cityCode) {
+            // 尝试从车辆标记属性中获取位置信息
+            const locationText = vehicleMarker.getAttribute('data-location') || '';
+            console.log("尝试从data-location解析坐标:", locationText);
+            
+            // 解析location文本获取坐标
+            if (locationText) {
+                parseLocationAndCreateRoute(locationText, vehicleX, vehicleY, cityCode);
+            } else {
+                // 如果没有任何位置信息，直接从车辆位置生成路线
+                console.log("无位置信息，使用车辆位置生成路线");
+                generateRouteFromVehiclePosition(vehicleX, vehicleY, cityCode);
+            }
+        }
+        
+        // 根据车辆位置生成路线
+        function generateRouteFromVehiclePosition(vehicleX, vehicleY, cityCode) {
+            console.log("根据车辆位置生成路线坐标");
+            
+            // 直接基于车辆位置生成合理的起点和终点
+            // 起点：在车辆当前位置的左上方
+            const startX = Math.max(50, vehicleX - 150);
+            const startY = Math.max(50, vehicleY - 150);
+            
+            // 终点：在车辆当前位置的右下方
+            const endX = Math.min(950, vehicleX + 150);
+            const endY = Math.min(950, vehicleY + 150);
+            
+            // 从地标数据中查找接近这些点的地标名称（如果有）
+            const landmarks = cityLandmarks[cityCode] || cityLandmarks['default'] || [];
+            let startName = '默认上车点';
+            let endName = '默认下车点';
+            
+            if (landmarks.length > 0) {
+                // 尝试查找接近生成点的地标名称，但即使找不到也不影响路线显示
+                const startLandmark = findNearestLandmark(startX, startY, landmarks);
+                const endLandmark = findNearestLandmark(endX, endY, landmarks);
+                
+                if (startLandmark) startName = startLandmark.name;
+                if (endLandmark) endName = endLandmark.name;
+            }
+            
+            console.log("生成的路线坐标:", {
+                start: { x: startX, y: startY, name: startName },
+                end: { x: endX, y: endY, name: endName }
+            });
+            
+            // 创建路线元素
+            createRouteElements(startX, startY, endX, endY, startName, endName);
+        }
+        
+        // 创建路线元素（起点标记、终点标记和连接线）
+        function createRouteElements(startX, startY, endX, endY, startName, endName) {
+            console.log("创建路线元素，从", { x: startX, y: startY, name: startName }, "到", { x: endX, y: endY, name: endName });
+            
+            // 创建起点标记
+            const startMarker = document.createElement('div');
+            startMarker.className = 'route-marker start-marker';
+            startMarker.style.left = `${startX}px`;
+            startMarker.style.top = `${startY}px`;
+            startMarker.innerHTML = 'S';
+            startMarker.title = `起点: ${startName}`;
+            
+            // 创建终点标记
+            const endMarker = document.createElement('div');
+            endMarker.className = 'route-marker end-marker';
+            endMarker.style.left = `${endX}px`;
+            endMarker.style.top = `${endY}px`;
+            endMarker.innerHTML = 'E';
+            endMarker.title = `终点: ${endName}`;
+            
+            // 创建路线
+            const routeLine = document.createElement('div');
+            routeLine.id = 'route-line';
+            routeLine.className = 'route-line';
+            
+            // 计算路线长度和角度
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            // 设置路线样式
+            routeLine.style.width = `${length}px`;
+            routeLine.style.left = `${startX}px`;
+            routeLine.style.top = `${startY}px`;
+            routeLine.style.transform = `rotate(${angle}deg)`;
+            routeLine.style.transformOrigin = '0 0';
+            
+            // 添加到地图
+            const mapGrid = document.getElementById('mapGrid');
+            mapGrid.appendChild(routeLine);
+            mapGrid.appendChild(startMarker);
+            mapGrid.appendChild(endMarker);
+            
+            // 显示路线信息提示
+            showToast(`显示行程路线: ${startName} → ${endName}`, 'info');
+        }
+        
+        // 查找最近的地标
+        function findNearestLandmark(x, y, landmarks) {
+            if (!landmarks || landmarks.length === 0) return null;
+            
+            let nearestLandmark = null;
+            let minDistance = Number.MAX_VALUE;
+            
+            landmarks.forEach(landmark => {
+                const dx = landmark.x - x;
+                const dy = landmark.y - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestLandmark = landmark;
+                }
+            });
+            
+            // 只有当距离在合理范围内才返回
+            return minDistance < 200 ? nearestLandmark : null;
+        }
+        
+        // 从location字符串解析坐标并创建路线
+        function parseLocationAndCreateRoute(locationText, vehicleX, vehicleY, cityCode) {
+            console.log("开始解析location文本:", locationText);
+            
+            // 默认坐标
+            let pickupX = 0, pickupY = 0, dropoffX = 0, dropoffY = 0;
+            let pickupName = '上车点', dropoffName = '下车点';
+            let hasValidCoordinates = false;
+            
+            // 检查是否包含坐标格式 (x, y)
+            const coordMatch = locationText.match(/\((\d+),\s*(\d+)\)/);
+            if (coordMatch) {
+                const x = parseInt(coordMatch[1]);
+                const y = parseInt(coordMatch[2]);
+                
+                // 对于前往上车点的车，已知上车点坐标，需要生成下车点
+                if (locationText.includes('上车点')) {
+                    console.log("车辆正前往上车点");
+                    pickupX = x;
+                    pickupY = y;
+                    pickupName = '上车点';
+                    
+                    // 为该车辆生成一个合理的下车点
+                    // 方法1：直接从当前位置生成一个在相反方向的点
+                    // 计算从车辆到上车点的向量
+                    const vectorX = pickupX - vehicleX;
+                    const vectorY = pickupY - vehicleY;
+                    
+                    // 从上车点沿相同方向延伸计算下车点
+                    // 使用足够大的距离确保点在地图上合理分布
+                    dropoffX = Math.min(950, Math.max(50, pickupX + vectorX * 2));
+                    dropoffY = Math.min(950, Math.max(50, pickupY + vectorY * 2));
+                    dropoffName = '预计下车点';
+                    hasValidCoordinates = true;
+                }
+                // 对于前往下车点的车，已知下车点坐标，需要处理上车点
+                else if (locationText.includes('下车点')) {
+                    console.log("车辆正前往下车点");
+                    dropoffX = x;
+                    dropoffY = y;
+                    dropoffName = '下车点';
+                    
+                    // 上车点应该是车辆已经过的地方，可以考虑沿反向路径设置
+                    // 计算从车辆到下车点的向量
+                    const vectorX = dropoffX - vehicleX;
+                    const vectorY = dropoffY - vehicleY;
+                    
+                    // 从车辆位置沿相反方向延伸计算上车点
+                    pickupX = Math.min(950, Math.max(50, vehicleX - vectorX * 2));
+                    pickupY = Math.min(950, Math.max(50, vehicleY - vectorY * 2));
+                    pickupName = '上车点';
+                    hasValidCoordinates = true;
+                }
+            }
+            
+            console.log("解析location后的坐标:", {
+                pickup: { x: pickupX, y: pickupY, name: pickupName },
+                dropoff: { x: dropoffX, y: dropoffY, name: dropoffName },
+                valid: hasValidCoordinates
+            });
+            
+            // 如果解析成功，创建路线
+            if (hasValidCoordinates) {
+                createRouteElements(pickupX, pickupY, dropoffX, dropoffY, pickupName, dropoffName);
+            } else {
+                // 解析失败，使用备用方案
+                console.log("location解析失败，使用车辆位置生成路线");
+                generateRouteFromVehiclePosition(vehicleX, vehicleY, cityCode);
+            }
+        }
+        
+        // 订单数据缓存
+        let pendingOrders = [];
+        let pendingOrderMarkers = [];
+        
+        // 获取待分配订单数据
+        function updatePendingOrdersData(cityCode, silent = false) {
+            // 如果待分配订单显示开关关闭，则不获取数据
+            if (!document.getElementById('showPendingOrders').checked) {
+                return;
+            }
+            
+            // 从API获取待分配订单数据
+            fetch(`/admin/orders/api/pending_orders_locations?city=${cityCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 更新订单数据缓存
+                        pendingOrders = data.data;
+                        
+                        // 更新地图上的订单标记
+                        updatePendingOrderMarkers();
+                        
+                        if (!silent) {
+                            showToast(`已加载 ${data.data.length} 个待分配订单`, 'success');
+                        }
+                    } else {
+                        if (!silent) {
+                            showToast('加载待分配订单数据失败', 'danger');
+                        }
+                        console.error('加载待分配订单数据失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    if (!silent) {
+                        showToast('加载待分配订单数据时发生错误', 'danger');
+                    }
+                    console.error('待分配订单API错误:', error);
+                });
+        }
+        
+        // 更新地图上的待分配订单标记
+        function updatePendingOrderMarkers() {
+            // 移除现有的订单标记
+            pendingOrderMarkers.forEach(marker => marker.remove());
+            pendingOrderMarkers = [];
+            
+            // 获取显示状态
+            const isShowPendingOrders = document.getElementById('showPendingOrders').checked;
+            
+            // 如果不显示待分配订单，直接返回
+            if (!isShowPendingOrders) {
+                return;
+            }
+            
+            // 添加新的订单标记
+            pendingOrders.forEach(order => {
+                if (order.pickup_location_x && order.pickup_location_y) {
+                    const marker = addPendingOrderMarker(order);
+                    pendingOrderMarkers.push(marker);
+                }
+            });
+        }
+        
+        // 添加待分配订单标记
+        function addPendingOrderMarker(order) {
+            const marker = document.createElement('div');
+            marker.className = 'pending-order-marker';
+            marker.style.left = `${order.pickup_location_x}px`;
+            marker.style.top = `${order.pickup_location_y}px`;
+            marker.style.position = 'absolute';
+            marker.style.width = '20px';
+            marker.style.height = '20px';
+            marker.style.backgroundColor = 'rgba(255, 193, 7, 0.8)';
+            marker.style.border = '1.5px solid #fd7e14';
+            marker.style.borderRadius = '50%';
+            marker.style.zIndex = '160';
+            marker.style.display = 'flex';
+            marker.style.justifyContent = 'center';
+            marker.style.alignItems = 'center';
+            marker.style.cursor = 'pointer';
+            marker.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.3)';
+            marker.style.transform = 'translate(-50%, -50%)';
+            
+            // 使用Bootstrap图标表示待分配订单
+            marker.innerHTML = '<i class="bi bi-geo-alt-fill" style="color: #fd7e14; font-size: 12px;"></i>';
+            
+            // 添加提示文本
+            marker.title = `订单ID: ${order.order_id} - 创建时间: ${order.create_time}`;
+            
+            // 存储订单数据
+            marker.setAttribute('data-order-id', order.order_id);
+            marker.setAttribute('data-city-code', order.city_code);
+            marker.setAttribute('data-pickup-x', order.pickup_location_x);
+            marker.setAttribute('data-pickup-y', order.pickup_location_y);
+            marker.setAttribute('data-create-time', order.create_time);
+            marker.setAttribute('data-pickup-location', order.pickup_location);
+            
+            // 点击显示订单详情
+            marker.addEventListener('click', function() {
+                showOrderInfo(this);
+            });
+            
+            // 添加到地图
+            mapGrid.appendChild(marker);
+            
+            return marker;
+        }
+        
+        // 显示订单详情
+        function showOrderInfo(marker) {
+            const orderId = marker.getAttribute('data-order-id');
+            const cityCode = marker.getAttribute('data-city-code');
+            const createTime = marker.getAttribute('data-create-time');
+            const pickupLocation = marker.getAttribute('data-pickup-location');
+            
+            // 显示订单信息弹窗
+            showToast(`
+                <strong>待分配订单信息</strong><br>
+                订单ID: ${orderId}<br>
+                城市: ${cityCode}<br>
+                创建时间: ${createTime}<br>
+                上车地点: ${pickupLocation}<br>
+
+            `, 'warning', 8000); // 显示8秒
+            
+
+        }
+        
+        // 刷新地图按钮添加待分配订单的刷新
+        refreshMapBtn.addEventListener('click', function() {
+            // 停止自动刷新
+            stopAutoRefresh();
+            
+            // 完全重新加载
+            loadVehiclesForCity(citySelector.value);
+            // 加载待分配订单
+            updatePendingOrdersData(citySelector.value);
+            showToast('地图已刷新', 'success');
+            
+            // 启动自动刷新
+            setTimeout(startAutoRefresh, 2000);
+        });
+        
+        // 城市选择变更事件添加待分配订单的加载
+        citySelector.addEventListener('change', function() {
+            const selectedCity = this.value;
+            
+            // 停止自动刷新
+            stopAutoRefresh();
+            
+            // 清除地图上所有元素
+            clearMap();
+            
+            // 加载道路地图
+            loadRoadMap(selectedCity);
+            
+            // 更新城市数据，直接调用loadVehiclesForCity函数
+            loadVehiclesForCity(selectedCity);
+            
+            // 加载待分配订单
+            updatePendingOrdersData(selectedCity);
+            
+            // 显示更新提示
+            showToast(`已切换到${selectedCity}地图`, 'success');
+            
+            // 重新启动自动刷新
+            setTimeout(startAutoRefresh, 2000);
+        });
+        
+        // 添加待分配订单显示/隐藏事件
+        showPendingOrders.addEventListener('change', function() {
+            const isShowPendingOrders = this.checked;
+            
+            // 显示/隐藏所有待分配订单标记
+            const pendingOrderMarkers = document.querySelectorAll('.pending-order-marker');
+            pendingOrderMarkers.forEach(marker => {
+                marker.style.display = isShowPendingOrders ? 'flex' : 'none';
+            });
+            
+            if (isShowPendingOrders) {
+                // 当开启显示时，更新数据
+                updatePendingOrdersData(citySelector.value, true);
+                showToast('已显示待分配订单', 'info');
+            } else {
+                showToast('已隐藏待分配订单', 'info');
+            }
+        });
+        
+        // 修改初始化函数，添加加载待分配订单
+        setTimeout(function() {
+            // 初始化地图
+            initMap();
+            
+            // 位置缓存
+            updateLocationCache();
+            
+            // 加载待分配订单
+            updatePendingOrdersData(citySelector.value);
+            
+            // 显示提示信息
+            showToast('已加载道路地图', 'info');
+        }, 1000);
+    });
+</script>
+{% endblock %}

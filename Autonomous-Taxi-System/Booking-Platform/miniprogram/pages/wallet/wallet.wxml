@@ -1,0 +1,144 @@
+<navigation-bar title="我的钱包" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<view class="container">
+  <!-- 内容区域容器 -->
+  <view class="content-area">
+    <!-- 余额卡片 -->
+    <view class="balance-card">
+      <view class="balance-header">
+        <text class="balance-label">账户余额</text>
+        <text class="balance-amount">¥{{userBalance}}</text>
+      </view>
+      <view class="balance-actions">
+        <button class="action-btn recharge-btn" bindtap="goToRecharge">
+          <text class="btn-icon">💰</text>
+          <text class="btn-text">充值</text>
+        </button>
+        <button class="action-btn withdraw-btn" bindtap="goToWithdraw">
+          <text class="btn-icon">💳</text>
+          <text class="btn-text">提现</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 导航栏 -->
+    <view class="tab-navigation">
+      <view 
+        class="tab-navigation-item tab-income {{currentTab === 0 ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="0"
+      >
+        收入记录
+        <text class="tab-count">({{transactionStats.income}})</text>
+      </view>
+      <view 
+        class="tab-navigation-item tab-expense {{currentTab === 1 ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="1"
+      >
+        消费记录
+        <text class="tab-count">({{transactionStats.expense}})</text>
+      </view>
+      <view 
+        class="tab-navigation-item tab-all {{currentTab === 2 ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="2"
+      >
+        全部记录
+        <text class="tab-count">({{transactionStats.total}})</text>
+      </view>
+    </view>
+
+    <!-- 交易记录列表 -->
+    <view class="transaction-list">
+      <view 
+        class="transaction-item"
+        wx:for="{{transactions}}"
+        wx:key="id"
+      >
+        <view class="transaction-main">
+          <view class="transaction-info">
+            <view class="transaction-type">{{item.type}}</view>
+            <view class="transaction-time">{{item.created_at}}</view>
+          </view>
+          <view class="transaction-amount {{item.amount_type === 'income' ? 'income' : 'expense'}}">
+            {{item.amount_type === 'income' ? '+' : '-'}}¥{{item.amount}}
+          </view>
+        </view>
+
+        <!-- 交易详情 -->
+ 
+
+        <!-- 订单详细信息 - 仅车费类型显示 -->
+        <view class="transaction-order-details" wx:if="{{item.type === '车费' && (item.distance || item.payment_method || item.pickup_coords || item.dropoff_coords)}}">
+          <view class="order-detail-row" wx:if="{{item.distance}}">
+            <text class="detail-label">行程距离:</text>
+            <text class="detail-value">{{item.distance}}km</text>
+          </view>
+          <view class="order-detail-row" wx:if="{{item.payment_method}}">
+            <text class="detail-label">支付方式:</text>
+            <text class="detail-value">{{item.payment_method}}</text>
+          </view>
+     
+          <view class="order-detail-row" wx:if="{{item.coupon_info}}">
+            <text class="detail-label">优惠信息:</text>
+            <text class="detail-value">{{item.coupon_info}}</text>
+          </view>
+          <view class="order-detail-row" wx:if="{{item.pickup_coords}}">
+            <text class="detail-label">起点坐标:</text>
+            <text class="detail-value">{{item.pickup_coords}}</text>
+          </view>
+          <view class="order-detail-row" wx:if="{{item.dropoff_coords}}">
+            <text class="detail-label">终点坐标:</text>
+            <text class="detail-value">{{item.dropoff_coords}}</text>
+          </view>
+        </view>
+
+        <!-- 关联订单信息 -->
+        <view class="transaction-order" wx:if="{{item.order_id}}">
+          <text class="order-label">关联订单：</text>
+          <text class="order-number">{{item.order_id}}</text>
+        </view>
+      </view>
+
+      <!-- 空状态卡片 -->
+      <view class="transaction-item empty-card" wx:if="{{!loading && transactions.length === 0}}">
+        <!-- 交易头部信息 -->
+        <view class="transaction-header">
+          <view class="transaction-info">
+            <text class="transaction-type">💰 暂无{{currentTab === 0 ? '收入' : currentTab === 1 ? '消费' : '交易'}}记录</text>
+            <text class="transaction-time">系统提示</text>
+          </view>
+          <view class="transaction-amount empty-amount">
+            系统
+          </view>
+        </view>
+
+        <!-- 交易详情 -->
+        <view class="transaction-details">
+          <text class="transaction-desc">{{currentTab === 0 ? '支出表中的相关记录会显示在这里' : currentTab === 1 ? '收入表中的相关记录会显示在这里' : '所有交易记录会显示在这里'}}</text>
+        </view>
+
+        <!-- 关联订单信息 -->
+        <view class="transaction-order">
+          <text class="order-label">提示：</text>
+          <text class="order-number">快去使用充值和提现功能吧</text>
+        </view>
+      </view>
+
+      <!-- 加载状态 -->
+      <view class="loading-state" wx:if="{{loading}}">
+        <view class="loading-text">加载中...</view>
+      </view>
+
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMore && !loading && transactions.length > 0}}">
+        <text class="load-more-text">上拉加载更多</text>
+      </view>
+
+      <!-- 没有更多 -->
+      <view class="no-more" wx:if="{{!hasMore && transactions.length > 0}}">
+        <text class="no-more-text">没有更多了</text>
+      </view>
+    </view>
+  </view>
+</view> 

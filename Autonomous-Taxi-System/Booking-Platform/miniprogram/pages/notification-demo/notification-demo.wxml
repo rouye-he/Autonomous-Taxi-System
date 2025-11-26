@@ -1,0 +1,24 @@
+<view class="container">
+  <notification />
+  
+  <view class="demo-section">
+    <text class="section-title">基础通知</text>
+    <button class="demo-btn success" bindtap="showSuccess">成功提示</button>
+    <button class="demo-btn error" bindtap="showError">错误提示</button>
+    <button class="demo-btn warning" bindtap="showWarning">警告提示</button>
+    <button class="demo-btn info" bindtap="showInfo">信息提示</button>
+  </view>
+  
+  <view class="demo-section">
+    <text class="section-title">自定义组件通知</text>
+    <button class="demo-btn success" bindtap="showComponentSuccess">组件成功</button>
+    <button class="demo-btn error" bindtap="showComponentError">组件错误</button>
+  </view>
+  
+  <view class="demo-section">
+    <text class="section-title">其他功能</text>
+    <button class="demo-btn" bindtap="showLoading">显示加载</button>
+    <button class="demo-btn" bindtap="showConfirm">确认对话框</button>
+    <button class="demo-btn" bindtap="testRequest">测试请求</button>
+  </view>
+</view> 

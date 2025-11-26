@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+
+{% block title %}添加车辆 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ _("添加车辆") }}</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">{{ _("控制台") }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('vehicles.index') }}">{{ _("车辆管理") }}</a></li>
+        <li class="breadcrumb-item active">添加车辆</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                添加车辆后，车辆即可在对应的城市运营，车辆在城市的初始位置为（10,10）。
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-plus me-1"></i>
+            添加车辆信息
+        </div>
+        <div class="card-body">
+            <form id="addVehicleForm" method="POST" action="{{ url_for('vehicles.add_vehicle_submit') }}">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="plateNumber" name="plate_number" type="text" required />
+                            <label for="plateNumber">{{ _("车牌号") }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="vin" name="vin" type="text" required />
+                            <label for="vin">{{ _("车辆识别号(VIN)") }}</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="model" name="model" required>
+                                <option value="" selected disabled>{{ _("请选择车型") }}</option>
+                                <optgroup label="Alpha系列" class="text-primary">
+                                    <option value="Alpha-X1">Alpha-X1</option>
+                                    <option value="Alpha-Nexus">Alpha-Nexus</option>
+                                    <option value="Alpha-Voyager">Alpha-Voyager</option>
+                                </optgroup>
+                                <optgroup label="Nova系列" class="text-success">
+                                    <option value="Nova-S1">Nova-S1</option>
+                                    <option value="Nova-Quantum">Nova-Quantum</option>
+                                    <option value="Nova-Pulse">Nova-Pulse</option>
+                                </optgroup>
+                                <optgroup label="Neon系列" class="text-danger">
+                                    <option value="Neon-500">Neon-500</option>
+                                    <option value="Neon-Zero">Neon-Zero</option>
+                                </optgroup>
+                            </select>
+                            <label for="model">{{ _("车辆型号") }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="currentCity" name="current_city" required>
+                                <option value="" selected disabled>{{ _("请选择城市") }}</option>
+                                <option value="沈阳市">{{ _("沈阳市") }}</option>
+                                <option value="上海市">{{ _("上海市") }}</option>
+                                <option value="北京市">{{ _("北京市") }}</option>
+                                <option value="广州市">{{ _("广州市") }}</option>
+                                <option value="深圳市">{{ _("深圳市") }}</option>
+                                <option value="杭州市">{{ _("杭州市") }}</option>
+                                <option value="南京市">{{ _("南京市") }}</option>
+                                <option value="成都市">{{ _("成都市") }}</option>
+                                <option value="重庆市">{{ _("重庆市") }}</option>
+                                <option value="武汉市">{{ _("武汉市") }}</option>
+                                <option value="西安市">{{ _("西安市") }}</option>
+                            </select>
+                            <label for="currentCity">{{ _("运营城市") }}</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="manufactureDate" name="manufacture_date" type="date" required />
+                            <label for="manufactureDate">{{ _("生产日期") }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="currentStatus" name="current_status" required>
+                                <option value="空闲中" selected>{{ _("空闲中") }}</option>
+                                <option value="运行中">{{ _("运行中") }}</option>
+                                <option value="充电中">{{ _("充电中") }}</option>
+                                <option value="电量不足">{{ _("电量不足") }}</option>
+                                <option value="维护中">{{ _("维护中") }}</option>
+                            </select>
+                            <label for="currentStatus">{{ _("当前状态") }}</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="batteryLevel" name="battery_level" type="number" min="0" max="100" value="100" required />
+                            <label for="batteryLevel">{{ _("电量") }} (%)</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="mileage" name="mileage" type="number" min="0" step="0.1" value="0" required />
+                            <label for="mileage">{{ _("累计距离(公里)") }}</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 添加显示购置价格计算区域 -->
+                <div class="card mb-4 mt-4" id="pricingCard">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-currency-yen me-1"></i>
+                        车辆购置价格计算
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-primary">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>车辆购置总价计算公式:</strong></p>
+                                    <p class="mb-1">{{ _("基础车型价格 × 城市车辆购置价格系数") }}</p>
+                                    <p class="mb-1"><span id="basePrice">0</span> × <span id="cityFactor">1.0</span> = <span id="totalVehiclePrice">0</span> 元</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="bg-light p-3 rounded text-center">
+                                        <h4 class="mb-0">总价: <span id="totalPriceDisplay" class="text-primary">0</span> 元</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('vehicles.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> {{ _("返回列表") }}
+                    </a>
+                    <div>
+                        <button type="reset" class="btn btn-warning">
+                            <i class="bi bi-arrow-counterclockwise"></i> {{ _("重置") }}
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="bi bi-save"></i> {{ _("添加车辆") }}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化日期为当前日期
+        const today = new Date();
+        const dateInput = document.getElementById('manufactureDate');
+        if (dateInput) {
+            // 格式化为YYYY-MM-DD
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            dateInput.value = `${year}-${month}-${day}`;
+        }
+        
+        // 车型信息显示
+        const modelSelect = document.getElementById('model');
+        const vehicleInfoDiv = document.createElement('div');
+        vehicleInfoDiv.id = 'vehicleInfo';
+        vehicleInfoDiv.className = 'mt-2';
+        
+        // 如果存在下拉框，添加车型信息显示区域并设置变化监听
+        if (modelSelect) {
+            modelSelect.parentElement.appendChild(vehicleInfoDiv);
+            
+            // 车型数据基础信息（不包含价格，价格将从API获取）
+            const vehicleData = {
+                'Alpha-X1': {
+                    name: 'Alpha X1',
+                    description: '入门级豪华车型，结合了卓越性能与舒适体验',
+                    features: ['高密度智能电池组', '碳纤维车身', '高强度铝合金底盘'],
+                    color: 'primary',
+                    price_key: 'Alpha_X1_PRICE'
+                },
+                'Alpha-Nexus': {
+                    name: 'Alpha Nexus',
+                    description: '面向科技爱好者的智能豪华车型，集成了最新自动驾驶辅助系统',
+                    features: ['石墨烯增强复合电极技术', '超长续航里程', '增强现实导航'],
+                    color: 'primary',
+                    price_key: 'Alpha_Nexus_PRICE'
+                },
+                'Alpha-Voyager': {
+                    name: 'Alpha Voyager',
+                    description: '顶级豪华SUV，为追求极致体验的商务精英打造',
+                    features: ['同级最佳续航能力', '豪华全套设备', '双层大容量智能电池阵列'],
+                    color: 'primary',
+                    price_key: 'Alpha_Voyager_PRICE'
+                },
+                'Nova-S1': {
+                    name: 'Nova S1',
+                    description: '经济实惠的家用车型，专为城市通勤设计',
+                    features: ['紧凑型高效磷酸铁锂电池', '重量轻、寿命长，安全性高', '城市通勤最佳选择'],
+                    color: 'success',
+                    price_key: 'Nova_S1_PRICE'
+                },
+                'Nova-Quantum': {
+                    name: 'Nova Quantum',
+                    description: '面向高效商务人士的智能中端轿车，强调驾驶辅助与工作便利性',
+                    features: ['优化的三元锂电池组', '均衡的容量与充电性能', '智能电池管理系统'],
+                    color: 'success',
+                    price_key: 'Nova_Quantum_PRICE'
+                },
+                'Nova-Pulse': {
+                    name: 'Nova Pulse',
+                    description: '面向年轻家庭的多功能中端SUV，兼顾空间与动力',
+                    features: ['可扩展模块化电池系统', '可选装增程电池包', '灵活适应不同场景'],
+                    color: 'success',
+                    price_key: 'Nova_Pulse_PRICE'
+                },
+                'Neon-500': {
+                    name: 'Neon 500',
+                    description: '面向年轻精英的运动轿跑，标志性的流线型设计与双色车身彰显个性',
+                    features: ['高输出密度性能电池', '赛车技术加持的散热系统', '持续高功率输出不衰减'],
+                    color: 'danger',
+                    price_key: 'Neon_500_PRICE'
+                },
+                'Neon-Zero': {
+                    name: 'Neon Zero',
+                    description: '顶级电动跑车，零百加速仅需3.5秒，为速度爱好者打造',
+                    features: ['赛车级固态电池技术', '超高功率密度与充电速度', '极致性能表现'],
+                    color: 'danger',
+                    price_key: 'Neon_Zero_PRICE'
+                }
+            };
+            
+            // 系统参数数据
+            let systemParams = {};
+            // 城市价格系数
+            let cityPriceFactors = {};
+            
+            // 从API获取最新车辆价格
+            fetch('/api/v1/system_parameters')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.parameters) {
+                        systemParams = data.parameters;
+                        
+                        // 更新下拉框中的价格显示
+                        const options = modelSelect.querySelectorAll('option');
+                        options.forEach(option => {
+                            const value = option.value;
+                            if (value && vehicleData[value]) {
+                                const priceKey = vehicleData[value].price_key;
+                                if (systemParams[priceKey]) {
+                                    const price = systemParams[priceKey];
+                                    const formattedPrice = new Intl.NumberFormat('zh-CN').format(price);
+                                    option.textContent = `${vehicleData[value].name} (参考价: ¥${formattedPrice})`;
+                                }
+                            }
+                        });
+                        
+                        // 如果已经选择了车型，更新显示
+                        if (modelSelect.value) {
+                            updateVehicleInfo(modelSelect.value);
+                        }
+                    } else {
+                        console.error('获取系统参数失败:', data.message || '未知错误');
+                    }
+                })
+                .catch(error => {
+                    console.error('获取系统参数时出错:', error);
+                });
+            
+            // 获取城市价格系数
+            fetch('/api/v1/city_price_factors')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.price_factors) {
+                        cityPriceFactors = data.price_factors;
+                        // 如果已经选择了城市和车型，更新价格计算
+                        updatePriceCalculation();
+                    } else {
+                        console.error('获取城市价格系数失败:', data.message || '未知错误');
+                    }
+                })
+                .catch(error => {
+                    console.error('获取城市价格系数时出错:', error);
+                });
+            
+            // 价格计算函数
+            function updatePriceCalculation() {
+                const selectedModel = modelSelect.value;
+                const selectedCity = document.getElementById('currentCity').value;
+                
+                if (!selectedModel || !selectedCity) {
+                    return; // 如果没有选择车型或城市，不进行计算
+                }
+                
+                // 获取车型基础价格
+                let basePrice = 0;
+                if (selectedModel && vehicleData[selectedModel]) {
+                    const priceKey = vehicleData[selectedModel].price_key;
+                    if (systemParams[priceKey]) {
+                        basePrice = parseFloat(systemParams[priceKey]);
+                    }
+                }
+                
+                // 获取城市价格系数
+                let cityFactor = 1.0; // 默认系数为1.0
+                if (selectedCity && cityPriceFactors && cityPriceFactors[selectedCity]) {
+                    cityFactor = parseFloat(cityPriceFactors[selectedCity].vehiclePrice || 1.0);
+                }
+                
+                // 计算总价
+                const totalPrice = basePrice * cityFactor;
+                
+                // 更新显示
+                document.getElementById('basePrice').textContent = new Intl.NumberFormat('zh-CN').format(basePrice);
+                document.getElementById('cityFactor').textContent = cityFactor.toFixed(2);
+                document.getElementById('totalVehiclePrice').textContent = new Intl.NumberFormat('zh-CN').format(totalPrice);
+                document.getElementById('totalPriceDisplay').textContent = new Intl.NumberFormat('zh-CN').format(totalPrice);
+            }
+            
+            // 更新车型信息卡片的函数
+            function updateVehicleInfo(selectedModel) {
+                if (selectedModel && vehicleData[selectedModel]) {
+                    const vehicle = vehicleData[selectedModel];
+                    
+                    // 获取价格
+                    let price = '加载中...';
+                    const priceKey = vehicle.price_key;
+                    if (systemParams[priceKey]) {
+                        price = new Intl.NumberFormat('zh-CN').format(systemParams[priceKey]);
+                    }
+                    
+                    // 生成特性列表
+                    let featuresList = '';
+                    vehicle.features.forEach(feature => {
+                        featuresList += `<li>${feature}</li>`;
+                    });
+                    
+                    // 创建信息卡片
+                    vehicleInfoDiv.innerHTML = `
+                        <div class="card border-${vehicle.color} mt-3">
+                            <div class="card-header bg-${vehicle.color} text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">${vehicle.name}</h5>
+                                    <span class="badge bg-light text-${vehicle.color}">¥${price}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">${vehicle.description}</p>
+                                <div class="mt-2">
+                                    <small class="text-muted">主要特性：</small>
+                                    <ul class="small mt-1 mb-0">
+                                        ${featuresList}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 更新价格计算
+                    updatePriceCalculation();
+                } else {
+                    vehicleInfoDiv.innerHTML = '';
+                }
+            }
+            
+            // 监听车型选择变化
+            modelSelect.addEventListener('change', function() {
+                updateVehicleInfo(this.value);
+            });
+            
+            // 监听城市选择变化
+            document.getElementById('currentCity').addEventListener('change', updatePriceCalculation);
+        }
+        
+        // 拦截表单提交
+        const form = document.getElementById('addVehicleForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 验证表单
+                if (!form.checkValidity()) {
+                    return;
+                }
+                
+                // 禁用提交按钮防止重复提交
+                const submitBtn = document.getElementById('submitBtn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 提交中...';
+                
+                // 收集表单数据
+                const formData = new FormData(form);
+                const formDataObj = {};
+                formData.forEach((value, key) => {
+                    formDataObj[key] = value;
+                });
+                
+                // 发送AJAX请求
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    // 重定向到车辆管理页面
+                    if (response.redirected) {
+                        // 在本地存储中设置一个成功消息，以便在重定向后显示
+                        const plate_number = formDataObj.plate_number;
+                        localStorage.setItem('vehicleAddSuccess', `成功添加车辆，车牌号: ${plate_number}`);
+                        window.location.href = response.url;
+                    } else {
+                        return response.text();
+                    }
+                })
+                .catch(error => {
+                    // 显示错误消息
+                    showToast('提交表单时发生错误，请重试', 'danger');
+                    
+                    // 恢复按钮状态
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                });
+            });
+        }
+        
+        // 显示Toast提示消息
+        function showToast(message, type = 'info') {
+            const toastId = 'toast-' + Date.now();
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            const toastContainer = document.getElementById('toast-container');
+            toastContainer.innerHTML += toastHTML;
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, {delay: 3000});
+            toast.show();
+            
+            // 自动移除
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                this.remove();
+            });
+        }
+    });
+</script>
+{% endblock %} 

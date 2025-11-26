@@ -1,0 +1,72 @@
+<!--车辆位置追踪页面-->
+<view class="container">
+  <!-- 地图容器 -->
+  <view class="map-container">
+    <map 
+      id="vehicleMap"
+      class="map"
+      longitude="{{mapCenter.longitude}}"
+      latitude="{{mapCenter.latitude}}"
+      scale="{{mapScale}}"
+      markers="{{markers}}"
+      show-location="{{true}}"
+      enable-zoom="{{true}}"
+      enable-scroll="{{true}}"
+    />
+    
+    <!-- 地图控制按钮 -->
+    <view class="map-controls">
+      <view class="control-btn" bindtap="refreshLocation">
+        <text>🔄</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 车辆信息卡片 -->
+  <view class="vehicle-info-card" wx:if="{{vehicleData}}">
+    <view class="card-header">
+      <view class="vehicle-title">
+        <text class="plate-number">{{vehicleData.plateNumber}}</text>
+        <text class="vehicle-model">{{vehicleData.model}}</text>
+      </view>
+      <view class="status-badge">
+        {{vehicleData.currentStatus}}
+      </view>
+    </view>
+    
+    <view class="card-content">
+      <view class="info-row">
+        <view class="info-item">
+          <text class="label">电量</text>
+          <text class="value">{{vehicleData.batteryLevel}}%</text>
+        </view>
+        <view class="info-item">
+          <text class="label">评分</text>
+          <text class="value">{{vehicleData.rating === -1 ? '尚无评价' : vehicleData.rating + '⭐'}}</text>
+        </view>
+      </view>
+      
+      <view class="location-info">
+        <text class="location-label">当前位置</text>
+        <text class="location-text">{{vehicleData.location.locationName || '位置更新中...'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <text class="loading-text">正在获取车辆位置...</text>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-container" wx:if="{{errorMessage}}">
+    <text class="error-text">{{errorMessage}}</text>
+    <button class="retry-btn" bindtap="retryLoad">重试</button>
+  </view>
+
+  <!-- 无数据提示 -->
+  <view class="empty-container" wx:if="{{!isLoading && !vehicleData && !errorMessage}}">
+    <text class="empty-text">暂无进行中的订单</text>
+    <button class="go-home-btn" bindtap="goHome">返回首页</button>
+  </view>
+</view> 

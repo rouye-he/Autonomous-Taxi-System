@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}编辑用户 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <nav aria-label="breadcrumb" class="mt-3 mb-3">
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">{{ _("首页") }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('users.index', page=request.args.get('page', 1)) }}">{{ _("用户管理") }}</a></li>
+                    <li class="breadcrumb-item active">编辑用户</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{{ _("编辑用户信息") }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="mt-2">
+                        <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
+                        {% if search_params %}
+                            {% for key, value in search_params.items() %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                            {% endfor %}
+                        {% endif %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">{{ _("用户名") }}</label>
+                                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="real_name" class="form-label">{{ _("真实姓名") }}</label>
+                                <input type="text" class="form-control" id="real_name" name="real_name" value="{{ user.real_name }}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">{{ _("手机号") }}</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">{{ _("邮箱") }}</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">{{ _("性别") }}</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="男" {% if user.gender == '男' %}selected{% endif %}>{{ _("男") }}</option>
+                                    <option value="女" {% if user.gender == '女' %}selected{% endif %}>{{ _("女") }}</option>
+                                    <option value="其他" {% if user.gender == '其他' %}selected{% endif %}>{{ _("其他") }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="birth_date" class="form-label">{{ _("出生日期") }}</label>
+                                <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ user.birth_date.strftime('%Y-%m-%d') if user.birth_date }}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_card" class="form-label">{{ _("身份证号") }}</label>
+                                <input type="text" class="form-control" id="id_card" name="id_card" value="{{ user.id_card }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="credit_score" class="form-label">{{ _("信用分") }}</label>
+                                <input type="number" class="form-control" id="credit_score" name="credit_score" value="{{ user.credit_score }}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="balance" class="form-label">{{ _("余额") }}</label>
+                                <input type="number" class="form-control" id="balance" name="balance" value="{{ user.balance }}" step="0.01">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">{{ _("状态") }}</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="正常" {% if user.status == '正常' %}selected{% endif %}>{{ _("正常") }}</option>
+                                    <option value="禁用" {% if user.status == '禁用' %}selected{% endif %}>{{ _("禁用") }}</option>
+                                    <option value="注销" {% if user.status == '注销' %}selected{% endif %}>{{ _("注销") }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="registration_city" class="form-label">{{ _("注册城市") }}</label>
+                                <input type="text" class="form-control" id="registration_city" name="registration_city" value="{{ user.registration_city or '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="registration_channel" class="form-label">{{ _("注册渠道") }}</label>
+                                <select class="form-select" id="registration_channel" name="registration_channel">
+                                    <option value="手机应用" {% if user.registration_channel == '手机应用' %}selected{% endif %}>{{ _("手机应用") }}</option>
+                                    <option value="网站" {% if user.registration_channel == '网站' %}selected{% endif %}>{{ _("网站") }}</option>
+                                    <option value="微信小程序" {% if user.registration_channel == '微信小程序' %}selected{% endif %}>{{ _("微信小程序") }}</option>
+                                    <option value="合作推广" {% if user.registration_channel == '合作推广' %}selected{% endif %}>{{ _("合作推广") }}</option>
+                                    <option value="其他" {% if user.registration_channel == '其他' or not user.registration_channel %}selected{% endif %}>{{ _("其他") }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="tags" class="form-label">{{ _("用户标签") }}</label>
+                                <input type="text" class="form-control" id="tags" name="tags" value="{{ user.tags or '' }}" placeholder="{{ _("多个标签请用逗号分隔，如：日常通勤,高频用户,价格敏感") }}">
+                                <div class="form-text">多个标签请用逗号分隔，如：日常通勤,高频用户,价格敏感</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end mt-4">
+                            {% if search_params %}
+                            <a href="{{ url_for('users.advanced_search', page=page) }}{% if search_query_string %}&{{ search_query_string }}{% endif %}" class="btn btn-secondary me-2"><i class="bi bi-arrow-left"></i> {{ _("返回") }}</a>
+                            {% else %}
+                            <a href="{{ url_for('users.index', page=page) }}" class="btn btn-secondary me-2"><i class="bi bi-arrow-left"></i> {{ _("返回") }}</a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">{{ _("保存修改") }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

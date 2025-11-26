@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}用户通知管理 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notifications/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>用户通知管理</h2>
+            <p class="text-muted">向用户发送通知消息，支持单个用户或全体用户</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('notifications.index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> 返回系统通知
+            </a>
+        </div>
+    </div>
+
+    <!-- 创建通知表单 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">创建新通知</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('notifications.create_user_notification') }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="title" class="form-label">通知标题 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="title" name="title" required maxlength="100">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="target_type" class="form-label">接收对象 <span class="text-danger">*</span></label>
+                        <select class="form-select" id="target_type" name="target_type" required onchange="toggleUserSelect()">
+                            <option value="0">所有用户</option>
+                            <option value="1">指定用户</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6" id="userSelectDiv" style="display: none;">
+                        <label for="user_id" class="form-label">选择用户</label>
+                        <div class="mb-2">
+                            <input type="text" class="form-control" id="userSearch" placeholder="搜索用户ID、用户名或姓名..." onkeyup="filterUsers()">
+                        </div>
+                        <select class="form-select" id="user_id" name="user_id" size="8" style="height: 200px;">
+                            <option value="">请选择用户</option>
+                            {% for user in users %}
+                            <option value="{{ user.user_id }}" data-search="{{ user.user_id }} {{ user.username }} {{ user.real_name or '' }}">
+                                ID:{{ user.user_id }} - {{ user.username }} - {{ user.real_name or '未设置姓名' }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">可通过搜索框快速查找用户</small>
+                    </div>
+                    <div class="col-12">
+                        <label for="content" class="form-label">通知内容 <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="content" name="content" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> 发送通知
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> 重置
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 通知列表 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">已发送通知</h5>
+        </div>
+        <div class="card-body">
+            {% if error %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i> 错误：{{ error }}
+            </div>
+            {% endif %}
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>标题</th>
+                            <th>内容</th>
+                            <th>接收对象</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if notifications %}
+                            {% for notification in notifications %}
+                            <tr>
+                                <td>{{ notification.notification_id }}</td>
+                                <td>{{ notification.title }}</td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 200px;" title="{{ notification.content }}">
+                                        {{ notification.content }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if notification.target_type == 0 %}
+                                        <span class="badge bg-primary">所有用户</span>
+                                    {% else %}
+                                        <span class="badge bg-info">ID:{{ notification.userid }} - {{ notification.user_info.username }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if notification.is_read %}
+                                        <span class="badge bg-success">已读</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">未读</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ notification.create_time.strftime('%Y-%m-%d %H:%M:%S') if notification.create_time else '-' }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteNotification({{ notification.notification_id }})">
+                                        <i class="bi bi-trash"></i> 删除
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">暂无通知记录</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页 -->
+            {% if total_pages > 1 %}
+            <nav aria-label="通知分页">
+                <ul class="pagination justify-content-center">
+                    {% if current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('notifications.user_notifications', page=current_page-1) }}">上一页</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in range(1, total_pages + 1) %}
+                        {% if page_num == current_page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('notifications.user_notifications', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if current_page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('notifications.user_notifications', page=current_page+1) }}">下一页</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleUserSelect() { // 切换用户选择框显示
+    const targetType = document.getElementById('target_type').value;
+    const userSelectDiv = document.getElementById('userSelectDiv');
+    const userSelect = document.getElementById('user_id');
+    
+    if (targetType === '1') {
+        userSelectDiv.style.display = 'block';
+        userSelect.required = true;
+    } else {
+        userSelectDiv.style.display = 'none';
+        userSelect.required = false;
+        userSelect.value = '';
+    }
+}
+
+function filterUsers() { // 用户搜索过滤功能
+    const searchInput = document.getElementById('userSearch');
+    const userSelect = document.getElementById('user_id');
+    const searchTerm = searchInput.value.toLowerCase();
+    
+    for (let i = 0; i < userSelect.options.length; i++) {
+        const option = userSelect.options[i];
+        const searchData = option.getAttribute('data-search');
+        
+        if (searchData && searchData.toLowerCase().includes(searchTerm)) {
+            option.style.display = '';
+        } else if (option.value === '') {
+            option.style.display = ''; // 保持"请选择用户"选项始终可见
+        } else {
+            option.style.display = 'none';
+        }
+    }
+}
+
+function deleteNotification(notificationId) { // 删除通知
+    if (confirm('确定要删除这条通知吗？')) {
+        fetch(`{{ url_for('notifications.delete_user_notification', notification_id=0) }}`.replace('0', notificationId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // 刷新页面
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('删除失败，请重试');
+        });
+    }
+}
+</script>
+{% endblock %} 

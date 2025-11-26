@@ -1,0 +1,3617 @@
+# English translations for Autonomous Taxi Management Platform
+# Copyright (C) 2025
+# This file is distributed under the same license as the project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-26 16:53+0800\n"
+"PO-Revision-Date: 2025-11-26 16:54+0800\n"
+"Last-Translator: \n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.14.0\n"
+
+# Navigation and Menu
+msgid "无人驾驶出租车管理平台"
+msgstr "Autonomous Taxi Management Platform"
+
+msgid "首页仪表盘"
+msgstr "Dashboard"
+
+msgid "车辆管理"
+msgstr "Vehicle Management"
+
+msgid "订单管理"
+msgstr "Order Management"
+
+msgid "通知管理"
+msgstr "Notification Management"
+
+msgid "财务管理"
+msgstr "Financial Management"
+
+msgid "数据分析"
+msgstr "Data Analytics"
+
+msgid "优惠管理"
+msgstr "Coupon Management"
+
+msgid "用户管理"
+msgstr "User Management"
+
+msgid "系统设置"
+msgstr "System Settings"
+
+msgid "算法测试"
+msgstr "Algorithm Testing"
+
+# Common Actions
+msgid "添加"
+msgstr "Add"
+
+msgid "编辑"
+msgstr "Edit"
+
+msgid "删除"
+msgstr "Delete"
+
+msgid "保存"
+msgstr "Save"
+
+msgid "取消"
+msgstr "Cancel"
+
+msgid "确认"
+msgstr "Confirm"
+
+msgid "搜索"
+msgstr "Search"
+
+msgid "导出"
+msgstr "Export"
+
+msgid "刷新"
+msgstr "Refresh"
+
+msgid "查看"
+msgstr "View"
+
+msgid "详情"
+msgstr "Details"
+
+msgid "返回"
+msgstr "Back"
+
+msgid "提交"
+msgstr "Submit"
+
+msgid "重置"
+msgstr "Reset"
+
+# Notifications
+msgid "系统通知"
+msgstr "System Notifications"
+
+msgid "查看全部通知"
+msgstr "View All Notifications"
+
+msgid "加载中..."
+msgstr "Loading..."
+
+msgid "未读通知"
+msgstr "Unread Notifications"
+
+msgid "已读通知"
+msgstr "Read Notifications"
+
+msgid "标记为已读"
+msgstr "Mark as Read"
+
+msgid "标记为未读"
+msgstr "Mark as Unread"
+
+msgid "全部标记为已读"
+msgstr "Mark All as Read"
+
+msgid "清空通知"
+msgstr "Clear Notifications"
+
+# Vehicle Management
+msgid "车辆编号"
+msgstr "Vehicle ID"
+
+msgid "车辆状态"
+msgstr "Vehicle Status"
+
+msgid "电池电量"
+msgstr "Battery Level"
+
+msgid "当前位置"
+msgstr "Current Location"
+
+msgid "行驶里程"
+msgstr "Mileage"
+
+msgid "空闲"
+msgstr "Idle"
+
+msgid "行驶中"
+msgstr "In Service"
+
+msgid "维护中"
+msgstr "Under Maintenance"
+
+msgid "充电中"
+msgstr "Charging"
+
+msgid "电量不足"
+msgstr "Low Battery"
+
+# Order Management
+msgid "订单编号"
+msgstr "Order ID"
+
+msgid "订单状态"
+msgstr "Order Status"
+
+msgid "出发地"
+msgstr "Origin"
+
+msgid "目的地"
+msgstr "Destination"
+
+msgid "乘客"
+msgstr "Passenger"
+
+msgid "司机"
+msgstr "Driver"
+
+msgid "订单金额"
+msgstr "Order Amount"
+
+msgid "创建时间"
+msgstr "Created Time"
+
+msgid "完成时间"
+msgstr "Completed Time"
+
+msgid "待接单"
+msgstr "Pending"
+
+msgid "进行中"
+msgstr "In Progress"
+
+msgid "已完成"
+msgstr "Completed"
+
+msgid "已取消"
+msgstr "Cancelled"
+
+# Financial Management
+msgid "收入"
+msgstr "Income"
+
+msgid "支出"
+msgstr "Expense"
+
+msgid "利润"
+msgstr "Profit"
+
+msgid "总收入"
+msgstr "Total Income"
+
+msgid "总支出"
+msgstr "Total Expense"
+
+msgid "净利润"
+msgstr "Net Profit"
+
+msgid "收入分析"
+msgstr "Income Analysis"
+
+msgid "支出分析"
+msgstr "Expense Analysis"
+
+msgid "利润分析"
+msgstr "Profit Analysis"
+
+# User Management
+msgid "用户名"
+msgstr "Username"
+
+msgid "邮箱"
+msgstr "Email"
+
+msgid "手机号"
+msgstr "Phone Number"
+
+msgid "注册时间"
+msgstr "Registration Time"
+
+msgid "最后登录"
+msgstr "Last Login"
+
+msgid "用户状态"
+msgstr "User Status"
+
+msgid "激活"
+msgstr "Active"
+
+msgid "禁用"
+msgstr "Disabled"
+
+# Data Analytics
+msgid "运营效率"
+msgstr "Operational Efficiency"
+
+msgid "服务质量"
+msgstr "Service Quality"
+
+msgid "车辆维护"
+msgstr "Vehicle Maintenance"
+
+msgid "电池管理"
+msgstr "Battery Management"
+
+msgid "财务健康"
+msgstr "Financial Health"
+
+msgid "用户营销"
+msgstr "User Marketing"
+
+# System Settings
+msgid "基本设置"
+msgstr "Basic Settings"
+
+msgid "系统参数"
+msgstr "System Parameters"
+
+msgid "安全设置"
+msgstr "Security Settings"
+
+msgid "通知设置"
+msgstr "Notification Settings"
+
+msgid "语言设置"
+msgstr "Language Settings"
+
+msgid "中文"
+msgstr "Chinese"
+
+msgid "英文"
+msgstr "English"
+
+# Common Messages
+msgid "操作成功"
+msgstr "Operation Successful"
+
+msgid "操作失败"
+msgstr "Operation Failed"
+
+msgid "确认删除吗?"
+msgstr "Are you sure you want to delete?"
+
+msgid "数据加载失败"
+msgstr "Failed to Load Data"
+
+msgid "请填写完整信息"
+msgstr "Please Fill in Complete Information"
+
+msgid "保存成功"
+msgstr "Saved Successfully"
+
+msgid "保存失败"
+msgstr "Save Failed"
+
+msgid "删除成功"
+msgstr "Deleted Successfully"
+
+msgid "删除失败"
+msgstr "Delete Failed"
+
+# Date and Time
+msgid "今天"
+msgstr "Today"
+
+msgid "昨天"
+msgstr "Yesterday"
+
+msgid "本周"
+msgstr "This Week"
+
+msgid "本月"
+msgstr "This Month"
+
+msgid "本年"
+msgstr "This Year"
+
+msgid "开始日期"
+msgstr "Start Date"
+
+msgid "结束日期"
+msgstr "End Date"
+
+# Statistics
+msgid "总计"
+msgstr "Total"
+
+msgid "平均"
+msgstr "Average"
+
+msgid "最大"
+msgstr "Maximum"
+
+msgid "最小"
+msgstr "Minimum"
+
+msgid "数量"
+msgstr "Quantity"
+
+msgid "百分比"
+msgstr "Percentage"
+
+# Pagination
+msgid "上一页"
+msgstr "Previous"
+
+msgid "下一页"
+msgstr "Next"
+
+msgid "第"
+msgstr "Page"
+
+msgid "页"
+msgstr ""
+
+msgid "共"
+msgstr "Total"
+
+msgid "条记录"
+msgstr "Records"
+
+# Dashboard specific
+msgid "运行车辆/总车辆"
+msgstr "Running/Total Vehicles"
+
+msgid "今日完成订单"
+msgstr "Today's Completed Orders"
+
+msgid "今日收入"
+msgstr "Today's Income"
+
+msgid "今日活跃用户"
+msgstr "Today's Active Users"
+
+
+#: management_platform/Lib/site-packages/click/_termui_impl.py:556
+msgid "{editor}: Editing failed"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/_termui_impl.py:560
+msgid "{editor}: Editing failed: {e}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:1124
+msgid "Aborted!"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:1349
+#: management_platform/Lib/site-packages/click/core.py:1379
+msgid "(Deprecated) {text}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:1396
+msgid "Options"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:1424
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: management_platform/Lib/site-packages/click/core.py:1437
+msgid "DeprecationWarning: The command {name!r} is deprecated."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:1645
+msgid "Commands"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:1677
+msgid "Missing command."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:1755
+msgid "No such command {name!r}."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:2313
+msgid "Value must be an iterable."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:2336
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: management_platform/Lib/site-packages/click/core.py:2783
+msgid "env var: {var}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:2813
+msgid "(dynamic)"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:2828
+msgid "default: {default}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/core.py:2841
+msgid "required"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/decorators.py:457
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/decorators.py:520
+msgid "Show the version and exit."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/decorators.py:541
+msgid "Show this message and exit."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:49
+#: management_platform/Lib/site-packages/click/exceptions.py:88
+msgid "Error: {message}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:80
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:129
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:131
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:187
+msgid "Missing argument"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:189
+msgid "Missing option"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:191
+msgid "Missing parameter"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:193
+msgid "Missing {param_type}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:200
+msgid "Missing parameter: {param_name}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:220
+msgid "No such option: {name}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:234
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:270
+msgid "unknown error"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/exceptions.py:277
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/parser.py:233
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/parser.py:415
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/parser.py:475
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+msgstr[1] ""
+
+#: management_platform/Lib/site-packages/click/shell_completion.py:325
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/shell_completion.py:333
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/termui.py:158
+msgid "Repeat for confirmation"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/termui.py:174
+msgid "Error: The value you entered was invalid."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/termui.py:176
+msgid "Error: {e.message}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/termui.py:187
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/termui.py:243
+msgid "Error: invalid input"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/termui.py:773
+msgid "Press any key to continue..."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:267
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:301
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: management_platform/Lib/site-packages/click/types.py:395
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: management_platform/Lib/site-packages/click/types.py:415
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:471
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:612
+msgid "{value!r} is not a valid boolean."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:636
+msgid "{value!r} is not a valid UUID."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:826
+msgid "file"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:828
+msgid "directory"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:830
+msgid "path"
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:881
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:890
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:898
+msgid "{name} {filename!r} is a directory."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:907
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:916
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:925
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: management_platform/Lib/site-packages/click/types.py:991
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+# Batch added translations
+
+msgid "${capacityValue} 个"
+msgstr "${capacityValue} items"
+
+msgid "${count}张"
+msgstr "${count} coupons"
+
+msgid "${couponType.min_amount > 0 ? '满' + couponType.min_amount + '元可用' : '无门槛'}"
+msgstr "${couponType.min_amount > 0 ? 'Min. ¥' + couponType.min_amount : 'No threshold'}"
+
+msgid "${demandValue} 辆"
+msgstr "${demandValue} vehicles"
+
+msgid "${item.expense_count"
+msgstr "| 0}笔支出 | ${item.expense_count || 0} expenses"
+
+msgid "${lowBatteryValue} 辆"
+msgstr "${lowBatteryValue} vehicles"
+
+msgid "${package.description"
+msgstr "| '暂无描述'} | ${package.description || 'No description'}"
+
+msgid "${package.sale_count}份"
+msgstr "${package.sale_count} sold"
+
+msgid "${package.status == 1 ? '在售中' : '已下架'}"
+msgstr "${package.status == 1 ? 'On Sale' : 'Delisted'}"
+
+msgid "${package.validity_days}天"
+msgstr "${package.validity_days} days"
+
+msgid "${totalCoupons}张"
+msgstr "${totalCoupons} coupons"
+
+msgid "(共{{ total_count }}条记录)"
+msgstr "(Total {{ total_count }} records)"
+
+msgid "(共{{ total_count"
+msgstr "default(0) }}条记录) | (Total {{ total_count|default(0) }} records)"
+
+msgid "30天用户留存率"
+msgstr "30-Day User Retention Rate"
+
+msgid "= total_pages %}aria-disabled=\"true\"{% endif %}>下一页"
+msgstr "= total_pages %}aria-disabled=\"true\"{% endif %}>Next"
+
+msgid "= total_pages"
+msgstr "default(1) %}aria-disabled=\"true\"{% endif %}>下一页 | = total_pages|default(1) %}aria-disabled=\"true\"{% endif %}>Next"
+
+msgid "{% if coupon.min_amount > 0 %}满{{ coupon.min_amount }}元可用{% else %}无门槛{% endif %}"
+msgstr "{% if coupon.min_amount > 0 %}Min. ¥{{ coupon.min_amount }}{% else %}No threshold{% endif %}"
+
+msgid "{% if package.id == 0 %}新增优惠券套{% else %}编辑优惠券套{% endif %}"
+msgstr "{% if package.id == 0 %}Add Coupon Package{% else %}Edit Coupon Package{% endif %}"
+
+msgid "{{ chat_records"
+msgstr "length }}条消息 | {{ chat_records|length }} messages"
+
+msgid "{{ coupon.validity_start }} 至 {{ coupon.validity_end }}"
+msgstr "{{ coupon.validity_start }} to {{ coupon.validity_end }}"
+
+msgid "{{ expense.description or '无' }}"
+msgstr "{{ expense.description or 'None' }}"
+
+msgid "{{ finance_data.month_display if finance_data and finance_data.month_display else \"当月\" }}暂无订单数据"
+msgstr "{{ finance_data.month_display if finance_data and finance_data.month_display else \"Current Month\" }} No order data"
+
+msgid "{{ finance_data.month_display if finance_data and finance_data.month_display else \"当月\" }}暂无订单金额数据"
+msgstr "{{ finance_data.month_display if finance_data and finance_data.month_display else \"Current Month\" }} No order amount data"
+
+msgid "{{ income.description or '无' }}"
+msgstr "{{ income.description or 'None' }}"
+
+msgid "{{ notification.read_at or '未读' }}"
+msgstr "{{ notification.read_at or 'Unread' }}"
+
+msgid "{{ package.get('description', '暂无描述') }}"
+msgstr "{{ package.get('description', 'No description') }}"
+
+msgid "{{ package.get('name', '未命名套餐') }}"
+msgstr "{{ package.get('name', 'Unnamed Package') }}"
+
+msgid "{{ review.comment or '无评价内容' }}"
+msgstr "{{ review.comment or 'No review content' }}"
+
+msgid "{{ user_info.real_name or '未设置' }}"
+msgstr "{{ user_info.real_name or 'Not set' }}"
+
+msgid "{{ vehicle.current_location_name or '未知' }}"
+msgstr "{{ vehicle.current_location_name or 'Unknown' }}"
+
+msgid "{{ vehicle.last_maintenance_date or '暂无记录' }}"
+msgstr "{{ vehicle.last_maintenance_date or 'No record' }}"
+
+msgid "为优惠券 #{{ coupon.coupon_id }} 延长有效期："
+msgstr "Extend validity for Coupon #{{ coupon.coupon_id }}:"
+
+msgid "今日聊天次数"
+msgstr "Today's Chat Count"
+
+msgid "使用过智能客服的用户数"
+msgstr "Users Who Used AI Customer Service"
+
+msgid "修改支出记录 ID: {{ expense.id }}"
+msgstr "Edit Expense Record ID: {{ expense.id }}"
+
+msgid "修改收入记录 ID: {{ income.id }}"
+msgstr "Edit Income Record ID: {{ income.id }}"
+
+msgid "充电/电量不足/维护"
+msgstr "Charging/Low Battery/Maintenance"
+
+msgid "全部车辆"
+msgstr "All Vehicles"
+
+msgid "共{{ package.get('coupon_count', '-') }}张优惠券"
+msgstr "Total {{ package.get('coupon_count', '-') }} coupons"
+
+msgid "创建时间: ${package.created_at"
+msgstr "| '未知'} | Created: ${package.created_at || 'Unknown'}"
+
+msgid "创建时间: {{ latest.created_at }}"
+msgstr "Created: {{ latest.created_at }}"
+
+msgid "创建时间:{{ order.create_time }}"
+msgstr "Created: {{ order.create_time }}"
+
+msgid "利润率"
+msgstr "Profit Margin"
+
+msgid "到达时间:{{ order.arrival_time or '尚未到达' }}"
+msgstr "Arrival Time: {{ order.arrival_time or 'Not arrived yet' }}"
+
+msgid "加载数据失败: ${error.message}"
+msgstr "Failed to load data: ${error.message}"
+
+msgid "单车每日收益"
+msgstr "Daily Revenue Per Vehicle"
+
+msgid "城市:{{ order.city_code }}"
+msgstr "City: {{ order.city_code }}"
+
+msgid "套餐ID: ${package.id}"
+msgstr "Package ID: ${package.id}"
+
+msgid "好评率 (4-5星)"
+msgstr "Positive Rate (4-5 stars)"
+
+msgid "姓名: {{ order.real_name }}"
+msgstr "Name: {{ order.real_name }}"
+
+msgid "客单价"
+msgstr "Average Order Value"
+
+msgid "密度估计: ${Math.round(lineData.value[1] * 100) / 100}"
+msgstr "Density Estimate: ${Math.round(lineData.value[1] * 100) / 100}"
+
+msgid "差评率 (1-2星)"
+msgstr "Negative Rate (1-2 stars)"
+
+msgid "平均响应时效"
+msgstr "Average Response Time"
+
+msgid "平均完成时长: ${data.value} 分钟"
+msgstr "Average Completion Time: ${data.value} minutes"
+
+msgid "平均订单完成时长"
+msgstr "Average Order Completion Time"
+
+msgid "平均订单金额"
+msgstr "Average Order Amount"
+
+msgid "平均评分"
+msgstr "Average Rating"
+
+msgid "平均车辆投资回报期"
+msgstr "Average Vehicle ROI Period"
+
+msgid "当前位置: {{ order.current_location_name }}"
+msgstr "Current Location: {{ order.current_location_name }}"
+
+msgid "当前状态: {{ coupon.status }}"
+msgstr "Current Status: {{ coupon.status }}"
+
+msgid "总用户数"
+msgstr "Total Users"
+
+msgid "总评价数"
+msgstr "Total Reviews"
+
+msgid "手机号: {{ order.phone }}"
+msgstr "Phone: {{ order.phone }}"
+
+msgid "支付方式: {{ latest.payment_method }}"
+msgstr "Payment Method: {{ latest.payment_method }}"
+
+msgid "支出 #{{ expense.id }}"
+msgstr "Expense #{{ expense.id }}"
+
+msgid "收入 #{{ income.id }}"
+msgstr "Income #{{ income.id }}"
+
+msgid "收入/充电站支出比"
+msgstr "Revenue/Charging Station Expense Ratio"
+
+msgid "数据错误"
+msgstr "Data Error"
+
+msgid "新用户转化率"
+msgstr "New User Conversion Rate"
+
+msgid "暂无优惠券详情"
+msgstr "No Coupon Details"
+
+msgid "暂无可用车辆"
+msgstr "No Available Vehicles"
+
+msgid "暂无支出数据"
+msgstr "No Expense Data"
+
+msgid "暂无通知记录"
+msgstr "No Notification Records"
+
+msgid "更新时间: {{ latest.updated_at }}"
+msgstr "Updated: {{ latest.updated_at }}"
+
+msgid "有效期{{ package.get('validity_days', 30) }}天"
+msgstr "Valid for {{ package.get('validity_days', 30) }} days"
+
+msgid "本月新增用户"
+msgstr "New Users This Month"
+
+msgid "来源: {{ filter.source }}"
+msgstr "Source: {{ filter.source }}"
+
+msgid "没有新通知"
+msgstr "No New Notifications"
+
+msgid "测试类型: ${testType === 'assignment' ? '智能订单分配算法' : '智能车辆匹配算法'}"
+msgstr "Test Type: ${testType === 'assignment' ? 'Smart Order Assignment Algorithm' : 'Smart Vehicle Matching Algorithm'}"
+
+msgid "状态: {{ filter.status }}"
+msgstr "Status: {{ filter.status }}"
+
+msgid "用户ID: {{ filter.user_id }}"
+msgstr "User ID: {{ filter.user_id }}"
+
+msgid "用户ID: {{ order.user_id }}"
+msgstr "User ID: {{ order.user_id }}"
+
+msgid "用户名: {{ order.username }}"
+msgstr "Username: {{ order.username }}"
+
+msgid "用户平均聊天次数"
+msgstr "Average Chat Count Per User"
+
+msgid "用户总数"
+msgstr "Total Users"
+
+msgid "用户活跃率"
+msgstr "User Activity Rate"
+
+msgid "用户重复使用率"
+msgstr "User Repeat Usage Rate"
+
+msgid "确定要作废优惠券 #{{ coupon.coupon_id }} 吗？"
+msgstr "Are you sure you want to void Coupon #{{ coupon.coupon_id }}?"
+
+msgid "空闲中"
+msgstr "Idle"
+
+msgid "空闲车辆"
+msgstr "Idle Vehicles"
+
+msgid "系统预警率"
+msgstr "System Alert Rate"
+
+msgid "订单 #{{ order.order_number }}"
+msgstr "Order #{{ order.order_number }}"
+
+msgid "订单ID: {{ order.order_id }}"
+msgstr "Order ID: {{ order.order_id }}"
+
+msgid "订单完成率"
+msgstr "Order Completion Rate"
+
+msgid "订单数量: ${barData.value}"
+msgstr "Order Count: ${barData.value}"
+
+msgid "订单编号: {{ order.order_number }}"
+msgstr "Order Number: {{ order.order_number }}"
+
+msgid "详情记录ID: #{{ latest.id }}"
+msgstr "Detail Record ID: #{{ latest.id }}"
+
+msgid "车型: {{ order.model }}"
+msgstr "Model: {{ order.model }}"
+
+msgid "车牌号: {{ order.plate_number }}"
+msgstr "License Plate: {{ order.plate_number }}"
+
+msgid "车辆ID: {{ order.vehicle_id or '未分配' }}"
+msgstr "Vehicle ID: {{ order.vehicle_id or 'Unassigned' }}"
+
+msgid "车辆ID: {{ order.vehicle_id }}"
+msgstr "Vehicle ID: {{ order.vehicle_id }}"
+
+msgid "车辆周转率"
+msgstr "Vehicle Turnover Rate"
+
+msgid "车辆总数"
+msgstr "Total Vehicles"
+
+msgid "车辆成本占比"
+msgstr "Vehicle Cost Ratio"
+
+msgid "车辆日均充电次数"
+msgstr "Average Daily Charging Count"
+
+msgid "车辆日均行驶里程"
+msgstr "Average Daily Mileage"
+
+msgid "车辆维护频率"
+msgstr "Vehicle Maintenance Frequency"
+
+msgid "车队平均车龄"
+msgstr "Average Fleet Age"
+
+msgid "运营利润率"
+msgstr "Operating Profit Margin"
+
+msgid "运营成本"
+msgstr "Operating Cost"
+
+msgid "运行中"
+msgstr "In Service"
+
+msgid "迭代次数: ${iterations}"
+msgstr "Iterations: ${iterations}"
+
+msgid "通知总数"
+msgstr "Total Notifications"
+
+msgid "邮箱: {{ order.email }}"
+msgstr "Email: {{ order.email }}"
+
+msgid "最低电量"
+msgstr "Min Battery"
+
+msgid "最高电量"
+msgstr "Max Battery"
+
+# Batch added translations
+
+msgid "= total_pages %}aria-disabled=\"true\"{% endif %}>下一页"
+msgstr "= total_pages %}aria-disabled=\"true\"{% endif %}>Next"
+
+msgid "{{ finance_data.month_display if finance_data and finance_data.month_display else \"当月\" }}暂无订单数据"
+msgstr "{{ finance_data.month_display if finance_data and finance_data.month_display else \"Current Month\" }} No order data"
+
+msgid "{{ finance_data.month_display if finance_data and finance_data.month_display else \"当月\" }}暂无订单金额数据"
+msgstr "{{ finance_data.month_display if finance_data and finance_data.month_display else \"Current Month\" }} No order amount data"
+
+# Batch added translations
+
+msgid "智能车辆匹配算法测试"
+msgstr "Smart Vehicle Matching Algorithm Test"
+
+msgid "更新用户最后登录时间"
+msgstr "Update User Last Login Time"
+
+msgid "注册城市"
+msgstr "Registration City"
+
+msgid "注册时间 (开始)"
+msgstr "Registration Time (Start)"
+
+msgid "注册时间 (结束)"
+msgstr "Registration Time (End)"
+
+msgid "注册渠道"
+msgstr "Registration Channel"
+
+msgid "用户数据分析"
+msgstr "User Data Analytics"
+
+msgid "用户通知管理"
+msgstr "User Notification Management"
+
+msgid "算法测试平台"
+msgstr "Algorithm Testing Platform"
+
+msgid "系统通知管理"
+msgstr "System Notification Management"
+
+msgid "订单分配算法测试"
+msgstr "Order Assignment Algorithm Test"
+
+msgid "车辆数据分析"
+msgstr "Vehicle Data Analytics"
+
+msgid "首页"
+msgstr "Home"
+
+msgid "Alpha Nexus 详情与参数设置"
+msgstr "Alpha Nexus Details & Parameter Settings"
+
+msgid "Alpha X1 详情与参数设置"
+msgstr "Alpha X1 Details & Parameter Settings"
+
+msgid "Neon 500 详情与参数设置"
+msgstr "Neon 500 Details & Parameter Settings"
+
+msgid "Neon Zero 详情与参数设置"
+msgstr "Neon Zero Details & Parameter Settings"
+
+msgid "Nova Pulse 详情与参数设置"
+msgstr "Nova Pulse Details & Parameter Settings"
+
+msgid "Nova Quantum 详情与参数设置"
+msgstr "Nova Quantum Details & Parameter Settings"
+
+msgid "Nova S1 详情与参数设置"
+msgstr "Nova S1 Details & Parameter Settings"
+
+msgid "下载图表"
+msgstr "Download Chart"
+
+msgid "人工修改"
+msgstr "Manual Edit"
+
+msgid "优惠券详情"
+msgstr "Coupon Details"
+
+msgid "保存中心点设置"
+msgstr "Save Center Point Settings"
+
+msgid "保存修改"
+msgstr "Save Changes"
+
+msgid "保存参数"
+msgstr "Save Parameters"
+
+msgid "保存地图参数"
+msgstr "Save Map Parameters"
+
+msgid "保存套餐"
+msgstr "Save Package"
+
+msgid "保存更改"
+msgstr "Save Changes"
+
+msgid "保存缩放设置"
+msgstr "Save Zoom Settings"
+
+msgid "保存规则"
+msgstr "Save Rules"
+
+msgid "保存设置"
+msgstr "Save Settings"
+
+msgid "信用记录详情"
+msgstr "Credit Record Details"
+
+msgid "修改障碍物信息"
+msgstr "Edit Obstacle Information"
+
+msgid "全选"
+msgstr "Select All"
+
+msgid "关闭"
+msgstr "Close"
+
+msgid "删除订单"
+msgstr "Delete Order"
+
+msgid "删除通知"
+msgstr "Delete Notification"
+
+msgid "刷新位置"
+msgstr "Refresh Location"
+
+msgid "刷新数据"
+msgstr "Refresh Data"
+
+msgid "刷新间隔 (秒)"
+msgstr "Refresh Interval (seconds)"
+
+msgid "加载地图数据失败，请刷新页面重试"
+msgstr "Failed to load map data, please refresh the page and try again"
+
+msgid "套餐详情"
+msgstr "Package Details"
+
+msgid "导出格式"
+msgstr "Export Format"
+
+msgid "导出选项"
+msgstr "Export Options"
+
+msgid "应用筛选"
+msgstr "Apply Filter"
+
+msgid "批量添加订单"
+msgstr "Batch Add Orders"
+
+msgid "搜索包含的标签"
+msgstr "Search Tags"
+
+msgid "搜索描述中包含的关键词"
+msgstr "Search Keywords in Description"
+
+msgid "搜索用户ID、用户名或姓名..."
+msgstr "Search User ID, Username or Name..."
+
+msgid "支出详情"
+msgstr "Expense Details"
+
+msgid "收入详情"
+msgstr "Income Details"
+
+msgid "日志详情"
+msgstr "Log Details"
+
+msgid "查看各城市车辆的实时位置分布"
+msgstr "View Real-time Vehicle Distribution by City"
+
+msgid "查看和管理无人驾驶出租车的操作日志记录"
+msgstr "View and Manage Autonomous Taxi Operation Logs"
+
+msgid "查看和管理无人驾驶出租车订单"
+msgstr "View and Manage Autonomous Taxi Orders"
+
+msgid "查看和管理用户与智能客服的对话记录"
+msgstr "View and Manage User-AI Customer Service Chat Records"
+
+msgid "查看和管理用户对出行服务的评价"
+msgstr "View and Manage User Service Reviews"
+
+msgid "查看和管理系统支出记录"
+msgstr "View and Manage System Expense Records"
+
+msgid "查看和管理系统收入记录"
+msgstr "View and Manage System Income Records"
+
+msgid "查看实时信息"
+msgstr "View Real-time Information"
+
+msgid "查看用户与智能客服的历史对话记录"
+msgstr "View User-AI Customer Service Chat History"
+
+msgid "查看订单详情"
+msgstr "View Order Details"
+
+msgid "查看详情"
+msgstr "View Details"
+
+msgid "查看详情与参数设置"
+msgstr "View Details & Parameter Settings"
+
+msgid "查询"
+msgstr "Query"
+
+msgid "正在加载订单详情..."
+msgstr "Loading Order Details..."
+
+msgid "此操作不可撤销，订单将被永久删除。"
+msgstr "This operation cannot be undone. The order will be permanently deleted."
+
+msgid "消息详情"
+msgstr "Message Details"
+
+msgid "添加优惠券种类"
+msgstr "Add Coupon Type"
+
+msgid "添加信用规则"
+msgstr "Add Credit Rule"
+
+msgid "添加充电站"
+msgstr "Add Charging Station"
+
+msgid "添加支出记录"
+msgstr "Add Expense Record"
+
+msgid "添加收入记录"
+msgstr "Add Income Record"
+
+msgid "添加新套餐"
+msgstr "Add New Package"
+
+msgid "添加新用户"
+msgstr "Add New User"
+
+msgid "添加新车辆"
+msgstr "Add New Vehicle"
+
+msgid "添加用户"
+msgstr "Add User"
+
+msgid "添加车辆"
+msgstr "Add Vehicle"
+
+msgid "点击地图添加点，双击完成"
+msgstr "Click map to add points, double-click to finish"
+
+msgid "确定要删除此优惠券种类吗？该操作不可逆。"
+msgstr "Are you sure you want to delete this coupon type? This operation is irreversible."
+
+msgid "确定要删除此消息记录吗？该操作不可逆。"
+msgstr "Are you sure you want to delete this message record? This operation is irreversible."
+
+msgid "确定要删除此评价记录吗？该操作不可逆。"
+msgstr "Are you sure you want to delete this review record? This operation is irreversible."
+
+msgid "确认作废"
+msgstr "Confirm Void"
+
+msgid "确认删除"
+msgstr "Confirm Delete"
+
+msgid "确认导出"
+msgstr "Confirm Export"
+
+msgid "确认延期"
+msgstr "Confirm Extension"
+
+msgid "编辑优惠券种类"
+msgstr "Edit Coupon Type"
+
+msgid "编辑信用等级"
+msgstr "Edit Credit Level"
+
+msgid "编辑信用规则"
+msgstr "Edit Credit Rule"
+
+msgid "编辑套餐"
+msgstr "Edit Package"
+
+msgid "编辑支出记录"
+msgstr "Edit Expense Record"
+
+msgid "编辑收入记录"
+msgstr "Edit Income Record"
+
+msgid "编辑用户信息"
+msgstr "Edit User Information"
+
+msgid "编辑车辆"
+msgstr "Edit Vehicle"
+
+msgid "编辑障碍物"
+msgstr "Edit Obstacle"
+
+msgid "自动刷新"
+msgstr "Auto Refresh"
+
+msgid "规则状态（开启/关闭）"
+msgstr "Rule Status (On/Off)"
+
+msgid "订单详情"
+msgstr "Order Details"
+
+msgid "评价详情"
+msgstr "Review Details"
+
+msgid "车辆删除"
+msgstr "Vehicle Deletion"
+
+msgid "车辆添加"
+msgstr "Vehicle Addition"
+
+msgid "输入用户ID搜索"
+msgstr "Search by User ID"
+
+msgid "选择要导出的列"
+msgstr "Select Columns to Export"
+
+msgid "通知详情"
+msgstr "Notification Details"
+
+msgid "重置视图"
+msgstr "Reset View"
+
+msgid "高级搜索"
+msgstr "Advanced Search"
+
+msgid "暂无数据"
+msgstr "No Data Available"
+
+msgid "请选择一个城市进行参数配置"
+msgstr "Please select a city for parameter configuration"
+
+msgid "请选择优惠券种类"
+msgstr "Please select coupon type"
+
+msgid "请选择城市"
+msgstr "Please select city"
+
+msgid "请选择用户"
+msgstr "Please select user"
+
+msgid "-- 选择收入来源 --"
+msgstr "-- Select Income Source --"
+
+msgid "充值收入"
+msgstr "Recharge Income"
+
+msgid "充电站支出"
+msgstr "Charging Station Expense"
+
+msgid "其他支出"
+msgstr "Other Expenses"
+
+msgid "其他收入"
+msgstr "Other Income"
+
+msgid "分析利润形成和变化趋势"
+msgstr "Analyze Profit Formation and Trends"
+
+msgid "分析成本结构和支出趋势"
+msgstr "Analyze Cost Structure and Expense Trends"
+
+msgid "创建新的支出记录"
+msgstr "Create New Expense Record"
+
+msgid "创建新的收入记录"
+msgstr "Create New Income Record"
+
+msgid "可变成本"
+msgstr "Variable Cost"
+
+msgid "可变成本（元/车位）"
+msgstr "Variable Cost (¥/Parking Space)"
+
+msgid "同比增长"
+msgstr "Year-over-Year Growth"
+
+msgid "城市距离转换比例设置"
+msgstr "City Distance Conversion Ratio Settings"
+
+msgid "基础成本"
+msgstr "Base Cost"
+
+msgid "基础成本（元）"
+msgstr "Base Cost (¥)"
+
+msgid "基础维护费用（元/次）"
+msgstr "Base Maintenance Fee (¥/time)"
+
+msgid "平均耗时"
+msgstr "Average Duration"
+
+msgid "支出ID"
+msgstr "Expense ID"
+
+msgid "支出信息"
+msgstr "Expense Information"
+
+msgid "支出管理"
+msgstr "Expense Management"
+
+msgid "支出记录元数据"
+msgstr "Expense Record Metadata"
+
+msgid "收入ID"
+msgstr "Income ID"
+
+msgid "收入信息"
+msgstr "Income Information"
+
+msgid "收入来源"
+msgstr "Income Source"
+
+msgid "收入管理"
+msgstr "Income Management"
+
+msgid "收入记录元数据"
+msgstr "Income Record Metadata"
+
+msgid "日均收入"
+msgstr "Daily Average Income"
+
+msgid "日环比"
+msgstr "Day-over-Day"
+
+msgid "最大耗时"
+msgstr "Maximum Duration"
+
+msgid "最大重试次数"
+msgstr "Maximum Retry Count"
+
+msgid "最小耗时"
+msgstr "Minimum Duration"
+
+msgid "没有找到符合条件的支出记录"
+msgstr "No matching expense records found"
+
+msgid "没有找到符合条件的收入记录"
+msgstr "No matching income records found"
+
+msgid "深入分析各类收入来源和趋势"
+msgstr "In-depth Analysis of Income Sources and Trends"
+
+msgid "维护成本系数"
+msgstr "Maintenance Cost Coefficient"
+
+msgid "维护费用说明"
+msgstr "Maintenance Fee Description"
+
+msgid "缩放比例"
+msgstr "Zoom Level"
+
+msgid "缩放比例设置"
+msgstr "Zoom Level Settings"
+
+msgid "距离转换比例"
+msgstr "Distance Conversion Ratio"
+
+msgid "车费收入"
+msgstr "Fare Income"
+
+msgid "车辆支出"
+msgstr "Vehicle Expenses"
+
+msgid "最近30天"
+msgstr "Last 30 Days"
+
+msgid "最近7天"
+msgstr "Last 7 Days"
+
+msgid "不可用"
+msgstr "Unavailable"
+
+msgid "充电中电量更新频率（秒）"
+msgstr "Battery Update Frequency While Charging (seconds)"
+
+msgid "加载优惠券类型失败"
+msgstr "Failed to Load Coupon Types"
+
+msgid "可用"
+msgstr "Available"
+
+msgid "可用状态"
+msgstr "Available Status"
+
+msgid "启用"
+msgstr "Enable"
+
+msgid "启用障碍物"
+msgstr "Enable Obstacle"
+
+msgid "正在加载可用车辆..."
+msgstr "Loading Available Vehicles..."
+
+msgid "正常"
+msgstr "Normal"
+
+msgid "此优惠券仍然有效，可以正常使用"
+msgstr "This coupon is still valid and can be used normally"
+
+msgid "点击激活规则"
+msgstr "Click to Activate Rule"
+
+msgid "点击禁用规则"
+msgstr "Click to Disable Rule"
+
+msgid "管理系统中可用的优惠券类型"
+msgstr "Manage Available Coupon Types in System"
+
+msgid "运行中电量更新频率（秒）"
+msgstr "Battery Update Frequency While In Service (seconds)"
+
+msgid "进行中订单"
+msgstr "Orders In Progress"
+
+msgid "Neon系列"
+msgstr "Neon Series"
+
+msgid "Nova系列"
+msgstr "Nova Series"
+
+msgid "X坐标"
+msgstr "X Coordinate"
+
+msgid "Y坐标"
+msgstr "Y Coordinate"
+
+msgid "上架"
+msgstr "List"
+
+msgid "上次维护"
+msgstr "Last Maintenance"
+
+msgid "上海市"
+msgstr "Shanghai"
+
+msgid "上车地点"
+msgstr "Pickup Location"
+
+msgid "上车点X坐标"
+msgstr "Pickup Point X Coordinate"
+
+msgid "上车点Y坐标"
+msgstr "Pickup Point Y Coordinate"
+
+msgid "下架"
+msgstr "Delist"
+
+msgid "下车地点"
+msgstr "Drop-off Location"
+
+msgid "中心点坐标"
+msgstr "Center Point Coordinates"
+
+msgid "中心点纬度"
+msgstr "Center Point Latitude"
+
+msgid "中心点经度"
+msgstr "Center Point Longitude"
+
+msgid "中端实用型"
+msgstr "Mid-range Practical"
+
+msgid "交通枢纽"
+msgstr "Transportation Hub"
+
+msgid "产业园区"
+msgstr "Industrial Park"
+
+msgid "价值"
+msgstr "Value"
+
+msgid "优先级"
+msgstr "Priority"
+
+msgid "优惠值"
+msgstr "Discount Value"
+
+msgid "优惠券ID"
+msgstr "Coupon ID"
+
+msgid "优惠券总数:"
+msgstr "Total Coupons:"
+
+msgid "优惠券有效期"
+msgstr "Coupon Validity Period"
+
+msgid "优惠券种类"
+msgstr "Coupon Type"
+
+msgid "优惠券管理"
+msgstr "Coupon Management"
+
+msgid "优惠券说明"
+msgstr "Coupon Description"
+
+msgid "优惠券配置"
+msgstr "Coupon Configuration"
+
+msgid "余额"
+msgstr "Balance"
+
+msgid "余额支付系数"
+msgstr "Balance Payment Coefficient"
+
+msgid "作废优惠券"
+msgstr "Void Coupon"
+
+msgid "使用条件"
+msgstr "Usage Conditions"
+
+msgid "使用订单"
+msgstr "Usage Order"
+
+msgid "使用门槛"
+msgstr "Usage Threshold"
+
+msgid "信用分"
+msgstr "Credit Score"
+
+msgid "信用变动记录"
+msgstr "Credit Change Records"
+
+msgid "信用管理"
+msgstr "Credit Management"
+
+msgid "元"
+msgstr "¥"
+
+msgid "元/车位"
+msgstr "¥/Parking Space"
+
+msgid "充电价格系数"
+msgstr "Charging Price Coefficient"
+
+msgid "充电参数"
+msgstr "Charging Parameters"
+
+msgid "充电站ID"
+msgstr "Charging Station ID"
+
+msgid "充电站ID:"
+msgstr "Charging Station ID:"
+
+msgid "充电速度系数"
+msgstr "Charging Speed Coefficient"
+
+msgid "免费券"
+msgstr "Free Coupon"
+
+msgid "全部"
+msgstr "All"
+
+msgid "全部城市"
+msgstr "All Cities"
+
+msgid "全部显示"
+msgstr "Show All"
+
+msgid "公园绿地"
+msgstr "Parks and Green Spaces"
+
+msgid "公里/单位"
+msgstr "km/unit"
+
+msgid "关联充电站"
+msgstr "Associated Charging Station"
+
+msgid "关联用户"
+msgstr "Associated User"
+
+msgid "关联订单ID"
+msgstr "Associated Order ID"
+
+msgid "关联订单信息"
+msgstr "Associated Order Information"
+
+msgid "关联车辆"
+msgstr "Associated Vehicle"
+
+msgid "其他"
+msgstr "Other"
+
+msgid "内容"
+msgstr "Content"
+
+msgid "减分规则"
+msgstr "Point Deduction Rules"
+
+msgid "分值变动"
+msgstr "Score Change"
+
+msgid "分值范围"
+msgstr "Score Range"
+
+msgid "分配结果："
+msgstr "Assignment Result:"
+
+msgid "分配车辆"
+msgstr "Assign Vehicle"
+
+msgid "创建新通知"
+msgstr "Create New Notification"
+
+msgid "前往上车点"
+msgstr "Go to Pickup Point"
+
+msgid "前往充电"
+msgstr "Go to Charge"
+
+msgid "加分规则"
+msgstr "Point Addition Rules"
+
+msgid "包含的优惠券"
+msgstr "Included Coupons"
+
+msgid "北京市"
+msgstr "Beijing"
+
+msgid "匹配结果："
+msgstr "Match Result:"
+
+msgid "单行道"
+msgstr "One-way Street"
+
+msgid "南京市"
+msgstr "Nanjing"
+
+msgid "占比"
+msgstr "Proportion"
+
+msgid "历史古迹"
+msgstr "Historical Sites"
+
+msgid "原价"
+msgstr "Original Price"
+
+msgid "原价:"
+msgstr "Original Price:"
+
+msgid "参数设置"
+msgstr "Parameter Settings"
+
+msgid "变动分值"
+msgstr "Change Value"
+
+msgid "变动前分值"
+msgstr "Score Before Change"
+
+msgid "变动原因"
+msgstr "Reason for Change"
+
+msgid "变动后分值"
+msgstr "Score After Change"
+
+msgid "合作推广"
+msgstr "Partnership Promotion"
+
+msgid "名称:"
+msgstr "Name:"
+
+msgid "商业区域"
+msgstr "Commercial Area"
+
+msgid "地区分析"
+msgstr "Regional Analysis"
+
+msgid "地图缩放级别"
+msgstr "Map Zoom Level"
+
+msgid "坐标点"
+msgstr "Coordinate Point"
+
+msgid "城市"
+msgstr "City"
+
+msgid "城市:"
+msgstr "City:"
+
+msgid "城市价格系数"
+msgstr "City Price Coefficient"
+
+msgid "城市参数设置"
+msgstr "City Parameter Settings"
+
+msgid "堆叠图"
+msgstr "Stacked Chart"
+
+msgid "填写帮助"
+msgstr "Fill-in Help"
+
+msgid "多边形"
+msgstr "Polygon"
+
+msgid "天数"
+msgstr "Days"
+
+msgid "套餐价格"
+msgstr "Package Price"
+
+msgid "套餐名称"
+msgstr "Package Name"
+
+msgid "女"
+msgstr "Female"
+
+msgid "定期恢复"
+msgstr "Periodic Recovery"
+
+msgid "客服会话记录"
+msgstr "Customer Service Chat Records"
+
+msgid "已使用"
+msgstr "Used"
+
+msgid "已发送通知"
+msgstr "Notification Sent"
+
+msgid "已结束"
+msgstr "Ended"
+
+msgid "已结束订单"
+msgstr "Completed Orders"
+
+msgid "已读"
+msgstr "Read"
+
+msgid "已过期"
+msgstr "Expired"
+
+msgid "年轻运动型"
+msgstr "Young & Sporty"
+
+msgid "广州市"
+msgstr "Guangzhou"
+
+msgid "延长天数"
+msgstr "Extension Days"
+
+msgid "开始性能测试"
+msgstr "Start Performance Test"
+
+msgid "张"
+msgstr "pcs"
+
+msgid "当前价格:"
+msgstr "Current Price:"
+
+msgid "当日"
+msgstr "Current Day"
+
+msgid "待出行"
+msgstr "Pending Trip"
+
+msgid "待分配"
+msgstr "Pending Assignment"
+
+msgid "待分配订单"
+msgstr "Orders Pending Assignment"
+
+msgid "待支付"
+msgstr "Pending Payment"
+
+msgid "微信小程序"
+msgstr "WeChat Mini Program"
+
+msgid "微信支付系数"
+msgstr "WeChat Pay Coefficient"
+
+msgid "性别"
+msgstr "Gender"
+
+msgid "恢复规则"
+msgstr "Recovery Rules"
+
+msgid "成都市"
+msgstr "Chengdu"
+
+msgid "所在城市"
+msgstr "City"
+
+msgid "所有会话记录"
+msgstr "All Chat Records"
+
+msgid "所有城市"
+msgstr "All Cities"
+
+msgid "所有来源"
+msgstr "All Sources"
+
+msgid "所有用户"
+msgstr "All Users"
+
+msgid "手机应用"
+msgstr "Mobile App"
+
+msgid "折扣券"
+msgstr "Discount Coupon"
+
+msgid "折扣率:"
+msgstr "Discount Rate:"
+
+msgid "折线图"
+msgstr "Line Chart"
+
+msgid "指定用户"
+msgstr "Specified User"
+
+msgid "排序方式"
+msgstr "Sort By"
+
+msgid "接收对象"
+msgstr "Recipients"
+
+msgid "控制台"
+msgstr "Console"
+
+msgid "操作"
+msgstr "Action"
+
+msgid "操作人"
+msgstr "Operator"
+
+msgid "支付宝系数"
+msgstr "Alipay Coefficient"
+
+msgid "支付方式分析"
+msgstr "Payment Method Analysis"
+
+msgid "放大"
+msgstr "Zoom In"
+
+msgid "政府部门"
+msgstr "Government Department"
+
+msgid "教育机构"
+msgstr "Educational Institution"
+
+msgid "文化娱乐"
+msgstr "Culture & Entertainment"
+
+msgid "施工区域"
+msgstr "Construction Area"
+
+msgid "日志ID"
+msgstr "Log ID"
+
+msgid "日志信息"
+msgstr "Log Information"
+
+msgid "日志内容"
+msgstr "Log Content"
+
+msgid "日志内容:"
+msgstr "Log Content:"
+
+msgid "昨日"
+msgstr "Yesterday"
+
+msgid "显示充电站"
+msgstr "Show Charging Stations"
+
+msgid "显示地标"
+msgstr "Show Landmarks"
+
+msgid "显示地标名称"
+msgstr "Show Landmark Names"
+
+msgid "显示总数"
+msgstr "Show Total"
+
+msgid "显示车辆"
+msgstr "Show Vehicles"
+
+msgid "显示颜色"
+msgstr "Display Color"
+
+msgid "景点名胜"
+msgstr "Tourist Attractions"
+
+msgid "智能匹配车辆"
+msgstr "Smart Vehicle Matching"
+
+msgid "智能客服管理"
+msgstr "AI Customer Service Management"
+
+msgid "暂无聊天记录"
+msgstr "No Chat Records"
+
+msgid "最低余额"
+msgstr "Minimum Balance"
+
+msgid "最低信用分"
+msgstr "Minimum Credit Score"
+
+msgid "最低分值"
+msgstr "Minimum Score"
+
+msgid "最低评分"
+msgstr "Minimum Rating"
+
+msgid "最低距离"
+msgstr "Minimum Distance"
+
+msgid "最后更新:"
+msgstr "Last Updated:"
+
+msgid "最多订单数"
+msgstr "Maximum Orders"
+
+msgid "最少订单数"
+msgstr "Minimum Orders"
+
+msgid "最近180天"
+msgstr "Last 180 Days"
+
+msgid "最近3天"
+msgstr "Last 3 Days"
+
+msgid "最近90天"
+msgstr "Last 90 Days"
+
+msgid "最近一年"
+msgstr "Last Year"
+
+msgid "最高余额"
+msgstr "Maximum Balance"
+
+msgid "最高信用分"
+msgstr "Maximum Credit Score"
+
+msgid "最高分值"
+msgstr "Maximum Score"
+
+msgid "最高峰时段"
+msgstr "Peak Hours"
+
+msgid "最高评分"
+msgstr "Maximum Rating"
+
+msgid "最高距离"
+msgstr "Maximum Distance"
+
+msgid "有效期"
+msgstr "Validity Period"
+
+msgid "有效期(天)"
+msgstr "Validity Period (Days)"
+
+msgid "有效期:"
+msgstr "Validity Period:"
+
+msgid "有效期至"
+msgstr "Valid Until"
+
+msgid "未使用"
+msgstr "Unused"
+
+msgid "未设置"
+msgstr "Not Set"
+
+msgid "未读"
+msgstr "Unread"
+
+msgid "权益说明"
+msgstr "Benefits Description"
+
+msgid "来源"
+msgstr "Source"
+
+msgid "来源套餐信息"
+msgstr "Source Package Information"
+
+msgid "杭州市"
+msgstr "Hangzhou"
+
+msgid "柱状图"
+msgstr "Bar Chart"
+
+msgid "标准差"
+msgstr "Standard Deviation"
+
+msgid "标题"
+msgstr "Title"
+
+msgid "格式说明："
+msgstr "Format Description:"
+
+msgid "次数从多到少"
+msgstr "Count: High to Low"
+
+msgid "次数从少到多"
+msgstr "Count: Low to High"
+
+msgid "武汉市"
+msgstr "Wuhan"
+
+msgid "沈阳市"
+msgstr "Shenyang"
+
+msgid "注销"
+msgstr "Logout"
+
+msgid "测试分配算法"
+msgstr "Test Assignment Algorithm"
+
+msgid "消息内容"
+msgstr "Message Content"
+
+msgid "深圳市"
+msgstr "Shenzhen"
+
+msgid "清除"
+msgstr "Clear"
+
+msgid "满减券"
+msgstr "Full Reduction Coupon"
+
+msgid "生成订单"
+msgstr "Generate Order"
+
+msgid "用户"
+msgstr "User"
+
+msgid "用户:"
+msgstr "User:"
+
+msgid "用户ID"
+msgstr "User ID"
+
+msgid "用户ID:"
+msgstr "User ID:"
+
+msgid "用户标签"
+msgstr "User Tags"
+
+msgid "用户消费分布"
+msgstr "User Consumption Distribution"
+
+msgid "用户消费分析"
+msgstr "User Consumption Analysis"
+
+msgid "用户聊天历史"
+msgstr "User Chat History"
+
+msgid "用户评价管理"
+msgstr "User Review Management"
+
+msgid "用户详细信息"
+msgstr "User Details"
+
+msgid "电池容量系数"
+msgstr "Battery Capacity Coefficient"
+
+msgid "男"
+msgstr "Male"
+
+msgid "立减券"
+msgstr "Instant Discount Coupon"
+
+msgid "笔数"
+msgstr "Count"
+
+msgid "等待充电"
+msgstr "Waiting for Charge"
+
+msgid "等级名称"
+msgstr "Level Name"
+
+msgid "等级权益"
+msgstr "Level Benefits"
+
+msgid "算法参数配置"
+msgstr "Algorithm Parameter Configuration"
+
+msgid "算法工作原理"
+msgstr "Algorithm Working Principle"
+
+msgid "算法性能测试"
+msgstr "Algorithm Performance Test"
+
+msgid "系统"
+msgstr "System"
+
+msgid "系统奖励"
+msgstr "System Reward"
+
+msgid "系统操作"
+msgstr "System Operation"
+
+msgid "累计公里"
+msgstr "Total Mileage"
+
+msgid "纬度"
+msgstr "Latitude"
+
+msgid "线宽:"
+msgstr "Line Width:"
+
+msgid "线段"
+msgstr "Line Segment"
+
+msgid "终点"
+msgstr "End Point"
+
+msgid "终点:"
+msgstr "End Point:"
+
+msgid "经度"
+msgstr "Longitude"
+
+msgid "绘制障碍物"
+msgstr "Draw Obstacle"
+
+msgid "维护系数"
+msgstr "Maintenance Coefficient"
+
+msgid "维护记录"
+msgstr "Maintenance Record"
+
+msgid "缩小"
+msgstr "Zoom Out"
+
+msgid "缩放设置"
+msgstr "Zoom Settings"
+
+msgid "网站"
+msgstr "Website"
+
+msgid "聊天记录"
+msgstr "Chat Records"
+
+msgid "能耗系数"
+msgstr "Energy Consumption Coefficient"
+
+msgid "自定义"
+msgstr "Custom"
+
+msgid "至"
+msgstr "to"
+
+msgid "西安市"
+msgstr "Xi'an"
+
+msgid "规则名称"
+msgstr "Rule Name"
+
+msgid "触发事件"
+msgstr "Trigger Event"
+
+msgid "警告"
+msgstr "Warning"
+
+msgid "计算中..."
+msgstr "Calculating..."
+
+msgid "订单"
+msgstr "Order"
+
+msgid "订单ID"
+msgstr "Order ID"
+
+msgid "订单ID:"
+msgstr "Order ID:"
+
+msgid "订单ID列表"
+msgstr "Order ID List"
+
+msgid "订单价格系数"
+msgstr "Order Price Coefficient"
+
+msgid "订单信息"
+msgstr "Order Information"
+
+msgid "订单参数设置"
+msgstr "Order Parameter Settings"
+
+msgid "订单号"
+msgstr "Order Number"
+
+msgid "订单完成"
+msgstr "Order Completed"
+
+msgid "订单数"
+msgstr "Order Count"
+
+msgid "记录ID"
+msgstr "Record ID"
+
+msgid "评价内容"
+msgstr "Review Content"
+
+msgid "评分"
+msgstr "Rating"
+
+msgid "财务分析"
+msgstr "Financial Analysis"
+
+msgid "财务详细分析"
+msgstr "Detailed Financial Analysis"
+
+msgid "购买用户"
+msgstr "Purchasing User"
+
+msgid "起步价（元）"
+msgstr "Base Fare (¥)"
+
+msgid "起点"
+msgstr "Starting Point"
+
+msgid "起点:"
+msgstr "Starting Point:"
+
+msgid "跳至"
+msgstr "Jump to"
+
+msgid "跳转"
+msgstr "Jump"
+
+msgid "身份证号"
+msgstr "ID Card Number"
+
+msgid "车辆"
+msgstr "Vehicle"
+
+msgid "车辆:"
+msgstr "Vehicle:"
+
+msgid "车辆ID"
+msgstr "Vehicle ID"
+
+msgid "车辆ID:"
+msgstr "Vehicle ID:"
+
+msgid "车辆信息"
+msgstr "Vehicle Information"
+
+msgid "车辆列表"
+msgstr "Vehicle List"
+
+msgid "车辆参数设置"
+msgstr "Vehicle Parameter Settings"
+
+msgid "车辆地图视图"
+msgstr "Vehicle Map View"
+
+msgid "车辆型号"
+msgstr "Vehicle Model"
+
+msgid "车辆操作日志"
+msgstr "Vehicle Operation Logs"
+
+msgid "车辆救援"
+msgstr "Vehicle Rescue"
+
+msgid "车辆维护参数"
+msgstr "Vehicle Maintenance Parameters"
+
+msgid "车辆详细信息"
+msgstr "Vehicle Details"
+
+msgid "车辆财务分析"
+msgstr "Vehicle Financial Analysis"
+
+msgid "车辆购置系数"
+msgstr "Vehicle Purchase Coefficient"
+
+msgid "车辆运行参数"
+msgstr "Vehicle Operating Parameters"
+
+msgid "运营城市"
+msgstr "Operating City"
+
+msgid "违规行为"
+msgstr "Violation"
+
+msgid "迭代"
+msgstr "Iteration"
+
+msgid "迭代次数"
+msgstr "Iteration Count"
+
+msgid "选择城市"
+msgstr "Select City"
+
+msgid "选择用户"
+msgstr "Select User"
+
+msgid "选择颜色"
+msgstr "Select Color"
+
+msgid "通知"
+msgstr "Notification"
+
+msgid "速度"
+msgstr "Speed"
+
+msgid "速度系数"
+msgstr "Speed Coefficient"
+
+msgid "重庆市"
+msgstr "Chongqing"
+
+msgid "限制区域"
+msgstr "Restricted Area"
+
+msgid "限制措施"
+msgstr "Restriction Measures"
+
+msgid "限速区域"
+msgstr "Speed Limit Zone"
+
+msgid "障碍墙"
+msgstr "Obstacle Wall"
+
+msgid "障碍物信息"
+msgstr "Obstacle Information"
+
+msgid "障碍物名称"
+msgstr "Obstacle Name"
+
+msgid "面值"
+msgstr "Face Value"
+
+msgid "顶级电动跑车"
+msgstr "Top-tier Electric Sports Car"
+
+msgid "颜色:"
+msgstr "Color:"
+
+msgid "高端豪华型"
+msgstr "High-end Luxury"
+
+msgid "-- 请选择支出类型 --"
+msgstr "-- Please Select Expense Type --"
+
+msgid "Alpha系列车型"
+msgstr "Alpha Series Models"
+
+msgid "Neon系列车型"
+msgstr "Neon Series Models"
+
+msgid "Nova系列车型"
+msgstr "Nova Series Models"
+
+msgid "上次维护日期"
+msgstr "Last Maintenance Date"
+
+msgid "上次维护日期(开始)"
+msgstr "Last Maintenance Date (Start)"
+
+msgid "上次维护日期(结束)"
+msgstr "Last Maintenance Date (End)"
+
+msgid "下单时间"
+msgstr "Order Time"
+
+msgid "下单时间(开始)"
+msgstr "Order Time (Start)"
+
+msgid "下单时间(结束)"
+msgstr "Order Time (End)"
+
+msgid "下单时间:"
+msgstr "Order Time:"
+
+msgid "乘客等待时间（秒）"
+msgstr "Passenger Wait Time (seconds)"
+
+msgid "优惠券类型"
+msgstr "Coupon Type"
+
+msgid "会话数量"
+msgstr "Session Count"
+
+msgid "位置数据库更新频率（秒）"
+msgstr "Location Database Update Frequency (seconds)"
+
+msgid "位置更新"
+msgstr "Location Update"
+
+msgid "位置移动频率（秒）"
+msgstr "Location Movement Frequency (seconds)"
+
+msgid "低电量状态更新频率（秒）"
+msgstr "Low Battery Status Update Frequency (seconds)"
+
+msgid "使用时间"
+msgstr "Usage Time"
+
+msgid "入门级豪华车型"
+msgstr "Entry-level Luxury Model"
+
+msgid "全部状态"
+msgstr "All Status"
+
+msgid "几何形状类型"
+msgstr "Geometry Type"
+
+msgid "出生日期"
+msgstr "Date of Birth"
+
+msgid "创建时间(开始)"
+msgstr "Created Time (Start)"
+
+msgid "创建时间(结束)"
+msgstr "Created Time (End)"
+
+msgid "创建时间:"
+msgstr "Created Time:"
+
+msgid "创建时间（开始）"
+msgstr "Created Time (Start)"
+
+msgid "创建时间（结束）"
+msgstr "Created Time (End)"
+
+msgid "到达时间(开始)"
+msgstr "Arrival Time (Start)"
+
+msgid "到达时间(结束)"
+msgstr "Arrival Time (End)"
+
+msgid "发送时间"
+msgstr "Send Time"
+
+msgid "变动类型"
+msgstr "Change Type"
+
+msgid "基础车型价格 × 城市车辆购置价格系数"
+msgstr "Base Model Price × City Vehicle Purchase Price Coefficient"
+
+msgid "套餐描述"
+msgstr "Package Description"
+
+msgid "密码"
+msgstr "Password"
+
+msgid "已售数量:"
+msgstr "Sold Quantity:"
+
+msgid "当前状态"
+msgstr "Current Status"
+
+msgid "当月暂无订单金额数据"
+msgstr "No order amount data for current month"
+
+msgid "所有变动类型"
+msgstr "All Change Types"
+
+msgid "所有类型"
+msgstr "All Types"
+
+msgid "折扣类型"
+msgstr "Discount Type"
+
+msgid "按车型名称"
+msgstr "By Model Name"
+
+msgid "描述"
+msgstr "Description"
+
+msgid "描述:"
+msgstr "Description:"
+
+msgid "描述包含"
+msgstr "Description Contains"
+
+msgid "支出类型"
+msgstr "Expense Type"
+
+msgid "收入金额"
+msgstr "Income Amount"
+
+msgid "日志类型"
+msgstr "Log Type"
+
+msgid "日期"
+msgstr "Date"
+
+msgid "日期:"
+msgstr "Date:"
+
+msgid "日期范围"
+msgstr "Date Range"
+
+msgid "时间"
+msgstr "Time"
+
+msgid "最大金额"
+msgstr "Maximum Amount"
+
+msgid "最小金额"
+msgstr "Minimum Amount"
+
+msgid "最近会话时间"
+msgstr "Last Session Time"
+
+msgid "测试类型"
+msgstr "Test Type"
+
+msgid "消息类型"
+msgstr "Message Type"
+
+msgid "状态"
+msgstr "Status"
+
+msgid "生产日期"
+msgstr "Production Date"
+
+msgid "生产日期(开始)"
+msgstr "Production Date (Start)"
+
+msgid "生产日期(结束)"
+msgstr "Production Date (End)"
+
+msgid "电量"
+msgstr "Battery Level"
+
+msgid "电量低阈值（%%）"
+msgstr "Low Battery Threshold (%%)"
+
+msgid "电量变化"
+msgstr "Battery Change"
+
+msgid "电量更新频率（秒）"
+msgstr "Battery Update Frequency (seconds)"
+
+msgid "电量消耗速率（%%/秒）"
+msgstr "Battery Consumption Rate (%%/second)"
+
+msgid "真实姓名"
+msgstr "Real Name"
+
+msgid "管理平台用户信息、状态和权限"
+msgstr "Manage Platform User Information, Status and Permissions"
+
+msgid "类型"
+msgstr "Type"
+
+msgid "类型:"
+msgstr "Type:"
+
+msgid "类型名称"
+msgstr "Type Name"
+
+msgid "经济实惠的家用车型"
+msgstr "Economical Family Car"
+
+msgid "获得时间"
+msgstr "Obtained Time"
+
+msgid "规则描述"
+msgstr "Rule Description"
+
+msgid "订单数量"
+msgstr "Order Quantity"
+
+msgid "评价时间"
+msgstr "Review Time"
+
+msgid "请选择优惠券类型"
+msgstr "Please Select Coupon Type"
+
+msgid "请选择车型"
+msgstr "Please Select Model"
+
+msgid "车型"
+msgstr "Vehicle Model"
+
+msgid "车型价格设置"
+msgstr "Model Price Settings"
+
+msgid "车型系列详细参数"
+msgstr "Model Series Detailed Parameters"
+
+msgid "车牌号"
+msgstr "License Plate"
+
+msgid "车牌号:"
+msgstr "License Plate:"
+
+msgid "车辆位置跟踪"
+msgstr "Vehicle Location Tracking"
+
+msgid "车辆状态图例:"
+msgstr "Vehicle Status Legend:"
+
+msgid "选择类型"
+msgstr "Select Type"
+
+msgid "金额"
+msgstr "Amount"
+
+msgid "金额:"
+msgstr "Amount:"
+
+msgid "阅读时间"
+msgstr "Read Time"
+
+msgid "障碍物类型"
+msgstr "Obstacle Type"
+
+msgid "面向科技爱好者的智能豪华车型"
+msgstr "Smart Luxury Model for Tech Enthusiasts"
+
+# Batch added translations
+
+msgid "(基础成本 + 充电站车位 × 可变成本) × 城市价格系数"
+msgstr "(Base Cost + Charging Station Spaces × Variable Cost) × City Price Coefficient"
+
+msgid "-- 不关联充电站 --"
+msgstr "-- No Associated Charging Station --"
+
+msgid "-- 不关联用户 --"
+msgstr "-- No Associated User --"
+
+msgid "-- 不关联车辆 --"
+msgstr "-- No Associated Vehicle --"
+
+msgid "-- 全部 --"
+msgstr "-- All --"
+
+msgid "<div style='text-align:left'>单位里程收益分析：展示不同行程距离下的单位里程收益分布情况。<br/>计算方法：订单总金额/行程距离(元/公里)。<br/>业务价值：指导优化定价模型。</div>"
+msgstr "<div style='text-align:left'>Revenue per Unit Distance Analysis: Shows the distribution of revenue per unit distance for different trip distances.<br/>Calculation: Total Order Amount / Trip Distance (¥/km).<br/>Business Value: Guide pricing model optimization.</div>"
+
+msgid "<div style='text-align:left'>展示24小时内不同时段的收入情况。<br/>数据来源：按小时分组的订单收入。<br/>统计口径：统计所选时间范围内各小时段的平均收入。</div>"
+msgstr "<div style='text-align:left'>Shows revenue for different time periods within 24 hours.<br/>Data Source: Order revenue grouped by hour.<br/>Statistics: Average revenue for each hour within the selected time range.</div>"
+
+msgid "<div style='text-align:left'>展示不同付款方式的使用情况。<br/>数据来源：按支付渠道分类的订单金额。<br/>统计范围：包括微信支付、支付宝、余额支付等渠道的累计金额。</div>"
+msgstr "<div style='text-align:left'>Shows usage of different payment methods.<br/>Data Source: Order amounts classified by payment channel.<br/>Statistics: Cumulative amounts for channels including WeChat Pay, Alipay, Balance Payment, etc.</div>"
+
+msgid "<div style='text-align:left'>展示不同收入来源对总收入的贡献情况。<br/>数据来源：按收入来源分类的收入记录。<br/>计算方式：特定收入来源占总收入的百分比。</div>"
+msgstr "<div style='text-align:left'>Shows contribution of different income sources to total revenue.<br/>Data Source: Income records classified by source.<br/>Calculation: Percentage of specific income source to total revenue.</div>"
+
+msgid "<div style='text-align:left'>展示不同类别支出所占总支出的比例。<br/>数据来源：按支出类别分组的金额统计。<br/>计算方法：特定类别支出金额/总支出金额。</div>"
+msgstr "<div style='text-align:left'>Shows proportion of different expense categories to total expenses.<br/>Data Source: Amount statistics grouped by expense category.<br/>Calculation: Specific category expense amount / Total expense amount.</div>"
+
+msgid "<div style='text-align:left'>展示不同类型支出随时间的变化情况。<br/>数据来源：按月份和支出类型汇总的支出记录。<br/>统计维度：横轴为时间（月份），纵轴为不同类型支出金额。</div>"
+msgstr "<div style='text-align:left'>Shows changes in different types of expenses over time.<br/>Data Source: Expense records summarized by month and expense type.<br/>Statistics: X-axis is time (month), Y-axis is expense amount by type.</div>"
+
+msgid "<div style='text-align:left'>展示不同类型收入来源的占比分布。<br/>数据来源：按收入类型分类统计的金额。<br/>计算方式：各类型收入金额占总收入的百分比。</div>"
+msgstr "<div style='text-align:left'>Shows distribution of different income source types.<br/>Data Source: Amounts classified by income type.<br/>Calculation: Percentage of each income type to total revenue.</div>"
+
+msgid "<div style='text-align:left'>展示利润率随时间的变化情况。<br/>数据来源：各月份的收入和支出记录。<br/>计算方式：利润率 = (总收入 - 总支出) / 总收入 × 100%%。</div>"
+msgstr "<div style='text-align:left'>Shows profit margin changes over time.<br/>Data Source: Monthly income and expense records.<br/>Calculation: Profit Margin = (Total Revenue - Total Expenses) / Total Revenue × 100%%.</div>"
+
+msgid "<div style='text-align:left'>展示各车辆产生的维护支出情况。<br/>数据来源：按车辆ID分组的维护支出记录。<br/>统计范围：包括保养、维修、配件更换等所有维护相关支出。</div>"
+msgstr "<div style='text-align:left'>Shows maintenance expenses by vehicle.<br/>Data Source: Maintenance expense records grouped by vehicle ID.<br/>Statistics: Includes all maintenance-related expenses such as servicing, repairs, parts replacement, etc.</div>"
+
+msgid "<div style='text-align:left'>展示总收入、总支出和净利润之间的关系。<br/>数据来源：所选时间范围内的收入和支出记录。<br/>计算方式：净利润 = 总收入 - 总支出。</div>"
+msgstr "<div style='text-align:left'>Shows relationship between total revenue, total expenses, and net profit.<br/>Data Source: Income and expense records within selected time range.<br/>Calculation: Net Profit = Total Revenue - Total Expenses.</div>"
+
+msgid "<div style='text-align:left'>展示所选时间区间内每日支出金额的变化趋势。<br/>数据来源：每日支出记录的累计金额。<br/>统计周期：所选时间范围内的每一天。</div>"
+msgstr "<div style='text-align:left'>Shows daily expense amount trends within selected time period.<br/>Data Source: Cumulative daily expense amounts.<br/>Statistics Period: Each day within the selected time range.</div>"
+
+msgid "<div style='text-align:left'>展示每日支出的详细记录。<br/>数据源：按日期汇总的支出记录。<br/>包含信息：日期、笔数、金额、占总支出比例。</div>"
+msgstr "<div style='text-align:left'>Shows detailed daily expense records.<br/>Data Source: Expense records summarized by date.<br/>Information: Date, count, amount, percentage of total expenses.</div>"
+
+msgid "<div style='text-align:left'>展示每日收入的详细数据。<br/>包含信息：日期、订单数、收入金额、环比变化。<br/>环比变化：与前一日相比的收入变化百分比。</div>"
+msgstr "<div style='text-align:left'>Shows detailed daily revenue data.<br/>Information: Date, order count, revenue amount, day-over-day change.<br/>Day-over-day Change: Revenue change percentage compared to previous day.</div>"
+
+msgid "<div style='text-align:left'>展示特定时间段内的日收入变化情况。<br/>数据来源：已完成订单的收入总和。<br/>参考区间：所选日期范围内的每日数据。</div>"
+msgstr "<div style='text-align:left'>Shows daily revenue changes within specific time period.<br/>Data Source: Total revenue from completed orders.<br/>Reference Period: Daily data within selected date range.</div>"
+
+msgid "<div style='text-align:left'>支付方式分析：展示用户选择不同支付方式的金额分布和数量分布。</div>"
+msgstr "<div style='text-align:left'>Payment Method Analysis: Shows amount and quantity distribution of different payment methods chosen by users.</div>"
+
+msgid "<div style='text-align:left'>汇总展示当前选定时间区间内的总收入及相关统计数据。<br/>总收入：所选日期范围内所有收入的累计总和。<br/>日均收入：总收入除以天数。<br/>同比增长：与上一个相同长度时间段的收入比较。</div>"
+msgstr "<div style='text-align:left'>Summary of total revenue and related statistics for currently selected time period.<br/>Total Revenue: Cumulative sum of all revenue within selected date range.<br/>Daily Average Revenue: Total revenue divided by number of days.<br/>Year-over-Year Growth: Revenue comparison with previous period of same length.</div>"
+
+msgid "<div style='text-align:left'>用户充值与消费关联：分析用户充值金额与消费金额之间的相关性。<br/>统计方式：横轴为用户充值金额，纵轴为用户消费金额，气泡大小代表用户数量。</div>"
+msgstr "<div style='text-align:left'>User Recharge and Consumption Correlation: Analyzes correlation between user recharge amount and consumption amount.<br/>Statistics: X-axis is user recharge amount, Y-axis is user consumption amount, bubble size represents number of users.</div>"
+
+msgid "<div style='text-align:left'>用户消费分布：展示不同消费区间的用户数量分布情况。<br/>统计范围：包含用户通过微信支付、支付宝和余额支付的所有消费金额。</div>"
+msgstr "<div style='text-align:left'>User Consumption Distribution: Shows distribution of users across different consumption ranges.<br/>Statistics: Includes all consumption amounts via WeChat Pay, Alipay, and Balance Payment.</div>"
+
+msgid "<div style='text-align:left'>边际收益(MR)：单位产出增加所带来的总收入增量。<br/>计算方式：总收入变化量/产量变化量。<br/><br/>边际成本(MC)：企业增加一单位产量所引起的总成本的增量。<br/>计算方式：总成本变化量/产量变化量。</div>"
+msgstr "<div style='text-align:left'>Marginal Revenue (MR): Increment in total revenue from unit output increase.<br/>Calculation: Change in Total Revenue / Change in Output.<br/><br/>Marginal Cost (MC): Increment in total cost from one unit output increase.<br/>Calculation: Change in Total Cost / Change in Output.</div>"
+
+msgid "Alpha Nexus是面向科技爱好者的智能豪华车型，集成了最新自动驾驶辅助系统和增强现实导航。采用石墨烯增强复合电极技术，电池容量大且寿命长，实现超长续航里程和强大性能。"
+msgstr "Alpha Nexus is a smart luxury model for tech enthusiasts, integrating the latest autonomous driving assistance system and augmented reality navigation. Features graphene-enhanced composite electrode technology with large battery capacity and long lifespan, achieving ultra-long range and powerful performance."
+
+msgid "Alpha Nexus（元）"
+msgstr "Alpha Nexus (¥)"
+
+msgid "Alpha Voyager 详情与参数设置"
+msgstr "Alpha Voyager Details & Parameter Settings"
+
+msgid "Alpha Voyager是我们的顶级豪华SUV，为追求极致体验的商务精英打造。搭载双层大容量智能电池阵列，提供同级最佳的续航能力，即使在开启全车豪华设备的情况下仍能保持出色续航表现。"
+msgstr "Alpha Voyager is our top luxury SUV, crafted for business elites seeking ultimate experience. Equipped with dual-layer high-capacity smart battery array, providing best-in-class range, maintaining excellent performance even with all luxury features activated."
+
+msgid "Alpha Voyager（元）"
+msgstr "Alpha Voyager (¥)"
+
+msgid "Alpha X1是我们的入门级豪华车型，结合了卓越性能与舒适体验，定位于追求品质的年轻精英客户。采用碳纤维车身和高强度铝合金底盘，搭载高密度智能电池组，实现长续航与快速充电。"
+msgstr "Alpha X1 is our entry-level luxury model, combining excellent performance with comfortable experience, positioned for young elite customers pursuing quality. Features carbon fiber body and high-strength aluminum alloy chassis, equipped with high-density smart battery pack for long range and fast charging."
+
+msgid "Alpha X1（元）"
+msgstr "Alpha X1 (¥)"
+
+msgid "Alpha系列"
+msgstr "Alpha Series"
+
+msgid "Alpha系列是我们的旗舰高端系列，专注于豪华体验、卓越性能和尖端技术，价格较高但提供极致用户体验。"
+msgstr "Alpha Series is our flagship high-end series, focusing on luxury experience, excellent performance, and cutting-edge technology, with higher prices but providing ultimate user experience."
+
+msgid "Neon 500是面向年轻精英的运动轿跑，标志性的流线型设计与双色车身彰显个性。采用高输出密度性能电池，搭载赛车技术加持的散热系统，确保持续高功率输出不衰减。"
+msgstr "Neon 500 is a sporty coupe for young elites, with iconic streamlined design and two-tone body showcasing personality. Features high output density performance battery with racing technology-enhanced cooling system, ensuring sustained high power output without degradation."
+
+msgid "Neon 500（元）"
+msgstr "Neon 500 (¥)"
+
+msgid "Neon Zero是顶级电动跑车，零百加速仅需3.5秒，为速度爱好者打造。采用赛车级固态电池技术，具备超高功率密度与充电速度，提供极致性能表现，是街道上的赛道利器。"
+msgstr "Neon Zero is a top-tier electric sports car with 0-100km/h in just 3.5 seconds, built for speed enthusiasts. Features racing-grade solid-state battery technology with ultra-high power density and charging speed, delivering ultimate performance, a track weapon for the streets."
+
+msgid "Neon Zero（元）"
+msgstr "Neon Zero (¥)"
+
+msgid "Neon系列面向追求个性与驾驶乐趣的年轻用户，强调动感设计、驾驶体验和科技感，价格中高但提供差异化体验。"
+msgstr "Neon Series targets young users seeking personality and driving pleasure, emphasizing dynamic design, driving experience, and tech feel, with mid-to-high prices but offering differentiated experience."
+
+msgid "Nova Pulse是面向年轻家庭的多功能中端SUV，兼顾空间与动力。配备可扩展模块化电池系统，可选装增程电池包，灵活适应不同场景，是家庭出行的理想选择。"
+msgstr "Nova Pulse is a versatile mid-range SUV for young families, balancing space and power. Equipped with expandable modular battery system with optional range-extending battery pack, flexibly adapting to different scenarios, ideal choice for family travel."
+
+msgid "Nova Pulse（元）"
+msgstr "Nova Pulse (¥)"
+
+msgid "Nova Quantum是面向高效商务人士的智能中端轿车，强调驾驶辅助与工作便利性。采用优化的三元锂电池组，实现均衡的容量与充电性能，配备智能电池管理系统。"
+msgstr "Nova Quantum is a smart mid-range sedan for efficient business professionals, emphasizing driving assistance and work convenience. Features optimized ternary lithium battery pack achieving balanced capacity and charging performance, equipped with intelligent battery management system."
+
+msgid "Nova Quantum（元）"
+msgstr "Nova Quantum (¥)"
+
+msgid "Nova S1是经济实惠的家用车型，专为城市通勤设计。采用紧凑型高效磷酸铁锂电池，重量轻、寿命长，安全性高，虽然容量不及高端车型，但满足日常城市通勤需求。"
+msgstr "Nova S1 is an economical family car designed for city commuting. Features compact high-efficiency lithium iron phosphate battery, lightweight, long lifespan, high safety, though capacity is less than high-end models, it meets daily city commuting needs."
+
+msgid "Nova S1（元）"
+msgstr "Nova S1 (¥)"
+
+msgid "Nova系列是我们的主力市场产品，追求性价比、实用性和可靠性，价格适中，满足大多数家庭和个人用户需求。"
+msgstr "Nova Series is our mainstream market product, pursuing cost-effectiveness, practicality, and reliability, with moderate prices, meeting the needs of most families and individual users."
+
+msgid "与去年同期相比的支出增长百分比，正值表示增加，负值表示减少，用于评估支出控制情况和趋势变化。"
+msgstr "Year-over-year expense growth percentage, positive values indicate increase, negative values indicate decrease, used to evaluate expense control and trend changes."
+
+msgid "中心点坐标使用经度、纬度的格式（例如：123.429092, 41.796768）"
+msgstr "Center point coordinates use longitude, latitude format (e.g., 123.429092, 41.796768)"
+
+msgid "优惠券基本信息"
+msgstr "Coupon Basic Information"
+
+msgid "优惠券套餐列表"
+msgstr "Coupon Package List"
+
+msgid "优惠券种类列表"
+msgstr "Coupon Type List"
+
+msgid "使用AI智能评分机制（多维度优化）"
+msgstr "Use AI Smart Scoring Mechanism (Multi-dimensional Optimization)"
+
+msgid "使用真实地图API展示车辆位置，支持多个城市切换"
+msgstr "Use real map API to display vehicle locations, supports multiple city switching"
+
+msgid "使用门槛(元)"
+msgstr "Usage Threshold (¥)"
+
+msgid "信用等级规则列表"
+msgstr "Credit Level Rules List"
+
+msgid "充电单价（元/%%）"
+msgstr "Charging Unit Price (¥/%%)"
+
+msgid "充电站价格系数"
+msgstr "Charging Station Price Coefficient"
+
+msgid "充电站参数设置"
+msgstr "Charging Station Parameter Settings"
+
+msgid "充电站调度参数"
+msgstr "Charging Station Dispatch Parameters"
+
+msgid "充电站购置价格设置"
+msgstr "Charging Station Purchase Price Settings"
+
+msgid "充电速率（%%/秒）"
+msgstr "Charging Rate (%%/second)"
+
+msgid "入门级豪华车型，结合了卓越性能与舒适体验，定位于追求品质的年轻精英客户。"
+msgstr "Entry-level luxury model combining excellent performance with comfortable experience, positioned for young elite customers pursuing quality."
+
+msgid "分析平台运营数据，挖掘业务洞察，提供决策支持"
+msgstr "Analyze platform operational data, uncover business insights, provide decision support"
+
+msgid "分析用户消费行为和模式"
+msgstr "Analyze user consumption behavior and patterns"
+
+msgid "加载城市参数..."
+msgstr "Loading city parameters..."
+
+msgid "加载城市地图参数..."
+msgstr "Loading city map parameters..."
+
+msgid "加载系统参数..."
+msgstr "Loading system parameters..."
+
+msgid "单位: 次/车"
+msgstr "Unit: times/vehicle"
+
+msgid "单位里程收益分析"
+msgstr "Revenue per Unit Distance Analysis"
+
+msgid "可视化分析用户数据，了解用户行为和趋势"
+msgstr "Visualize and analyze user data, understand user behavior and trends"
+
+msgid "向用户发送通知消息，支持单个用户或全体用户"
+msgstr "Send notification messages to users, supports individual or all users"
+
+msgid "在地图上管理障碍物，绘制障碍墙、限制区域等"
+msgstr "Manage obstacles on map, draw obstacle walls, restricted areas, etc."
+
+msgid "城市中心点设置"
+msgstr "City Center Point Settings"
+
+msgid "城市地图参数设置"
+msgstr "City Map Parameter Settings"
+
+msgid "城市物价系数设置"
+msgstr "City Price Coefficient Settings"
+
+msgid "多个标签请用逗号分隔，如：日常通勤,高频用户,价格敏感"
+msgstr "Separate multiple tags with commas, e.g.: daily commute, frequent user, price sensitive"
+
+msgid "多边形格式说明："
+msgstr "Polygon Format Description:"
+
+msgid "延长优惠券有效期"
+msgstr "Extend Coupon Validity Period"
+
+msgid "当前月份内新注册的用户数量，环比增长表示与上个月相比的增长百分比"
+msgstr "Number of newly registered users in current month, month-over-month growth represents growth percentage compared to last month"
+
+msgid "当月暂无订单数据"
+msgstr "No order data for current month"
+
+msgid "性能测试结果："
+msgstr "Performance Test Results:"
+
+msgid "按总支出除以天数计算得出的平均每日支出金额，用于分析日常运营成本水平。"
+msgstr "Average daily expense amount calculated by dividing total expenses by number of days, used to analyze daily operational cost level."
+
+msgid "支付方式偏好系数设置"
+msgstr "Payment Method Preference Coefficient Settings"
+
+msgid "显示待分配订单"
+msgstr "Show Pending Assignment Orders"
+
+msgid "显示所选时间范围内的总支出金额，包含所有支出项目如运营成本、维护费用等。"
+msgstr "Shows total expense amount within selected time range, including all expense items such as operating costs, maintenance fees, etc."
+
+msgid "智能订单分配算法"
+msgstr "Smart Order Assignment Algorithm"
+
+msgid "智能车辆匹配算法"
+msgstr "Smart Vehicle Matching Algorithm"
+
+msgid "暂无待分配订单数据"
+msgstr "No pending assignment order data"
+
+msgid "正在加载充电站数据..."
+msgstr "Loading charging station data..."
+
+msgid "正在加载车辆数据..."
+msgstr "Loading vehicle data..."
+
+msgid "正在处理订单..."
+msgstr "Processing order..."
+
+msgid "此优惠券已过期或被作废，无法使用"
+msgstr "This coupon has expired or been voided and cannot be used"
+
+msgid "此操作不可逆，作废后优惠券将无法使用。"
+msgstr "This operation is irreversible, coupon cannot be used after voiding."
+
+msgid "每公里价格（元）"
+msgstr "Price per Kilometer (¥)"
+
+msgid "没有找到符合条件的日志记录"
+msgstr "No matching log records found"
+
+msgid "没有找到符合条件的用户"
+msgstr "No matching users found"
+
+msgid "没有找到符合条件的订单"
+msgstr "No matching orders found"
+
+msgid "没有找到符合条件的车辆"
+msgstr "No matching vehicles found"
+
+msgid "没有找到符合条件的通知"
+msgstr "No matching notifications found"
+
+msgid "用户信用分是评估用户行为可信度的重要指标，初始分值为100分，满分为150分。系统根据以下规则自动调整用户信用分："
+msgstr "User credit score is an important indicator for evaluating user behavior credibility, initial score is 100 points, maximum is 150 points. The system automatically adjusts user credit score according to the following rules:"
+
+msgid "用户充值与消费关联"
+msgstr "User Recharge and Consumption Correlation"
+
+msgid "用户购买优惠券套餐"
+msgstr "User Purchase Coupon Package"
+
+msgid "留存率表示30-60天前注册的用户中，最近30天内有登录记录的比例，是衡量用户粘性的重要指标"
+msgstr "Retention rate represents the proportion of users registered 30-60 days ago who have login records in the last 30 days, an important indicator for measuring user stickiness"
+
+msgid "监控和管理无人驾驶车辆的运行状态和维护情况"
+msgstr "Monitor and manage operational status and maintenance of autonomous vehicles"
+
+msgid "管理优惠券套和用户优惠券列表"
+msgstr "Manage coupon packages and user coupon lists"
+
+msgid "管理平台通知信息，包括查看、搜索、标记已读和删除通知"
+msgstr "Manage platform notification information, including viewing, searching, marking as read, and deleting notifications"
+
+msgid "管理无人驾驶出租车平台的收入、成本和财务报表"
+msgstr "Manage autonomous taxi platform revenue, costs, and financial statements"
+
+msgid "管理用户信用等级规则和信用分变动规则"
+msgstr "Manage user credit level rules and credit score change rules"
+
+msgid "管理系统配置、用户权限和安全设置"
+msgstr "Manage system configuration, user permissions, and security settings"
+
+msgid "系统中注册的所有用户总数，同比增长表示与去年同期相比的增长百分比"
+msgstr "Total number of all registered users in the system, year-over-year growth represents growth percentage compared to same period last year"
+
+msgid "累计距离(公里)"
+msgstr "Total Distance (km)"
+
+msgid "线宽 (仅线段有效)"
+msgstr "Line Width (line segments only)"
+
+msgid "线段格式说明："
+msgstr "Line Segment Format Description:"
+
+msgid "经济实惠的家用车型，专为城市通勤设计。采用紧凑型高效磷酸铁锂电池。"
+msgstr "Economical family car designed for city commuting. Features compact high-efficiency lithium iron phosphate battery."
+
+msgid "维护间隔（天）"
+msgstr "Maintenance Interval (days)"
+
+msgid "缩放比例值越大，车辆坐标映射到实际经纬度的范围越大；值越小，车辆在地图上越集中。"
+msgstr "The larger the zoom ratio value, the larger the range of vehicle coordinates mapped to actual latitude and longitude; the smaller the value, the more concentrated the vehicles on the map."
+
+msgid "耗时 (ms)"
+msgstr "Duration (ms)"
+
+msgid "规律性的维护可以保障车辆的安全性，减少故障的发生。基础维护费用将根据不同车型和所在城市进行调整。各车型有特定的维护系数，反映其维护复杂性和零部件成本。不同城市的维护费用因人工成本和零配件价格也会有所差异。"
+msgstr "Regular maintenance ensures vehicle safety and reduces failures. Base maintenance fees are adjusted according to different vehicle models and cities. Each model has a specific maintenance coefficient reflecting its maintenance complexity and parts cost. Maintenance fees vary across cities due to labor costs and parts prices."
+
+msgid "订单价格计算参数"
+msgstr "Order Price Calculation Parameters"
+
+msgid "详细测试数据:"
+msgstr "Detailed Test Data:"
+
+msgid "请选择要配置的城市，下方所有参数将显示该城市的配置"
+msgstr "Please select the city to configure, all parameters below will display that city's configuration"
+
+msgid "调度检查间隔（秒）"
+msgstr "Dispatch Check Interval (seconds)"
+
+msgid "购买后将为选定用户发放此套餐中包含的所有优惠券。"
+msgstr "After purchase, all coupons included in this package will be issued to the selected user."
+
+msgid "起步距离（公里）"
+msgstr "Base Distance (km)"
+
+msgid "车辆真实地图视图"
+msgstr "Vehicle Real Map View"
+
+msgid "车辆移动速度（像素/秒）"
+msgstr "Vehicle Movement Speed (pixels/second)"
+
+msgid "车辆维护费用 = 基础维护费用 × 车型维护系数 × 城市系数"
+msgstr "Vehicle Maintenance Fee = Base Maintenance Fee × Model Maintenance Coefficient × City Coefficient"
+
+msgid "车辆识别号(VIN)"
+msgstr "Vehicle Identification Number (VIN)"
+
+msgid "输入多个订单ID，用逗号分隔，例如：1,2,3"
+msgstr "Enter multiple order IDs separated by commas, e.g.: 1,2,3"
+
+msgid "近30天内有登录记录的用户占总用户数的百分比，反映平台用户活跃程度"
+msgstr "Percentage of users with login records in the last 30 days to total users, reflecting platform user activity level"
+
+msgid "选择用户..."
+msgstr "Select User..."
+
+msgid "选择车型系列查看并设置详细性能参数，包括订单价格系数、速度系数、电池容量系数等。"
+msgstr "Select vehicle model series to view and set detailed performance parameters, including order price coefficient, speed coefficient, battery capacity coefficient, etc."
+
+msgid "障碍物地图管理"
+msgstr "Obstacle Map Management"
+
+msgid "面值(元/折扣率)"
+msgstr "Face Value (¥/Discount Rate)"
+
+msgid "面向年轻家庭的多功能中端SUV"
+msgstr "Versatile Mid-range SUV for Young Families"
+
+msgid "面向年轻家庭的多功能中端SUV，兼顾空间与动力。配备可扩展模块化电池系统。"
+msgstr "Versatile mid-range SUV for young families, balancing space and power. Equipped with expandable modular battery system."
+
+msgid "面向年轻精英的运动轿跑"
+msgstr "Sporty Coupe for Young Elites"
+
+msgid "面向年轻精英的运动轿跑，标志性的流线型设计与双色车身彰显个性。"
+msgstr "Sporty coupe for young elites, iconic streamlined design and two-tone body showcasing personality."
+
+msgid "面向科技爱好者的智能豪华车型，集成了最新自动驾驶辅助系统和增强现实导航。"
+msgstr "Smart luxury model for tech enthusiasts, integrating latest autonomous driving assistance system and augmented reality navigation."
+
+msgid "面向高效商务人士的智能中端轿车"
+msgstr "Smart Mid-range Sedan for Efficient Business Professionals"
+
+msgid "面向高效商务人士的智能中端轿车，强调驾驶辅助与工作便利性。"
+msgstr "Smart mid-range sedan for efficient business professionals, emphasizing driving assistance and work convenience."
+
+msgid "顶级电动跑车，零百加速仅需3.5秒，为速度爱好者打造。"
+msgstr "Top-tier electric sports car with 0-100km/h in just 3.5 seconds, built for speed enthusiasts."
+
+msgid "顶级豪华SUV"
+msgstr "Top Luxury SUV"
+
+msgid "顶级豪华SUV，为追求极致体验的商务精英打造。搭载双层大容量智能电池阵列。"
+msgstr "Top luxury SUV crafted for business elites seeking ultimate experience. Equipped with dual-layer high-capacity smart battery array."
+
+msgid "高级智能订单分配算法说明"
+msgstr "Advanced Smart Order Assignment Algorithm Description"
+
+msgid "高级算法决策流程"
+msgstr "Advanced Algorithm Decision Flow"
+
+# Batch added translations
+
+msgid "每日平均订单金额"
+msgstr "Daily Average Order Amount"
+
+msgid "平均每辆车每天完成的订单数"
+msgstr "Average Orders Completed Per Vehicle Per Day"
+
+msgid "按车型的收入与成本分析"
+msgstr "Revenue and Cost Analysis by Vehicle Model"
+
+msgid "数据来源"
+msgstr "Data Source"
+
+msgid "分析目的"
+msgstr "Analysis Purpose"
+
+msgid "图表说明"
+msgstr "Chart Description"
+
+msgid "orders表中的amount字段平均值，按日分组"
+msgstr "Average of amount field in orders table, grouped by day"
+
+msgid "了解每日订单价格趋势，判断用户消费水平变化"
+msgstr "Understand daily order price trends and assess changes in user consumption levels"
+
+msgid "折线图展示最近7天每日平均订单金额，帮助评估业务收入稳定性和增长趋势"
+msgstr "Line chart showing daily average order amounts for the last 7 days, helping evaluate business revenue stability and growth trends"
+
+msgid "orders表和vehicles表关联统计，按日分组"
+msgstr "Statistics from orders and vehicles tables, grouped by day"
+
+msgid "评估车辆利用效率，监控车辆周转率变化"
+msgstr "Evaluate vehicle utilization efficiency and monitor vehicle turnover rate changes"
+
+msgid "折线图展示每辆车平均每天完成的订单数量，反映资源利用效率和营运状况"
+msgstr "Line chart showing average number of orders completed per vehicle per day, reflecting resource utilization efficiency and operational status"
+
+msgid "orders表的amount字段（收入）和expenses表（支出）按车型分组统计"
+msgstr "Statistics from orders table amount field (revenue) and expenses table (expenses), grouped by vehicle model"
+
+msgid "比较不同车型的盈利能力，评估车队结构的经济效益"
+msgstr "Compare profitability of different vehicle models and evaluate economic benefits of fleet structure"
+
+msgid "柱状图展示各车型的收入和支出，折线图展示利润率，帮助优化车队配置决策"
+msgstr "Bar chart showing revenue and expenses for each model, line chart showing profit margin, helping optimize fleet configuration decisions"
+
+msgid "目前没有警告信息"
+msgstr "No warning messages at present"
+
+# Batch added translations
+
+msgid "显示所有日志"
+msgstr "Show All Logs"
+
+msgid "返回列表"
+msgstr "Back to List"
+
+msgid "导出报表"
+msgstr "Export Report"
+
+msgid "重置缩放"
+msgstr "Reset Zoom"
+
+msgid "返回车辆管理"
+msgstr "Back to Vehicle Management"
+
+msgid "清空条件"
+msgstr "Clear Conditions"
+
+msgid "已应用筛选条件"
+msgstr "Filters Applied"
+
+msgid "表格视图"
+msgstr "Table View"
+
+msgid "卡片视图"
+msgstr "Card View"
+
+msgid "清除所有筛选"
+msgstr "Clear All Filters"
+
+msgid "清除搜索"
+msgstr "Clear Search"
+
+msgid "地标类型"
+msgstr "Landmark Types"
+
+msgid "真实地图视图"
+msgstr "Real Map View"
+
+msgid "返回模拟地图"
+msgstr "Back to Simulation Map"
+
+# Batch added translations
+
+msgid "地图视图"
+msgstr "Map View"
+
+msgid "车辆操作记录"
+msgstr "Vehicle Operation Logs"
+
+# Batch added translations
+
+msgid "显示所有订单"
+msgstr "Show All Orders"
+
+msgid "生成订单详情"
+msgstr "Generate Order Details"
+
+msgid "打印详情"
+msgstr "Print Details"
+
+msgid "添加订单"
+msgstr "Add Order"
+
+msgid "一键分配"
+msgstr "One-Click Assignment"
+
+msgid "自动分配"
+msgstr "Auto Assignment"
+
+msgid "停止分配"
+msgstr "Stop Assignment"
+
+msgid "查找最近车辆"
+msgstr "Find Nearest Vehicle"
+
+# Batch added translations
+
+msgid "信用分变动规则"
+msgstr "Credit Score Change Rules"
+
+msgid "信用等级规则"
+msgstr "Credit Level Rules"
+
+msgid "充电站参数"
+msgstr "Charging Station Parameters"
+
+msgid "全部标为已读"
+msgstr "Mark All as Read"
+
+msgid "切换到支出"
+msgstr "Switch to Expenses"
+
+msgid "切换到收入"
+msgstr "Switch to Income"
+
+msgid "创建测试通知"
+msgstr "Create Test Notification"
+
+msgid "删除筛选结果"
+msgstr "Delete Filtered Results"
+
+msgid "刷新参数"
+msgstr "Refresh Parameters"
+
+msgid "发送通知"
+msgstr "Send Notification"
+
+msgid "城市参数"
+msgstr "City Parameters"
+
+msgid "导出Excel"
+msgstr "Export Excel"
+
+msgid "导出评价"
+msgstr "Export Reviews"
+
+msgid "应用"
+msgstr "Apply"
+
+msgid "批量删除所选"
+msgstr "Batch Delete Selected"
+
+msgid "支出记录"
+msgstr "Expense Records"
+
+msgid "收入记录"
+msgstr "Income Records"
+
+msgid "显示所有支出"
+msgstr "Show All Expenses"
+
+msgid "显示所有收入"
+msgstr "Show All Income"
+
+msgid "显示所有用户"
+msgstr "Show All Users"
+
+msgid "显示所有通知"
+msgstr "Show All Notifications"
+
+msgid "智能客服"
+msgstr "AI Customer Service"
+
+msgid "查看2款车型"
+msgstr "View 2 Models"
+
+msgid "查看3款车型"
+msgstr "View 3 Models"
+
+msgid "查看对话"
+msgstr "View Conversation"
+
+msgid "添加减分规则"
+msgstr "Add Credit Decrease Rule"
+
+msgid "添加加分规则"
+msgstr "Add Credit Increase Rule"
+
+msgid "添加恢复规则"
+msgstr "Add Recovery Rule"
+
+msgid "添加支出"
+msgstr "Add Expense"
+
+msgid "添加收入"
+msgstr "Add Income"
+
+msgid "清除通知"
+msgstr "Clear Notifications"
+
+msgid "用户会话列表"
+msgstr "User Session List"
+
+msgid "用户统计"
+msgstr "User Statistics"
+
+msgid "用户评价"
+msgstr "User Reviews"
+
+msgid "用户通知"
+msgstr "User Notifications"
+
+msgid "订单参数"
+msgstr "Order Parameters"
+
+msgid "财务统计"
+msgstr "Financial Statistics"
+
+msgid "车辆参数"
+msgstr "Vehicle Parameters"
+
+msgid "车辆统计"
+msgstr "Vehicle Statistics"
+
+msgid "返回客服管理"
+msgstr "Back to Customer Service"
+
+msgid "返回支出管理"
+msgstr "Back to Expense Management"
+
+msgid "返回收入管理"
+msgstr "Back to Income Management"
+
+msgid "返回用户管理"
+msgstr "Back to User Management"
+
+msgid "返回系统通知"
+msgstr "Back to System Notifications"
+
+msgid "返回财务管理"
+msgstr "Back to Finance Management"
+
+# Batch added translations
+
+msgid "0表示无使用门槛"
+msgstr "0 means no threshold"
+
+msgid "优惠券列表"
+msgstr "Coupon List"
+
+msgid "充电和电池管理"
+msgstr "Charging and Battery Management"
+
+msgid "共筛选出"
+msgstr "Filtered"
+
+msgid "分析目的:"
+msgstr "Analysis Purpose:"
+
+msgid "利润走势"
+msgstr "Profit Trend"
+
+msgid "区域收支对比"
+msgstr "Regional Revenue and Expense Comparison"
+
+msgid "半圆仪表盘显示维护中车辆占总车队的百分比，红色表示维护中，蓝色表示运营中"
+msgstr "Semi-circular gauge shows percentage of vehicles under maintenance in total fleet, red for maintenance, blue for operation"
+
+msgid "单位里程收益分析：展示不同行程距离下的单位里程收益分布情况。"
+msgstr "Revenue Per Kilometer Analysis: Shows the distribution of revenue per kilometer across different trip distances."
+
+msgid "参考区间：所选日期范围内的每日数据。"
+msgstr "Reference Period: Daily data within the selected date range."
+
+msgid "各城市充电站当前使用情况与最大容量数据统计"
+msgstr "Current Usage vs Max Capacity of Charging Stations by City"
+
+msgid "各城市平均订单完成时长"
+msgstr "Average Order Completion Time by City"
+
+msgid "同比增长：与上一个相同长度时间段的收入比较。"
+msgstr "Year-over-Year Growth: Comparison with income from the previous period of the same length."
+
+msgid "图表加载失败，请刷新页面重试"
+msgstr "Chart loading failed, please refresh and try again"
+
+msgid "地图加载失败，请刷新页面重试"
+msgstr "Map loading failed, please refresh and try again"
+
+msgid "城市业绩雷达图"
+msgstr "City Performance Radar Chart"
+
+msgid "字段说明"
+msgstr "Field Description"
+
+msgid "展示不同类别支出所占总支出的比例。"
+msgstr "Shows the proportion of different expense categories to total expenses."
+
+msgid "展示不同类型收入来源的占比分布。"
+msgstr "Shows the distribution of different types of income sources."
+
+msgid "展示利润率随时间的变化情况。"
+msgstr "Shows the change in profit margin over time."
+
+msgid "展示各车辆产生的维护支出情况。"
+msgstr "Shows maintenance expenses generated by each vehicle."
+
+msgid "展示总收入、总支出和净利润之间的关系。"
+msgstr "Shows the relationship between total income, total expenses, and net profit."
+
+msgid "展示所选时间区间内每日支出金额的变化趋势。"
+msgstr "Shows the trend of daily expense amounts within the selected time period."
+
+msgid "展示特定时间段内的日收入变化情况。"
+msgstr "Shows daily income changes within a specific time period."
+
+msgid "总收入：所选日期范围内所有收入的累计总和。"
+msgstr "Total Income: Cumulative sum of all income within the selected date range."
+
+msgid "成本分析"
+msgstr "Cost Analysis"
+
+msgid "支付方式分析：展示用户选择不同支付方式的金额分布和数量分布。"
+msgstr "Payment Method Analysis: Shows the distribution of amounts and quantities for different payment methods."
+
+msgid "收入趋势"
+msgstr "Income Trend"
+
+msgid "数据来源:"
+msgstr "Data Source:"
+
+msgid "数据来源：各月份的收入和支出记录。"
+msgstr "Data Source: Monthly income and expense records."
+
+msgid "数据来源：已完成订单的收入总和。"
+msgstr "Data Source: Total income from completed orders."
+
+msgid "数据来源：所选时间范围内的收入和支出记录。"
+msgstr "Data Source: Income and expense records within the selected time range."
+
+msgid "数据来源：按支出类别分组的金额统计。"
+msgstr "Data Source: Amount statistics grouped by expense category."
+
+msgid "数据来源：按收入类型分类统计的金额。"
+msgstr "Data Source: Amounts classified by income type."
+
+msgid "数据来源：每日支出记录的累计金额。"
+msgstr "Data Source: Cumulative amount from daily expense records."
+
+msgid "日均支出"
+msgstr "Daily Average Expenses"
+
+msgid "日均收入：总收入除以天数。"
+msgstr "Daily Average Income: Total income divided by number of days."
+
+msgid "暂无收入数据"
+msgstr "No Income Data"
+
+msgid "条符合条件的支出记录"
+msgstr "expense records matching criteria"
+
+msgid "条符合条件的收入记录"
+msgstr "income records matching criteria"
+
+msgid "汇总展示当前选定时间区间内的总收入及相关统计数据。"
+msgstr "Summarizes total income and related statistics for the currently selected time period."
+
+msgid "用户充值与消费关联：分析用户充值金额与消费金额之间的相关性。"
+msgstr "User Recharge vs Consumption: Analyzes the correlation between user recharge and consumption amounts."
+
+msgid "用户消费分布：展示不同消费区间的用户数量分布情况。"
+msgstr "User Consumption Distribution: Shows the distribution of users across different consumption ranges."
+
+msgid "用户行为和营销"
+msgstr "User Behavior and Marketing"
+
+msgid "筛选已应用!"
+msgstr "Filters Applied!"
+
+msgid "统计周期：所选时间范围内的每一天。"
+msgstr "Statistical Period: Each day within the selected time range."
+
+msgid "统计方式：横轴为用户充值金额，纵轴为用户消费金额，气泡大小代表用户数量。"
+msgstr "Statistical Method: X-axis is user recharge amount, Y-axis is user consumption amount, bubble size represents number of users."
+
+msgid "统计范围：包含用户通过微信支付、支付宝和余额支付的所有消费金额。"
+msgstr "Statistical Scope: Includes all consumption amounts paid by users through WeChat Pay, Alipay, and balance."
+
+msgid "计算方式：净利润 = 总收入 - 总支出。"
+msgstr "Calculation Method: Net Profit = Total Income - Total Expenses."
+
+msgid "计算方式：各类型收入金额占总收入的百分比。"
+msgstr "Calculation Method: Percentage of each income type to total income."
+
+msgid "计算方法：特定类别支出金额/总支出金额。"
+msgstr "Calculation Method: Specific category expense / Total expenses."
+
+msgid "计算方法：订单总金额/行程距离(元/公里)。"
+msgstr "Calculation Method: Total order amount / Trip distance (¥/km)."
+
+msgid "订单数量地理分布"
+msgstr "Geographic Distribution of Orders"
+
+msgid "订单金额地理分布"
+msgstr "Geographic Distribution of Order Amount"
+
+msgid "车辆单位里程收益对比"
+msgstr "Vehicle Revenue Per Kilometer Comparison"
+
+msgid "车辆投资回报率"
+msgstr "Vehicle ROI"
+
+msgid "车辆收入排行"
+msgstr "Vehicle Revenue Ranking"
+
+msgid "车辆维护成本与收入关系"
+msgstr "Vehicle Maintenance Cost vs Revenue"
+
+msgid "车辆运营效率"
+msgstr "Vehicle Operational Efficiency"
+
+msgid "面值(元)"
+msgstr "Face Value (¥)"
+
+# Batch added translations
+
+msgid "优惠券套餐"
+msgstr "Coupon Packages"
+
+msgid "服务质量分析"
+msgstr "Service Quality Analysis"
+
+msgid "财务和整体健康"
+msgstr "Financial and Overall Health"
+
+# Batch added translations
+
+msgid "当前月份"
+msgstr "Current Month"
+

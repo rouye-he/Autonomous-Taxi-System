@@ -1,0 +1,854 @@
+{% extends "base.html" %}
+
+{% block title %}收入管理 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/finance/income.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 添加Toast消息容器 -->
+    <div id="toast-container">
+        <button id="clearToastsBtn" class="btn btn-sm btn-outline-secondary position-absolute end-0 me-3 d-none">
+            <i class="bi bi-x-circle"></i> 清除通知
+        </button>
+    </div>
+    
+
+    
+    <div class="row mb-4">
+        <div class="col">
+            <h2>收入管理</h2>
+            <p class="text-muted">查看和管理系统收入记录</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('finance.add_income') }}" class="btn btn-primary me-2">
+                <i class="bi bi-plus-circle"></i> 添加收入
+            </a>
+            <a href="{{ url_for('finance.expense') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-arrow-left-right"></i> 切换到支出
+            </a>
+            <a href="{{ url_for('finance.index') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> 返回财务管理
+            </a>
+            <div class="btn-group ms-2">
+                <button type="button" class="btn btn-outline-secondary view-toggle-btn" data-view="table">
+                    <i class="bi bi-table"></i> 表格视图
+                </button>
+                <button type="button" class="btn btn-outline-secondary view-toggle-btn" data-view="card">
+                    <i class="bi bi-grid-3x3-gap-fill"></i> 卡片视图
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏元素存储URL和搜索参数 -->
+    <div style="display: none;">
+        <div id="indexUrl" data-url="{{ url_for('finance.income') }}"></div>
+        <div id="searchUrl" data-url="{{ url_for('finance.income') }}"></div>
+        {% if search_params %}
+            {% for key, value in search_params.items() %}
+                <div data-search-param data-param-key="{{ key }}" data-param-value="{{ value }}"></div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- 高级搜索区域 -->
+    <div class="search-section">
+        <div class="d-flex align-items-center mb-2 search-toggle" id="searchToggle" data-bs-toggle="collapse" data-bs-target="#searchForm" aria-expanded="false">
+            <i class="bi bi-chevron-down me-2"></i>
+            <h5 class="mb-0">高级搜索</h5>
+        </div>
+        
+        <!-- 搜索条件标签 -->
+        {% if search_params %}
+        <div class="search-tags">
+            {% for field, value in search_params.items() %}
+                {% if value and field != 'page' %}
+                <span class="search-tag" data-search-param data-param-key="{{ field }}" data-param-value="{{ value }}">
+                    {% if field == 'amount_min' %}
+                        最小金额: {{ value }}
+                    {% elif field == 'amount_max' %}
+                        最大金额: {{ value }}
+                    {% elif field == 'source' %}
+                        来源: {{ value }}
+                    {% elif field == 'user_id' %}
+                        用户ID: {{ value }}
+                    {% elif field == 'date_start' %}
+                        开始日期: {{ value }}
+                    {% elif field == 'date_end' %}
+                        结束日期: {{ value }}
+                    {% elif field == 'description' %}
+                        描述包含: {{ value }}
+                    {% else %}
+                        {{ field }}: {{ value }}
+                    {% endif %}
+                    <span class="badge bg-secondary" onclick="removeSearchParam('{{ field }}')">×</span>
+                </span>
+                {% endif %}
+            {% endfor %}
+            {% if search_params %}
+            <button class="btn btn-sm btn-outline-secondary" onclick="clearAllSearchParams()">
+                <i class="bi bi-x-circle"></i> 清除所有筛选
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="collapse" id="searchForm">
+            <div class="search-form">
+                <form id="incomeSearchForm" method="GET" action="{{ url_for('finance.income') }}">
+                    <div class="row g-3">
+                        <!-- 基本筛选字段 -->
+                        <div class="col-md-3">
+                            <label for="amount_min" class="form-label">最小金额</label>
+                            <input type="number" class="form-control" id="amount_min" name="amount_min" value="{{ search_params.amount_min if search_params else '' }}" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="amount_max" class="form-label">最大金额</label>
+                            <input type="number" class="form-control" id="amount_max" name="amount_max" value="{{ search_params.amount_max if search_params else '' }}" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="source" class="form-label">收入来源</label>
+                            <select class="form-select" id="source" name="source">
+                                <option value="">所有来源</option>
+                                <option value="充值收入" {% if search_params and search_params.source == '充值收入' %}selected{% endif %}>充值收入</option>
+                                <option value="车费收入" {% if search_params and search_params.source == '车费收入' %}selected{% endif %}>车费收入</option>
+                                <option value="其他收入" {% if search_params and search_params.source == '其他收入' %}selected{% endif %}>其他收入</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="user_id" class="form-label">用户ID</label>
+                            <input type="number" class="form-control" id="user_id" name="user_id" value="{{ search_params.user_id if search_params else '' }}">
+                        </div>
+                        
+                        <!-- 时间范围字段 -->
+                        <div class="col-md-3">
+                            <label for="date_start" class="form-label">开始日期</label>
+                            <input type="date" class="form-control" id="date_start" name="date_start" value="{{ search_params.date_start if search_params else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="date_end" class="form-label">结束日期</label>
+                            <input type="date" class="form-control" id="date_end" name="date_end" value="{{ search_params.date_end if search_params else '' }}">
+                        </div>
+                        
+                        <!-- 添加描述搜索 -->
+                        <div class="col-md-6">
+                            <label for="description" class="form-label">描述包含</label>
+                            <input type="text" class="form-control" id="description" name="description" value="{{ search_params.description if search_params else '' }}" placeholder="搜索描述中包含的关键词">
+                        </div>
+                        
+                        <!-- 操作按钮 -->
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> 搜索
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary ms-2" id="resetSearchBtn">
+                                <i class="bi bi-arrow-counterclockwise"></i> 重置
+                            </button>
+                            <button type="button" class="btn btn-outline-danger ms-2" onclick="clearAllSearchParams()">
+                                <i class="bi bi-x-circle"></i> 清除搜索
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <!-- 收入类型统计卡片 -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="stat-icon bg-primary">
+                                <i class="bi bi-cash"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="card-subtitle mb-1 text-muted fs-6">总收入</h6>
+                                <h3 class="card-title mb-0 fs-5">￥{{ income_stats.total|default(0)|round(1) }}</h3>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('finance.income') }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> 
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="stat-icon bg-success">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="card-subtitle mb-1 text-muted">充值收入</h6>
+                                <h3 class="card-title mb-0 fs-5">￥{{ income_stats.recharge|default(0)|round(1) }}</h3>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('finance.income', source='充值收入') }}" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-eye"></i> 
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="stat-icon bg-warning">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="card-subtitle mb-1 text-muted">车费收入</h6>
+                                <h3 class="card-title mb-0 fs-5">￥{{ income_stats.fare|default(0)|round(1) }}</h3>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('finance.income', source='车费收入') }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-eye"></i> 
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="stat-icon bg-info">
+                                <i class="bi bi-cash-coin"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="card-subtitle mb-1 text-muted">其他收入</h6>
+                                <h3 class="card-title mb-0 fs-5">￥{{ income_stats.other|default(0)|round(1) }}</h3>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ url_for('finance.income', source='其他收入') }}" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-eye"></i> 
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">收入记录 <span class="text-muted">(共{{ total_count|default(0) }}条记录)</span></h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- 表格视图 -->
+                    <div id="tableView">
+                        <div class="table-responsive income-table-container">
+                            {% include 'finance/_income_table.html' %}
+                        </div>
+                    </div>
+                    
+                    <!-- 卡片视图 -->
+                    <div id="cardView" style="display: none;">
+                        <div class="row">
+                            {% if incomes %}
+                                {% for income in incomes %}
+                                <div class="col-md-4 col-lg-3 mb-3">
+                                    <div class="card income-card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <span class="text-truncate">收入 #{{ income.id }}</span>
+                                            {% if income.source == '充值收入' %}
+                                                <span class="badge bg-success">充值收入</span>
+                                            {% elif income.source == '车费收入' %}
+                                                <span class="badge bg-warning">车费收入</span>
+                                            {% else %}
+                                                <span class="badge bg-info">{{ income.source }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="income-info">
+                                                <div class="income-info-item">
+                                                    <span class="label">金额:</span>
+                                                    <span>￥{{ income.amount }}</span>
+                                                </div>
+                                                <div class="income-info-item">
+                                                    <span class="label">用户ID:</span>
+                                                    <span>{{ income.user_id }}</span>
+                                                </div>
+                                                <div class="income-info-item">
+                                                    <span class="label">订单ID:</span>
+                                                    <span>
+                                                        {% if income.order_id %}
+                                                            <a href="/order/{{ income.order_id }}/details" target="_blank" class="text-primary">{{ income.order_id }}</a>
+                                                        {% else %}
+                                                            <span class="text-muted">-</span>
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                                <div class="income-info-item">
+                                                    <span class="label">日期:</span>
+                                                    <span>{{ income.date }}</span>
+                                                </div>
+                                                <div class="income-info-item">
+                                                    <span class="label">描述:</span>
+                                                    <span class="text-truncate">{{ income.description or '无' }}</span>
+                                                </div>
+                                                <div class="income-info-item">
+                                                    <span class="label">创建时间:</span>
+                                                    <span>{{ income.created_at }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-end mt-3">
+                                                <button class="btn btn-sm btn-info action-btn view-income-btn me-1" data-income-id="{{ income.id }}" data-bs-toggle="modal" data-bs-target="#incomeDetailModal">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </button>
+                                                <a href="{{ url_for('finance.edit_income', income_id=income.id, return_page=current_page|default(1), **search_params if search_params else {}) }}" class="btn btn-sm btn-warning action-btn me-1">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger action-btn delete-income-btn" data-income-id="{{ income.id }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                                <!-- 卡片视图分页控件 -->
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mt-4">
+                                        <div>显示 {{ offset|default(0) + 1 }} 到 {{ offset|default(0) + incomes|default([])|length }} 条，共 {{ total_count|default(0) }} 条</div>
+                                        <nav aria-label="Page navigation">
+                                            <div class="d-flex align-items-center">
+                                                <ul class="pagination mb-0 me-3">
+                                                    <!-- 上一页 -->
+                                                    <li class="page-item {% if current_page|default(1) == 1 %}disabled{% endif %}">
+                                                        <a class="page-link" href="?page={{ current_page|default(1) - 1 }}{% if search_params %}{% for key, value in search_params.items() %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}" {% if current_page|default(1) == 1 %}aria-disabled="true"{% endif %}>上一页</a>
+                                                    </li>
+                                                    
+                                                    <!-- 页码按钮组 -->
+                                                    {% for page_num in range(1, total_pages|default(1) + 1) %}
+                                                        {% if total_pages|default(1) <= 7 or page_num <= 2 or page_num >= total_pages|default(1) - 1 or (page_num >= current_page|default(1) - 1 and page_num <= current_page|default(1) + 1) %}
+                                                            <li class="page-item {% if page_num == current_page|default(1) %}active{% endif %}">
+                                                                <a class="page-link" href="?page={{ page_num }}{% if search_params %}{% for key, value in search_params.items() %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}">{{ page_num }}</a>
+                                                            </li>
+                                                        {% elif (loop.index0 == 2 and current_page|default(1) > 3) or (loop.index0 == total_pages|default(1) - 3 and current_page|default(1) < total_pages|default(1) - 2) %}
+                                                            <li class="page-item disabled">
+                                                                <a class="page-link" href="#">…</a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    
+                                                    <!-- 下一页 -->
+                                                    <li class="page-item {% if current_page|default(1) >= total_pages|default(1) %}disabled{% endif %}">
+                                                        <a class="page-link" href="?page={{ current_page|default(1) + 1 }}{% if search_params %}{% for key, value in search_params.items() %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% endif %}" {% if current_page|default(1) >= total_pages|default(1) %}aria-disabled="true"{% endif %}>下一页</a>
+                                                    </li>
+                                                </ul>
+                                                
+                                                <!-- 跳转到指定页 -->
+                                                <div class="input-group" style="width: 180px;">
+                                                    <span class="input-group-text">跳至</span>
+                                                    <input type="number" class="form-control" id="jumpToPage" min="1" max="{{ total_pages|default(1) }}" placeholder="{{ current_page|default(1) }}/{{ total_pages|default(1) }}">
+                                                    <button class="btn btn-outline-primary" type="button" id="jumpButton">
+                                                        <i class="bi bi-arrow-right-circle"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </nav>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="col-12">
+                                    <div class="alert alert-info">暂无收入数据</div>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- 搜索结果统计 (卡片视图) -->
+                            {% if search_params and total_count|default(0) %}
+                            <div class="col-12">
+                                <div class="mt-3 text-center text-muted">
+                                    <p><i class="bi bi-filter-circle"></i> 共筛选出 <strong>{{ total_count }}</strong> 条符合条件的收入记录</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 收入详情模态框 -->
+<div class="modal fade" id="incomeDetailModal" tabindex="-1" aria-labelledby="incomeDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="incomeDetailModalLabel">收入详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <!-- 金额信息卡片 -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="bi bi-currency-yen"></i> 金额信息</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-sm-4 fw-bold">收入ID:</div>
+                                    <div class="col-sm-8" id="modal-income-id"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4 fw-bold">金额:</div>
+                                    <div class="col-sm-8 fs-5 text-primary fw-bold">￥<span id="modal-amount"></span></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4 fw-bold">来源:</div>
+                                    <div class="col-sm-8" id="modal-source"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4 fw-bold">日期:</div>
+                                    <div class="col-sm-8" id="modal-date"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 关联信息卡片 -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="bi bi-link-45deg"></i> 关联信息</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-sm-4 fw-bold">用户ID:</div>
+                                    <div class="col-sm-8" id="modal-user-id"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4 fw-bold">用户名:</div>
+                                    <div class="col-sm-8" id="modal-username"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4 fw-bold">订单ID:</div>
+                                    <div class="col-sm-8">
+                                        <span id="modal-order-id"></span>
+                                        <a href="#" id="modal-order-link" class="ms-2 d-none"><i class="bi bi-box-arrow-up-right"></i></a>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-sm-4 fw-bold">创建于:</div>
+                                    <div class="col-sm-8" id="modal-created-at"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 描述信息卡片 -->
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0"><i class="bi bi-justify-left"></i> 详细描述</h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="modal-description" class="mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x"></i> 关闭</button>
+                <a href="#" id="edit-income-link" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> 编辑
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- 引入通用表格组件和收入组件 -->
+<script src="{{ url_for('static', filename='js/components/dataTable.js') }}"></script>
+<script src="{{ url_for('static', filename='js/finance/incomeTable.js') }}"></script>
+<script>
+    /**
+     * 显示本地化的Toast提示
+     */
+    function showLocalToast(message, type = 'info', duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = `toast-message toast-${type}`;
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+        
+        // 自动移除
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.5s';
+            setTimeout(() => {
+                toast.remove();
+            }, 500);
+        }, duration);
+    }
+
+    /**
+     * 清除所有Toast消息
+     */
+    function clearAllToasts() {
+        document.querySelectorAll('.toast-message').forEach(toast => {
+            toast.style.animation = 'fadeOut 0.5s';
+            setTimeout(() => {
+                toast.remove();
+            }, 500);
+        });
+    }
+
+    /**
+     * 安全设置元素文本内容，避免null错误
+     */
+    function setElementText(elementId, value, fallback = 'N/A') {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value || fallback;
+        }
+    }
+
+    /**
+     * 安全设置元素属性，避免null错误
+     */
+    function setElementAttribute(elementId, attribute, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.setAttribute(attribute, value);
+        }
+    }
+
+    /**
+     * 安全设置元素类，避免null错误
+     */
+    function toggleElementClass(elementId, className, add) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            if (add) {
+                element.classList.remove(className);
+            } else {
+                element.classList.add(className);
+            }
+        }
+    }
+
+    /**
+     * 移除搜索参数
+     */
+    function removeSearchParam(key) {
+        let url = new URL(window.location.href);
+        url.searchParams.delete(key);
+        window.location.href = url.toString();
+    }
+
+    /**
+     * 清除所有搜索参数
+     */
+    function clearAllSearchParams() {
+        window.location.href = "{{ url_for('finance.income') }}";
+    }
+
+    /**
+     * 修复页面滚动问题
+     */
+    function fixPageScroll() {
+        // 移除所有模态框背景
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        
+        // 恢复body滚动状态
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        // 触发滚动事件刷新页面位置
+        window.scrollTo(window.scrollX, window.scrollY);
+    }
+
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function() {
+        // 页面加载时修复滚动
+        // fixPageScroll(); // 这里会移除所有模态框背景，应该删除
+        
+        // 清除所有可能的toast消息
+        clearAllToasts();
+        
+        // 监听模态框隐藏事件
+        const incomeDetailModal = document.getElementById('incomeDetailModal');
+        incomeDetailModal.addEventListener('hidden.bs.modal', function() {
+            // 使用通用函数修复滚动
+            fixPageScroll();
+        });
+        
+        // 初始化收入表格
+        window.incomeTable = new IncomeTable({
+            initRowEvents: function() {
+                window.incomeTable.initRowEvents();
+            }
+        });
+
+        // 初始化查看收入详情按钮
+        document.querySelectorAll('.view-income-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // 清除任何可能存在的toast消息
+                clearAllToasts();
+                
+                const incomeId = this.getAttribute('data-income-id');
+                if (!incomeId) return;
+
+                // 发送AJAX请求获取收入详情
+                fetch(`/finance/api/income_details/${incomeId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`请求失败: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const income = data.data;
+                            
+                            // 使用安全的方式填充模态框信息
+                            setElementText('modal-income-id', income.id);
+                            setElementText('modal-amount', income.amount);
+                            setElementText('modal-source', income.source);
+                            setElementText('modal-date', income.date);
+                            setElementText('modal-user-id', income.user_id, 'N/A');
+                            setElementText('modal-username', income.username, 'N/A');
+                            setElementText('modal-description', income.description, '无描述');
+                            setElementText('modal-created-at', income.created_at);
+                            
+                            // 显示订单ID信息
+                            const orderIdElement = document.getElementById('modal-order-id');
+                            const orderLinkElement = document.getElementById('modal-order-link');
+                            
+                            if (orderIdElement) {
+                                orderIdElement.textContent = income.order_id || '无关联订单';
+                            }
+                            
+                            if (orderLinkElement) {
+                                if (income.order_id) {
+                                    orderLinkElement.href = `/order/${income.order_id}/details`;
+                                    orderLinkElement.classList.remove('d-none');
+                                } else {
+                                    orderLinkElement.classList.add('d-none');
+                                }
+                            }
+                            
+                            // 设置编辑链接
+                            let editUrl = `/finance/income/edit/${income.id}?return_page={{ current_page|default(1) }}`;
+                            
+                            // 获取当前URL中的查询参数
+                            const urlParams = new URLSearchParams(window.location.search);
+                            // 遍历参数并添加到编辑URL
+                            for (const [key, value] of urlParams.entries()) {
+                                if (key !== 'page') {
+                                    editUrl += `&${key}=${value}`;
+                                }
+                            }
+                            
+                            const editLinkElement = document.getElementById('edit-income-link');
+                            if (editLinkElement) {
+                                editLinkElement.href = editUrl;
+                            }
+                            
+                            // 显示模态框
+                            const modalElement = document.getElementById('incomeDetailModal');
+                            // 检查模态框是否已经打开
+                            if (!modalElement.classList.contains('show')) {
+                                const modal = new bootstrap.Modal(modalElement);
+                                modal.show();
+                            }
+                        } 
+                    })
+                    .catch(error => {
+                        console.error('获取收入详情出错:', error);
+                        // 过滤掉"Cannot set properties of null"类型的错误
+                        
+                    });
+            });
+        });
+
+        // 初始化删除收入按钮
+        document.querySelectorAll('.delete-income-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const incomeId = this.getAttribute('data-income-id');
+                if (!incomeId) return;
+
+                if (confirm('确定要删除此收入记录吗？此操作不可撤销。')) {
+                    // 发送AJAX请求删除收入
+                    fetch(`{{ url_for('finance.income') }}/delete/${incomeId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`请求失败: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            showLocalToast(data.message || '收入记录已删除', 'success');
+                            // 重新加载表格
+                            if (window.incomeTable) {
+                                window.incomeTable.reloadTable();
+                            } else {
+                                window.location.reload();
+                            }
+                        } 
+                    })
+                    .catch(error => {
+                        console.error('删除收入记录出错:', error);
+                    });
+                }
+            });
+        });
+
+        // 初始化重置搜索按钮
+        document.getElementById('resetSearchBtn').addEventListener('click', function() {
+            document.getElementById('incomeSearchForm').reset();
+        });
+
+        // 初始化视图切换按钮
+        document.querySelectorAll('.view-toggle-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const viewType = this.getAttribute('data-view');
+                document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                if (viewType === 'table') {
+                    document.getElementById('tableView').style.display = 'block';
+                    document.getElementById('cardView').style.display = 'none';
+                } else {
+                    document.getElementById('tableView').style.display = 'none';
+                    document.getElementById('cardView').style.display = 'block';
+                }
+                
+                // 保存用户偏好
+                localStorage.setItem('incomeViewPreference', viewType);
+            });
+        });
+        
+        // 加载用户视图偏好
+        const savedView = localStorage.getItem('incomeViewPreference');
+        if (savedView) {
+            document.querySelector(`.view-toggle-btn[data-view="${savedView}"]`).click();
+        } else {
+            // 默认表格视图
+            document.querySelector('.view-toggle-btn[data-view="table"]').click();
+        }
+        
+        // 为卡片视图中的页码按钮添加AJAX分页功能
+        if (document.getElementById('cardView')) {
+            document.querySelectorAll('#cardView .page-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (this.parentElement.classList.contains('disabled')) {
+                        return;
+                    }
+                    
+                    const href = this.getAttribute('href');
+                    if (href && href !== '#') {
+                        const url = new URL(href, window.location.origin);
+                        const pageNum = url.searchParams.get('page');
+                        
+                        if (pageNum && window.incomeTable) {
+                            // 显示加载中状态
+                            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                            
+                            // 切换到表格视图并加载数据
+                            const tableView = document.querySelector('.view-toggle-btn[data-view="table"]');
+                            if (tableView) {
+                                tableView.click();
+                            }
+                            
+                            setTimeout(() => {
+                                window.incomeTable.loadPageData(pageNum);
+                            }, 100);
+                        }
+                    }
+                });
+            });
+            
+            // 为卡片视图中的页码跳转按钮添加AJAX功能
+            const cardJumpBtn = document.getElementById('jumpButton');
+            if (cardJumpBtn) {
+                cardJumpBtn.addEventListener('click', function() {
+                    const input = document.getElementById('jumpToPage');
+                    const pageNum = parseInt(input.value);
+                    const maxPage = parseInt(input.getAttribute('max')) || 1;
+                    
+                    if (pageNum && pageNum >= 1 && pageNum <= maxPage && window.incomeTable) {
+                        // 切换到表格视图并加载数据
+                        const tableView = document.querySelector('.view-toggle-btn[data-view="table"]');
+                        if (tableView) {
+                            tableView.click();
+                        }
+                        
+                        setTimeout(() => {
+                            window.incomeTable.loadPageData(pageNum);
+                        }, 100);
+                    } else {
+                        showLocalToast('请输入有效的页码 (1-' + maxPage + ')', 'warning');
+                    }
+                });
+            }
+        }
+
+        // 初始化清除通知按钮
+        const clearToastsBtn = document.getElementById('clearToastsBtn');
+        if (clearToastsBtn) {
+            clearToastsBtn.addEventListener('click', function() {
+                clearAllToasts();
+                this.classList.add('d-none');
+            });
+            
+            // 当有toast消息时显示按钮
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList' && document.querySelector('.toast-message')) {
+                        clearToastsBtn.classList.remove('d-none');
+                    } else if (!document.querySelector('.toast-message')) {
+                        clearToastsBtn.classList.add('d-none');
+                    }
+                });
+            });
+            
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        // 添加双击修复滚动功能
+        document.addEventListener('dblclick', function(e) {
+            // 如果双击时没有点击在输入框内，则修复滚动
+            if (!(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+                fixPageScroll();
+            }
+        });
+
+        // 添加按键修复滚动功能
+        document.addEventListener('keydown', function(e) {
+            // 当按下Escape键时修复滚动
+            if (e.key === 'Escape') {
+                setTimeout(() => {
+                    fixPageScroll();
+                }, 300);
+            }
+        });
+    });
+</script>
+{% endblock %} 

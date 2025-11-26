@@ -1,0 +1,39 @@
+<navigation-bar title="编辑资料" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<view class="edit-profile-container">
+  <form bindsubmit="handleSubmit">
+    <view class="form-section">
+      <view class="form-item">
+        <text class="label">用户名</text>
+        <input class="input" name="username" value="{{formData.username}}" placeholder="请输入用户名" bindinput="onInputChange" data-field="username" />
+      </view>
+      
+      <view class="form-item">
+        <text class="label">真实姓名</text>
+        <input class="input" name="real_name" value="{{formData.real_name}}" placeholder="请输入真实姓名" bindinput="onInputChange" data-field="real_name" />
+      </view>
+      
+      <view class="form-item">
+        <text class="label">电子邮箱</text>
+        <input class="input" name="email" value="{{formData.email}}" placeholder="请输入电子邮箱" bindinput="onInputChange" data-field="email" />
+      </view>
+      
+      <view class="form-item">
+        <text class="label">性别</text>
+        <picker mode="selector" range="{{genderOptions}}" value="{{genderIndex}}" bindchange="onGenderChange">
+          <view class="picker">{{formData.gender || '请选择性别'}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <text class="label">出生日期</text>
+        <picker mode="date" value="{{formData.birth_date}}" bindchange="onDateChange">
+          <view class="picker">{{formData.birth_date || '请选择出生日期'}}</view>
+        </picker>
+      </view>
+    </view>
+    
+    <view class="button-container">
+      <button class="unified-btn" formType="submit" loading="{{isSubmitting}}">保存修改</button>
+    </view>
+  </form>
+</view> 

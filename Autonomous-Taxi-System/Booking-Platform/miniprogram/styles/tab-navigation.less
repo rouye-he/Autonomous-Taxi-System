@@ -1,0 +1,291 @@
+/* 可复用的导航栏组件样式 */
+
+/* 页面容器基础样式 - 确保最小高度 */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-area {
+  flex: 1;
+  min-height: calc(100vh - 200rpx); /* 减去导航栏和其他固定元素的高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+.content-list {
+  flex: 1;
+  min-height: 400rpx; /* 确保内容区域有最小高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 空状态样式 - 确保撑满剩余空间 */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400rpx;
+  padding: 100rpx 30rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 加载状态样式 */
+.loading-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400rpx;
+  text-align: center;
+  padding: 30rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 通知列表容器 - 当有数据时不使用flex:1 */
+.notification-list {
+  flex: 0 0 auto;
+}
+
+/* 导航栏容器基础样式 */
+.tab-navigation {
+  display: flex;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  margin: 20rpx 0 30rpx 0;
+  padding: 8rpx;
+  box-shadow: 0 8rpx 25rpx rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+  height: 80rpx;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0; /* 防止导航栏被压缩 */
+}
+
+.tab-navigation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  pointer-events: none;
+}
+
+/* 标签基础样式 - 确保所有状态的一致性 */
+.tab-navigation-item {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 4rpx;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.7);
+  position: relative;
+  font-weight: 500;
+  z-index: 2;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  /* 基础样式 - 确保尺寸一致 */
+  border: 2rpx solid transparent;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0);
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.tab-navigation-item:not(.active):hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tab-navigation-item.active {
+  color: #333;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.tab-navigation-item.active::after {
+  display: none;
+}
+
+/* 图标样式 */
+.tab-navigation-item::before {
+  content: '';
+  display: inline-block;
+  width: 24rpx;
+  height: 24rpx;
+  margin-right: 4rpx;
+  vertical-align: middle;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  flex-shrink: 0;
+}
+
+.tab-navigation-item.active::before {
+  opacity: 1;
+  filter: drop-shadow(0 0 4rpx rgba(102, 126, 234, 0.3));
+}
+
+/* 数量标签样式 */
+.tab-count {
+  font-size: 20rpx;
+  margin-left: 4rpx;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.tab-navigation-item.active .tab-count {
+  opacity: 1;
+  font-weight: 500;
+}
+
+/* 响应式设计 - 小屏幕优化 */
+@media (max-width: 375px) {
+  .tab-navigation {
+    margin: 16rpx 0 24rpx 0;
+    padding: 6rpx;
+    height: 72rpx;
+  }
+  
+  .tab-navigation-item {
+    font-size: 24rpx;
+    padding: 20rpx 2rpx;
+    height: 60rpx;
+  }
+  
+  .tab-count {
+    font-size: 18rpx;
+    margin-left: 2rpx;
+  }
+  
+  .tab-navigation-item::before {
+    width: 20rpx;
+    height: 20rpx;
+    margin-right: 2rpx;
+  }
+  
+  .tab-navigation-item.active {
+    box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 320px) {
+  .tab-navigation {
+    margin: 12rpx 0 20rpx 0;
+    height: 68rpx;
+  }
+  
+  .tab-navigation-item {
+    font-size: 22rpx;
+    padding: 18rpx 1rpx;
+    height: 56rpx;
+  }
+  
+  .tab-count {
+    font-size: 16rpx;
+    margin-left: 1rpx;
+  }
+  
+  .tab-navigation-item::before {
+    width: 18rpx;
+    height: 18rpx;
+    margin-right: 1rpx;
+  }
+  
+  .tab-navigation-item.active {
+    box-shadow: 0 3rpx 12rpx rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 特定图标样式 - 可根据需要自定义 */
+.tab-navigation-item.tab-available::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz4KPC9zdmc+');
+}
+
+.tab-navigation-item.tab-used::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkgMTZMMTIgMTNMMjIgM0wyMCA1TDEyIDE1TDkgMTJMOSAxNloiIGZpbGw9ImN1cnJlbnRDb2xvciIvPgo8L3N2Zz4=');
+}
+
+.tab-navigation-item.tab-expired::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyUzYuNDggMjIgMTIgMjJTMjIgMTcuNTIgMjIgMTJTMTcuNTIgMiAxMiAyWk0xMyAxN0gxMVYxNUgxM1YxN1pNMTMgMTNIMTFWN0gxM1YxM1oiIGZpbGw9ImN1cnJlbnRDb2xvciIvPgo8L3N2Zz4=');
+}
+
+/* 订单状态图标 */
+.tab-navigation-item.tab-pending::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyUzYuNDggMjIgMTIgMjJTMjIgMTcuNTIgMjIgMTJTMTcuNTIgMiAxMiAyWk0xMyAxN0gxMVYxMUgxM1YxN1pNMTMgOUgxMVY3SDEzVjlaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz4KPC9zdmc+');
+}
+
+.tab-navigation-item.tab-ongoing::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggNUwxNiAxMkw4IDE5VjVaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz4KPC9zdmc+');
+}
+
+.tab-navigation-item.tab-completed::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkgMTZMMTIgMTNMMjIgM0wyMCA1TDEyIDE1TDkgMTJMOSAxNloiIGZpbGw9ImN1cnJlbnRDb2xvciIvPgo8L3N2Zz4=');
+}
+
+.tab-navigation-item.tab-cancelled::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5IDYuNDFMMTcuNTkgNUwxMiAxMC41OUw2LjQxIDVMNSA2LjQxTDEwLjU5IDEyTDUgMTcuNTlMNi40MSAxOUwxMiAxMy40MUwxNy41OSAxOUwxOSAxNy41OUwxMy40MSAxMkwxOSA2LjQxWiIgZmlsbD0iY3VycmVudENvbG9yIi8+Cjwvc3ZnPg==');
+}
+
+.tab-navigation-item.tab-all::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMgMTNIMTFWM0gzVjEzWk0zIDIxSDExVjE1SDNWMjFaTTEzIDIxSDIxVjExSDEzVjIxWk0xMyAzVjlIMjFWM0gxM1oiIGZpbGw9ImN1cnJlbnRDb2xvciIvPgo8L3N2Zz4=');
+}
+
+/* 评价状态图标 */
+.tab-navigation-item.tab-pending-evaluation::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz4KPC9zdmc+');
+}
+
+.tab-navigation-item.tab-completed-evaluation::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMyIgZmlsbD0iIzAwRiIvPgo8L3N2Zz4=');
+}
+
+/* 信用页面图标 */
+.tab-navigation-item.tab-levels::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTUuMDkgOC4yNkwyMiA5TDE1LjA5IDE1Ljc0TDEyIDIyTDguOTEgMTUuNzRMMiA5TDguOTEgOC4yNkwxMiAyWiIgZmlsbD0iY3VycmVudENvbG9yIi8+CjxwYXRoIGQ9Ik0xMiA2TDEzLjU0IDEwLjI2TDE4IDExTDEzLjU0IDEzLjc0TDEyIDE4TDEwLjQ2IDEzLjc0TDYgMTFMMTAuNDYgMTAuMjZMMTIgNloiIGZpbGw9IiNGRkYiLz4KPC9zdmc+');
+}
+
+.tab-navigation-item.tab-rules::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMgM0gyMVY1SDNWM1pNMyA3SDIxVjlIM1Y3Wk0zIDExSDIxVjEzSDNWMTFaTTMgMTVIMjFWMTdIM1YxNVpNMyAxOUgyMVYyMUgzVjE5WiIgZmlsbD0iY3VycmVudENvbG9yIi8+Cjwvc3ZnPg==');
+}
+
+.tab-navigation-item.tab-logs::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMgM1YyMUgyMVYzSDNaTTUgNUgxOVYxOUg1VjVaTTcgN1YxN0g5VjdIN1pNMTEgN1YxN0gxM1Y3SDExWk0xNSA3VjE3SDE3VjdIMTVaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz4KPC9zdmc+');
+} 

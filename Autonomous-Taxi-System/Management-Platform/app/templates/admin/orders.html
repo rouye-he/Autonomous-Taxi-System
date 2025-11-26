@@ -1,0 +1,59 @@
+    // 添加订单
+    function addOrders() {
+        const cityCode = document.getElementById('city_code').value;
+        const orderCount = parseInt(document.getElementById('order_count').value);
+        
+        if (!cityCode || !orderCount) {
+            showErrorMessage('请选择城市并输入订单数量');
+            return;
+        }
+        
+        if (orderCount <= 0) {
+            showErrorMessage('订单数量必须大于0');
+            return;
+        }
+        
+        // 禁用提交按钮，防止重复提交
+        const submitBtn = document.getElementById('addOrdersBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '添加中...';
+        
+        showLoader();
+        
+        fetch('/orders/api/bulk_add_orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                city: cityCode,
+                order_count: orderCount
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showSuccessMessage(data.message);
+                // 刷新订单列表
+                loadOrders();
+            } else {
+                showErrorMessage(data.message || '添加订单失败');
+            }
+        })
+        .catch(error => {
+            console.error('添加订单失败:', error);
+            showErrorMessage('添加订单失败，请重试');
+        })
+        .finally(() => {
+            hideLoader();
+            // 恢复提交按钮状态
+            submitBtn.disabled = false;
+            submitBtn.textContent = '添加订单';
+        });
+    }
+    
+    // 只绑定表单提交事件，移除按钮点击事件
+    document.getElementById('addOrdersForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addOrders();
+    }); 

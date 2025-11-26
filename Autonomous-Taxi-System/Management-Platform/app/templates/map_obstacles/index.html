@@ -1,0 +1,997 @@
+{% extends "base.html" %}
+
+{% block title %}障碍物地图管理 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vehicles/map_view.css') }}">
+<style>
+    .color-preview {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 3px;
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+    
+    /* 障碍物样式 */
+    .obstacle-polygon {
+        background-color: rgba(255, 0, 0, 0.3);
+        border: 2px solid rgba(255, 0, 0, 0.7);
+        position: absolute;
+        z-index: 100;
+    }
+    
+    .obstacle-line {
+        background-color: #ff0000;
+        position: absolute;
+        transform-origin: 0 50%;
+        z-index: 100;
+    }
+    
+    /* 绘制模式样式 */
+    .drawing-mode .map-grid {
+        cursor: crosshair;
+    }
+    
+    /* 临时绘制点 */
+    .draw-point {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #ff0000;
+        border: 2px solid #ffffff;
+        transform: translate(-50%, -50%);
+        z-index: 150;
+    }
+    
+    .drawing-line {
+        position: absolute;
+        height: 2px;
+        background-color: #ff0000;
+        z-index: 100;
+        transform-origin: 0 50%;
+        pointer-events: none;
+    }
+    
+    /* 绘制控制面板 */
+    .draw-controls {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background-color: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        z-index: 1000;
+    }
+    
+    .obstacle-info {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 300px;
+        background-color: white;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        z-index: 1000;
+        display: none;
+    }
+    
+    /* 地图容器和网格样式 */
+    .map-container {
+        position: relative;
+        overflow: hidden;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        height: 700px; /* 设置一个合适的高度 */
+        width: 100%;
+    }
+    
+    .map-grid {
+        position: absolute;
+        width: 1000px;
+        height: 1000px;
+        overflow: visible;
+        cursor: grab;
+        transform-origin: 0 0;
+    }
+    
+    .city-map-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 10;
+    }
+    
+    /* 障碍物信息面板 */
+    .obstacle-info-panel {
+        margin-top: 20px;
+    }
+    
+    /* 坐标显示 */
+    .coordinates-display {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 12px;
+        z-index: 1000;
+    }
+    
+    /* 地图控制按钮 */
+    .map-controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        padding: 8px;
+        border-radius: 4px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    }
+    
+    .map-controls button {
+        margin: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>{{ _("障碍物地图管理") }}</h2>
+            <p class="text-muted">{{ _("在地图上管理障碍物，绘制障碍墙、限制区域等") }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('vehicles.map_view') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> 返回车辆地图视图
+            </a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-geo-alt me-2"></i> 
+                    <div class="city-selector mb-0 me-3">
+                        <select class="form-select form-select-sm" id="citySelector">
+                            <option value="shenyang">{{ _("沈阳市") }}</option>
+                            <option value="shanghai">{{ _("上海市") }}</option>
+                            <option value="beijing">{{ _("北京市") }}</option>
+                            <option value="guangzhou">{{ _("广州市") }}</option>
+                            <option value="shenzhen">{{ _("深圳市") }}</option>
+                            <option value="hangzhou">{{ _("杭州市") }}</option>
+                            <option value="nanjing">{{ _("南京市") }}</option>
+                            <option value="chengdu">{{ _("成都市") }}</option>
+                            <option value="chongqing">{{ _("重庆市") }}</option>
+                            <option value="wuhan">{{ _("武汉市") }}</option>
+                            <option value="xian">{{ _("西安市") }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex">
+                    <button id="startDrawPolygonBtn" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="bi bi-pentagon"></i> 绘制多边形障碍
+                    </button>
+                    <button id="startDrawLineBtn" class="btn btn-sm btn-outline-secondary me-2">
+                        <i class="bi bi-slash-lg"></i> 绘制线段障碍
+                    </button>
+                    <button id="cancelDrawBtn" class="btn btn-sm btn-outline-danger me-2" style="display: none;">
+                        <i class="bi bi-x-lg"></i> 取消绘制
+                    </button>
+                    <button id="saveObstacleBtn" class="btn btn-sm btn-success me-2" style="display: none;">
+                        <i class="bi bi-check-lg"></i> 保存障碍物
+                    </button>
+                    <button id="refreshMapBtn" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> 刷新地图
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="map-container">
+                <div class="map-grid" id="mapGrid">
+                    <!-- 背景地图图片 -->
+                    <img id="cityMapImage" src="{{ url_for('static', filename='images/shenyang.png') }}" class="city-map-image" />
+                    
+                    <!-- 障碍物将动态添加到这里 -->
+                </div>
+                
+                <!-- 坐标显示 -->
+                <div class="coordinates-display" id="coordinatesDisplay">坐标: (0, 0)</div>
+                
+                <!-- 地图控制按钮 -->
+                <div class="map-controls">
+                    <button id="zoomIn" class="btn btn-sm btn-outline-secondary" title="{{ _("放大") }}">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                    <button id="zoomOut" class="btn btn-sm btn-outline-secondary" title="{{ _("缩小") }}">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+                    <button id="resetZoom" class="btn btn-sm btn-outline-secondary" title="{{ _("重置视图") }}">
+                        <i class="bi bi-arrows-fullscreen"></i>
+                    </button>
+                </div>
+                
+                <!-- 绘制控制面板 -->
+                <div class="draw-controls" id="drawControls" style="display: none;">
+                    <h6 class="mb-2">{{ _("绘制障碍物") }}</h6>
+                    <div class="mb-3">
+                        <label for="obstacleName" class="form-label">{{ _("名称:") }}</label>
+                        <input type="text" class="form-control form-control-sm" id="obstacleName" placeholder="{{ _("障碍物名称") }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="obstacleType" class="form-label">{{ _("类型:") }}</label>
+                        <select class="form-select form-select-sm" id="obstacleType">
+                            <option value="barrier">{{ _("障碍墙") }}</option>
+                            <option value="restricted">{{ _("限制区域") }}</option>
+                            <option value="construction">{{ _("施工区域") }}</option>
+                            <option value="one_way">{{ _("单行道") }}</option>
+                            <option value="speed_limit">{{ _("限速区域") }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="obstacleColor" class="form-label">{{ _("颜色:") }}</label>
+                        <input type="color" class="form-control form-control-color" id="obstacleColor" value="#ff0000">
+                    </div>
+                    <div class="mb-3" id="lineWidthControl" style="display: none;">
+                        <label for="lineWidth" class="form-label">{{ _("线宽:") }}</label>
+                        <input type="number" class="form-control form-control-sm" id="lineWidth" min="1" max="10" step="0.5" value="2">
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="obstacleActive" checked>
+                        <label class="form-check-label" for="obstacleActive">{{ _("启用") }}</label>
+                    </div>
+                    <p class="text-muted small mb-2">
+                        <span id="drawingInstructions">{{ _("点击地图添加点，双击完成") }}</span>
+                        <br>已添加 <span id="pointCount">0</span> 个点
+                    </p>
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-sm btn-outline-danger" id="cancelDrawingBtn">
+                            <i class="bi bi-x"></i> 取消
+                        </button>
+                        <button class="btn btn-sm btn-primary" id="completeDrawingBtn">
+                            <i class="bi bi-check"></i> 完成
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 障碍物信息面板 -->
+                <div class="obstacle-info" id="obstacleInfo">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 id="obstacleTitle">{{ _("障碍物信息") }}</h5>
+                        <button type="button" class="btn-close" id="closeObstacleInfo"></button>
+                    </div>
+                    <div class="mb-2">
+                        <span class="badge bg-primary" id="obstacleStatus">{{ _("障碍墙") }}</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>ID:</strong> <span id="obstacleId"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>城市:</strong> <span id="obstacleCity"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>类型:</strong> <span id="obstacleTypeInfo"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>形状:</strong> <span id="obstacleShape"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>颜色:</strong> 
+                        <span class="color-preview" id="obstacleColorPreview"></span>
+                        <span id="obstacleColorText"></span>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-primary" id="editObstacleBtn">
+                            <i class="bi bi-pencil"></i> 编辑
+                        </button>
+                        <button class="btn btn-sm btn-danger" id="deleteObstacleBtn">
+                            <i class="bi bi-trash"></i> 删除
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="toggleObstacleBtn">
+                            <i class="bi bi-eye-slash"></i> 停用
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">{{ _("确认删除") }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确定要删除障碍物 "<span id="deleteObstacleName"></span>" 吗？此操作无法撤销。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _("取消") }}</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">{{ _("确认删除") }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化变量
+        const mapGrid = document.getElementById('mapGrid');
+        const citySelector = document.getElementById('citySelector');
+        const cityMapImage = document.getElementById('cityMapImage');
+        const coordinatesDisplay = document.getElementById('coordinatesDisplay');
+        const drawControls = document.getElementById('drawControls');
+        const obstacleInfo = document.getElementById('obstacleInfo');
+        const closeObstacleInfo = document.getElementById('closeObstacleInfo');
+        
+        // 地图缩放与拖动变量
+        let currentScale = 1;
+        let isDragging = false;
+        let lastX = 0;
+        let lastY = 0;
+        let translateX = 0;
+        let translateY = 0;
+        
+        // 地图缩放与拖动控制
+        const zoomIn = document.getElementById('zoomIn');
+        const zoomOut = document.getElementById('zoomOut');
+        const resetZoom = document.getElementById('resetZoom');
+        
+        // 绘制相关按钮
+        const startDrawPolygonBtn = document.getElementById('startDrawPolygonBtn');
+        const startDrawLineBtn = document.getElementById('startDrawLineBtn');
+        const cancelDrawBtn = document.getElementById('cancelDrawBtn');
+        const saveObstacleBtn = document.getElementById('saveObstacleBtn');
+        const refreshMapBtn = document.getElementById('refreshMapBtn');
+        const cancelDrawingBtn = document.getElementById('cancelDrawingBtn');
+        const completeDrawingBtn = document.getElementById('completeDrawingBtn');
+        
+        // 绘制状态变量
+        let isDrawing = false;
+        let drawingType = ''; // 'polygon' 或 'line'
+        let drawPoints = [];
+        let drawElements = [];
+        
+        // 当前选中的障碍物
+        let selectedObstacle = null;
+        
+        // 缩放控制函数
+        zoomIn.addEventListener('click', function() {
+            currentScale += 0.1;
+            updateMapTransform();
+        });
+        
+        zoomOut.addEventListener('click', function() {
+            currentScale = Math.max(0.5, currentScale - 0.1);
+            updateMapTransform();
+        });
+        
+        resetZoom.addEventListener('click', function() {
+            currentScale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateMapTransform();
+        });
+        
+        // 更新地图变换
+        function updateMapTransform() {
+            mapGrid.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+        }
+        
+        // 地图拖动
+        mapGrid.addEventListener('mousedown', function(e) {
+            // 如果处于绘制模式，不启用拖动
+            if (isDrawing) return;
+            
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+            mapGrid.style.cursor = 'grabbing';
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - lastX;
+            const deltaY = e.clientY - lastY;
+            
+            translateX += deltaX;
+            translateY += deltaY;
+            
+            updateMapTransform();
+            
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+        
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            if (!isDrawing) {
+                mapGrid.style.cursor = 'grab';
+            }
+        });
+        
+        // 修改坐标显示，考虑缩放和平移
+        mapGrid.addEventListener('mousemove', function(e) {
+            // 获取地图容器的位置和大小
+            const mapContainer = document.querySelector('.map-container');
+            const containerRect = mapContainer.getBoundingClientRect();
+            
+            // 计算鼠标相对于容器的位置
+            const mouseX = e.clientX - containerRect.left;
+            const mouseY = e.clientY - containerRect.top;
+            
+            // 计算地图的实际可见区域（应用缩放和平移后）
+            const mapRect = mapGrid.getBoundingClientRect();
+            
+            // 计算地图原点在视口中的位置
+            const originX = mapRect.left - containerRect.left;
+            const originY = mapRect.top - containerRect.top;
+            
+            // 计算鼠标相对于地图原点的位置
+            const relativeX = mouseX - originX;
+            const relativeY = mouseY - originY;
+            
+            // 将相对位置转换为1000×1000网格坐标（考虑缩放）
+            const gridX = Math.round(relativeX / currentScale);
+            const gridY = Math.round(relativeY / currentScale);
+            
+            // 更新坐标显示
+            coordinatesDisplay.textContent = `坐标: (${gridX}, ${gridY})`;
+            
+            // 如果正在绘制，显示临时线段
+            if (isDrawing && drawPoints.length > 0) {
+                updateTempLine(gridX, gridY);
+            }
+        });
+        
+        // 切换城市时更新地图
+        citySelector.addEventListener('change', function() {
+            const cityCode = this.value;
+            cityMapImage.src = `{{ url_for('static', filename='images/') }}${cityCode}.png`;
+            
+            // 加载该城市的障碍物
+            loadObstaclesForCity(cityCode);
+        });
+        
+        // 绘制临时线条 - 修改为使用网格坐标
+        function updateTempLine(x, y) {
+            // 移除之前的临时线
+            const oldTempLine = document.getElementById('tempLine');
+            if (oldTempLine) {
+                oldTempLine.remove();
+            }
+            
+            // 获取最后一个点
+            const lastPoint = drawPoints[drawPoints.length - 1];
+            
+            // 计算线段
+            const dx = x - lastPoint.x;
+            const dy = y - lastPoint.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
+            
+            // 创建临时线段
+            const line = document.createElement('div');
+            line.id = 'tempLine';
+            line.className = 'drawing-line';
+            line.style.left = `${lastPoint.x}px`;
+            line.style.top = `${lastPoint.y}px`;
+            line.style.width = `${length}px`;
+            line.style.transform = `rotate(${angle}rad)`;
+            
+            mapGrid.appendChild(line);
+        }
+        
+        // 开始绘制多边形
+        startDrawPolygonBtn.addEventListener('click', function() {
+            startDrawing('polygon');
+        });
+        
+        // 开始绘制线段
+        startDrawLineBtn.addEventListener('click', function() {
+            startDrawing('line');
+        });
+        
+        // 取消绘制
+        cancelDrawBtn.addEventListener('click', function() {
+            cancelDrawing();
+        });
+        
+        // 取消绘制（绘制控制面板内的按钮）
+        cancelDrawingBtn.addEventListener('click', function() {
+            cancelDrawing();
+        });
+        
+        // 开始绘制 - 修改处理绘制事件
+        function startDrawing(type) {
+            isDrawing = true;
+            drawingType = type;
+            drawPoints = [];
+            
+            // 清除临时元素
+            clearDrawElements();
+            
+            // 切换按钮显示状态
+            startDrawPolygonBtn.style.display = 'none';
+            startDrawLineBtn.style.display = 'none';
+            cancelDrawBtn.style.display = 'inline-block';
+            saveObstacleBtn.style.display = 'none';
+            
+            // 显示绘制控制面板
+            drawControls.style.display = 'block';
+            
+            // 根据类型更新UI
+            document.getElementById('lineWidthControl').style.display = (type === 'line') ? 'block' : 'none';
+            document.getElementById('drawingInstructions').textContent = 
+                (type === 'polygon') ? '点击地图添加点，至少需要3个点' : '点击地图添加点，至少需要2个点';
+            
+            // 添加绘制模式样式
+            mapGrid.classList.add('drawing-mode');
+            mapGrid.style.cursor = 'crosshair';
+            
+            // 绑定点击事件
+            mapGrid.addEventListener('click', handleMapClick);
+        }
+        
+        // 修改地图点击处理函数，考虑缩放和平移
+        function handleMapClick(e) {
+            // 如果点击的是障碍物或绘制点，则忽略
+            if (e.target !== mapGrid && e.target !== cityMapImage) {
+                return;
+            }
+            
+            // 获取地图容器的位置和大小
+            const mapContainer = document.querySelector('.map-container');
+            const containerRect = mapContainer.getBoundingClientRect();
+            
+            // 计算鼠标相对于容器的位置
+            const mouseX = e.clientX - containerRect.left;
+            const mouseY = e.clientY - containerRect.top;
+            
+            // 计算地图的实际可见区域（应用缩放和平移后）
+            const mapRect = mapGrid.getBoundingClientRect();
+            
+            // 计算地图原点在视口中的位置
+            const originX = mapRect.left - containerRect.left;
+            const originY = mapRect.top - containerRect.top;
+            
+            // 计算鼠标相对于地图原点的位置
+            const relativeX = mouseX - originX;
+            const relativeY = mouseY - originY;
+            
+            // 将相对位置转换为1000×1000网格坐标（考虑缩放）
+            const x = Math.round(relativeX / currentScale);
+            const y = Math.round(relativeY / currentScale);
+            
+            // 添加点
+            drawPoints.push({x, y});
+            
+            // 创建点标记
+            const point = document.createElement('div');
+            point.className = 'draw-point';
+            point.style.left = `${x}px`;
+            point.style.top = `${y}px`;
+            mapGrid.appendChild(point);
+            drawElements.push(point);
+            
+            // 更新点数量
+            document.getElementById('pointCount').textContent = drawPoints.length;
+            
+            // 如果有两个或更多点，绘制连线
+            if (drawPoints.length > 1) {
+                const p1 = drawPoints[drawPoints.length - 2];
+                const p2 = drawPoints[drawPoints.length - 1];
+                
+                // 计算线段
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                
+                // 创建线段
+                const line = document.createElement('div');
+                line.className = 'drawing-line';
+                line.style.left = `${p1.x}px`;
+                line.style.top = `${p1.y}px`;
+                line.style.width = `${length}px`;
+                line.style.transform = `rotate(${angle}rad)`;
+                
+                mapGrid.appendChild(line);
+                drawElements.push(line);
+            }
+            
+            // 检查是否可以保存
+            if ((drawingType === 'polygon' && drawPoints.length >= 3) ||
+                (drawingType === 'line' && drawPoints.length >= 2)) {
+                saveObstacleBtn.style.display = 'inline-block';
+            }
+        }
+        
+        // 取消绘制
+        function cancelDrawing() {
+            isDrawing = false;
+            
+            // 清除临时元素
+            clearDrawElements();
+            
+            // 复原按钮状态
+            startDrawPolygonBtn.style.display = 'inline-block';
+            startDrawLineBtn.style.display = 'inline-block';
+            cancelDrawBtn.style.display = 'none';
+            saveObstacleBtn.style.display = 'none';
+            
+            // 隐藏绘制控制面板
+            drawControls.style.display = 'none';
+            
+            // 移除绘制模式样式
+            mapGrid.classList.remove('drawing-mode');
+            mapGrid.style.cursor = 'grab';
+            
+            // 解绑点击事件
+            mapGrid.removeEventListener('click', handleMapClick);
+        }
+        
+        // 清除绘制元素
+        function clearDrawElements() {
+            // 移除所有临时绘制元素
+            drawElements.forEach(el => el.remove());
+            drawElements = [];
+            
+            // 移除临时线
+            const tempLine = document.getElementById('tempLine');
+            if (tempLine) {
+                tempLine.remove();
+            }
+        }
+        
+        // 加载城市障碍物
+        function loadObstaclesForCity(cityCode) {
+            // 清除现有障碍物
+            clearObstacles();
+            
+            // 从API获取障碍物数据
+            fetch(`{{ url_for('map_obstacles.api_get_by_city', city_code='CITY') }}`.replace('CITY', cityCode))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 渲染障碍物
+                        data.data.forEach(renderObstacle);
+                    } else {
+                        showToast('加载障碍物失败: ' + data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('加载障碍物请求失败', 'danger');
+                });
+        }
+        
+        // 清除所有障碍物
+        function clearObstacles() {
+            const obstacles = document.querySelectorAll('.obstacle-polygon, .obstacle-line');
+            obstacles.forEach(obstacle => obstacle.remove());
+        }
+        
+        // 渲染障碍物
+        function renderObstacle(obstacle) {
+            if (!obstacle.polygon_points) return;
+            
+            const points = obstacle.polygon_points.split(/[\n,]+/).map(p => parseInt(p.trim()));
+            
+            if (obstacle.geometry_type === 'line') {
+                // 渲染线段
+                for (let i = 0; i < points.length - 2; i += 2) {
+                    const x1 = points[i];
+                    const y1 = points[i + 1];
+                    const x2 = points[i + 2];
+                    const y2 = points[i + 3];
+                    
+                    // 计算线段
+                    const dx = x2 - x1;
+                    const dy = y2 - y1;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx);
+                    
+                    // 创建线段
+                    const line = document.createElement('div');
+                    line.className = 'obstacle-line';
+                    line.style.left = `${x1}px`;
+                    line.style.top = `${y1}px`;
+                    line.style.width = `${length}px`;
+                    line.style.transform = `rotate(${angle}rad)`;
+                    line.style.backgroundColor = obstacle.color || 'rgba(255, 0, 0, 0.7)';
+                    line.style.height = `${obstacle.width || 2}px`;
+                    
+                    // 数据属性
+                    line.setAttribute('data-obstacle-id', obstacle.id);
+                    line.setAttribute('data-obstacle-type', obstacle.obstacle_type);
+                    line.setAttribute('data-geometry-type', 'line');
+                    line.setAttribute('data-obstacle-name', obstacle.name);
+                    
+                    // 透明度基于激活状态
+                    if (!obstacle.is_active) {
+                        line.style.opacity = '0.3';
+                    }
+                    
+                    // 点击事件
+                    line.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        showObstacleInfo(obstacle);
+                    });
+                    
+                    mapGrid.appendChild(line);
+                }
+            } else {
+                // 渲染多边形
+                if (points.length < 6) return; // 至少需要3个点
+                
+                // 计算多边形的边界
+                let minX = Infinity, minY = Infinity, maxX = 0, maxY = 0;
+                for (let i = 0; i < points.length; i += 2) {
+                    minX = Math.min(minX, points[i]);
+                    maxX = Math.max(maxX, points[i]);
+                    minY = Math.min(minY, points[i + 1]);
+                    maxY = Math.max(maxY, points[i + 1]);
+                }
+                
+                // 创建多边形
+                const polygon = document.createElement('div');
+                polygon.className = 'obstacle-polygon';
+                polygon.style.left = `${minX}px`;
+                polygon.style.top = `${minY}px`;
+                polygon.style.width = `${maxX - minX}px`;
+                polygon.style.height = `${maxY - minY}px`;
+                
+                // 使用clip-path创建精确形状
+                let clipPath = 'polygon(';
+                for (let i = 0; i < points.length; i += 2) {
+                    const x = points[i] - minX;
+                    const y = points[i + 1] - minY;
+                    clipPath += `${x}px ${y}px, `;
+                }
+                clipPath = clipPath.slice(0, -2) + ')';
+                polygon.style.clipPath = clipPath;
+                
+                // 设置颜色
+                polygon.style.backgroundColor = obstacle.color || 'rgba(255, 0, 0, 0.3)';
+                polygon.style.borderColor = obstacle.color ? obstacle.color.replace('0.3', '0.7') : 'rgba(255, 0, 0, 0.7)';
+                
+                // 数据属性
+                polygon.setAttribute('data-obstacle-id', obstacle.id);
+                polygon.setAttribute('data-obstacle-type', obstacle.obstacle_type);
+                polygon.setAttribute('data-geometry-type', 'polygon');
+                polygon.setAttribute('data-obstacle-name', obstacle.name);
+                
+                // 透明度基于激活状态
+                if (!obstacle.is_active) {
+                    polygon.style.opacity = '0.3';
+                }
+                
+                // 点击事件
+                polygon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showObstacleInfo(obstacle);
+                });
+                
+                mapGrid.appendChild(polygon);
+            }
+        }
+        
+        // 显示障碍物信息
+        function showObstacleInfo(obstacle) {
+            selectedObstacle = obstacle;
+            
+            document.getElementById('obstacleTitle').textContent = obstacle.name;
+            document.getElementById('obstacleId').textContent = obstacle.id;
+            document.getElementById('obstacleCity').textContent = obstacle.city_code;
+            document.getElementById('obstacleTypeInfo').textContent = getObstacleTypeName(obstacle.obstacle_type);
+            document.getElementById('obstacleShape').textContent = obstacle.geometry_type === 'line' ? '线段' : '多边形';
+            
+            document.getElementById('obstacleColorPreview').style.backgroundColor = obstacle.color;
+            document.getElementById('obstacleColorText').textContent = obstacle.color;
+            
+            // 设置状态徽章
+            const statusBadge = document.getElementById('obstacleStatus');
+            statusBadge.textContent = getObstacleTypeName(obstacle.obstacle_type);
+            
+            // 设置按钮状态
+            const toggleBtn = document.getElementById('toggleObstacleBtn');
+            toggleBtn.innerHTML = obstacle.is_active ? 
+                '<i class="bi bi-eye-slash"></i> 停用' : 
+                '<i class="bi bi-info-circle"></i> 启用';
+            toggleBtn.className = obstacle.is_active ? 
+                'btn btn-sm btn-outline-secondary' : 
+                'btn btn-sm btn-outline-success';
+            
+            // 绑定按钮事件
+            document.getElementById('editObstacleBtn').onclick = function() {
+                // 跳转到编辑页面
+                window.location.href = `{{ url_for('map_obstacles.edit', obstacle_id=0) }}`.replace('0', obstacle.id);
+            };
+            
+            document.getElementById('deleteObstacleBtn').onclick = function() {
+                // 显示删除确认
+                document.getElementById('deleteObstacleName').textContent = obstacle.name;
+                const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                modal.show();
+            };
+            
+            document.getElementById('toggleObstacleBtn').onclick = function() {
+                // 切换激活状态
+                toggleObstacleActive(obstacle.id, obstacle.is_active ? 0 : 1);
+            };
+            
+            obstacleInfo.style.display = 'block';
+        }
+        
+        // 关闭障碍物信息面板
+        closeObstacleInfo.addEventListener('click', function() {
+            obstacleInfo.style.display = 'none';
+            selectedObstacle = null;
+        });
+        
+        // 确认删除
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (!selectedObstacle) return;
+            
+            // 删除障碍物
+            fetch('{{ url_for("map_obstacles.api_delete") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({obstacle_id: selectedObstacle.id})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('障碍物删除成功', 'success');
+                    
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                    modal.hide();
+                    
+                    // 关闭信息面板
+                    obstacleInfo.style.display = 'none';
+                    
+                    // 重新加载障碍物
+                    loadObstaclesForCity(citySelector.value);
+                } else {
+                    showToast('删除失败: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('删除请求失败，请重试', 'danger');
+            });
+        });
+        
+        // 切换障碍物激活状态
+        function toggleObstacleActive(obstacleId, activeStatus) {
+            fetch(`{{ url_for('map_obstacles.toggle_active', obstacle_id=0) }}`.replace('0', obstacleId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `is_active=${activeStatus}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('障碍物状态已更新', 'success');
+                    
+                    // 关闭信息面板
+                    obstacleInfo.style.display = 'none';
+                    
+                    // 重新加载障碍物
+                    loadObstaclesForCity(citySelector.value);
+                } else {
+                    showToast('更新状态失败: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('请求失败，请重试', 'danger');
+            });
+        }
+        
+        // 获取障碍物类型名称
+        function getObstacleTypeName(type) {
+            const typeNames = {
+                'barrier': '障碍墙',
+                'restricted': '限制区域',
+                'construction': '施工区域',
+                'one_way': '单行道',
+                'speed_limit': '限速区域'
+            };
+            return typeNames[type] || type;
+        }
+        
+        // 刷新按钮
+        refreshMapBtn.addEventListener('click', function() {
+            loadObstaclesForCity(citySelector.value);
+        });
+        
+        // 显示提示信息
+        function showToast(message, type, duration = 3000) {
+            // 检查是否存在toast容器，没有则创建
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'position-fixed bottom-0 end-0 p-3';
+                toastContainer.style.zIndex = '5';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // 创建toast元素
+            const toastId = 'toast-' + Date.now();
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+            toastEl.id = toastId;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            
+            toastEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastEl);
+            
+            // 显示toast
+            const toast = new bootstrap.Toast(toastEl, {
+                animation: true,
+                autohide: true,
+                delay: duration
+            });
+            toast.show();
+            
+            // 自动移除
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastEl.remove();
+            });
+        }
+        
+        // 初始加载当前城市的障碍物
+        loadObstaclesForCity(citySelector.value);
+    });
+</script>
+{% endblock %} 

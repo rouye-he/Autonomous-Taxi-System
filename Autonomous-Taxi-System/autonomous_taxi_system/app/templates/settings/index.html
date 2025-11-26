@@ -1,0 +1,1914 @@
+{% extends "base.html" %}
+
+{% block title %}系统设置 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 确保模态框内容正确显示 */
+    .modal-backdrop {
+        z-index: 1040 !important;
+    }
+    
+    .modal {
+        z-index: 1050 !important;
+    }
+    
+    .modal-dialog {
+        margin: 2rem auto;
+        pointer-events: all;
+    }
+    
+    .modal-content {
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+        background-color: #fff !important;
+        opacity: 1 !important;
+    }
+    
+    /* 强制模态框内容可见 */
+    .modal.show .modal-dialog {
+        transform: none !important;
+        opacity: 1 !important;
+    }
+    
+    /* 避免模态框被其他元素覆盖 */
+    .modal-backdrop.show {
+        opacity: 0.5 !important;
+    }
+    
+    /* 标签页样式 */
+    #settings-tab .nav-link {
+        padding: 1rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-radius: 0;
+        border-bottom: 3px solid transparent;
+    }
+
+    #settings-tab .nav-link.active {
+        border-bottom: 3px solid #0d6efd;
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+
+    #settings-tab .nav-link:hover:not(.active) {
+        background-color: rgba(0, 0, 0, 0.03);
+        border-bottom: 3px solid #dee2e6;
+    }
+
+    /* 标签页内容区域样式 */
+    .tab-content {
+        padding-top: 20px;
+    }
+
+    /* 标签页图标样式 */
+    #settings-tab .nav-link i {
+        font-size: 1.1rem;
+    }
+
+    /* 标签页特定颜色 */
+    #general-tab.active { border-bottom-color: #0d6efd !important; }
+    #vehicle-params-tab.active { border-bottom-color: #198754 !important; background-color: rgba(25, 135, 84, 0.1) !important; color: #198754 !important; }
+    #charging-params-tab.active { border-bottom-color: #fd7e14 !important; background-color: rgba(253, 126, 20, 0.1) !important; color: #fd7e14 !important; }
+    #order-params-tab.active { border-bottom-color: #6f42c1 !important; background-color: rgba(111, 66, 193, 0.1) !important; color: #6f42c1 !important; }
+    #city-params-tab.active { border-bottom-color: #dc3545 !important; background-color: rgba(220, 53, 69, 0.1) !important; color: #dc3545 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 删除重复的Bootstrap CSS和JS引入，因为base.html已经包含了这些 -->
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script> -->
+
+<style>
+    /* 移除旧样式，使用extra_css中定义的样式 */
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-4">系统设置</h2>
+            <p class="text-muted mb-3">管理系统配置、用户权限和安全设置</p>
+
+    <!-- Toast容器 -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container"></div>
+
+            <!-- 标签页导航 -->
+            <ul class="nav nav-pills mb-4" id="settings-tab" role="tablist">
+            
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="vehicle-params-tab" data-bs-toggle="pill" data-bs-target="#vehicle-params" type="button" role="tab" aria-controls="vehicle-params" aria-selected="true">
+                        <i class="bi bi-taxi-front-fill me-2"></i>车辆参数
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="charging-params-tab" data-bs-toggle="pill" data-bs-target="#charging-params" type="button" role="tab" aria-controls="charging-params" aria-selected="false">
+                        <i class="bi bi-battery-charging me-2"></i>充电站参数
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="order-params-tab" data-bs-toggle="pill" data-bs-target="#order-params" type="button" role="tab" aria-controls="order-params" aria-selected="false">
+                        <i class="bi bi-receipt me-2"></i>订单参数
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="city-params-tab" data-bs-toggle="pill" data-bs-target="#city-params" type="button" role="tab" aria-controls="city-params" aria-selected="false">
+                        <i class="bi bi-geo-alt-fill me-2"></i>城市参数
+                    </button>
+                </li>
+            </ul>
+
+            <!-- 标签页内容 -->
+            <div class="tab-content p-4 bg-white rounded shadow-sm" id="settings-tabContent">
+                
+                <!-- 车辆参数设置 -->
+                {% include 'settings/vehicle_params.html' %}
+
+                <!-- 充电站参数设置 -->
+                <div class="tab-pane fade" id="charging-params">
+                    <!-- 加载指示器 -->
+                    <div id="charging-params-loading" class="text-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">加载系统参数...</p>
+                    </div>
+                    
+                    <div id="charging-params-content" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>充电站参数设置</h4>
+                            <button type="button" class="btn btn-outline-secondary" id="refreshChargingParams">
+                                <i class="bi bi-arrow-repeat me-1"></i> 刷新参数
+                            </button>
+                        </div>
+                    
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">充电参数</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="chargingForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="chargingRate" class="form-label">充电速率（%/秒）</label>
+                                                <input type="number" class="form-control" id="CHARGING_RATE" name="CHARGING_RATE" step="0.01" min="0.01">
+                                                <div class="form-text">车辆在充电站时电量恢复的速度</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="chargingBatteryUpdateInterval" class="form-label">充电中电量更新频率（秒）</label>
+                                                <input type="number" class="form-control" id="CHARGING_BATTERY_UPDATE_INTERVAL" name="CHARGING_BATTERY_UPDATE_INTERVAL" step="0.1" min="0.1">
+                                                <div class="form-text">充电中状态电量更新频率</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="chargingPricePerPercent" class="form-label">充电单价（元/%）</label>
+                                                <input type="number" class="form-control" id="CHARGING_PRICE_PER_PERCENT" name="CHARGING_PRICE_PER_PERCENT" step="0.01" min="0" placeholder="0.35">
+                                                <div class="form-text">每充1%电的价格</div>
+                                            </div>
+                                        </div>
+                                            </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveParamsGroup('chargingForm')">保存设置</button>
+                                </form>
+                                        </div>
+                                    </div>
+                                    
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">充电站购置价格设置</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="chargingStationPriceForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="chargingStationBaseCost" class="form-label">基础成本（元）</label>
+                                                <input type="number" class="form-control" id="CHARGING_STATION_BASE_COST" name="CHARGING_STATION_BASE_COST" step="0.01" min="0" placeholder="250000.00">
+                                                <div class="form-text">充电站的固定基础成本</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="chargingStationVariableCost" class="form-label">可变成本（元/车位）</label>
+                                                <input type="number" class="form-control" id="CHARGING_STATION_VARIABLE_COST" name="CHARGING_STATION_VARIABLE_COST" step="0.01" min="0" placeholder="35000.00">
+                                                <div class="form-text">充电站每车位的可变成本</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle me-2"></i>充电站购置总价 = 基础成本 + 充电站车位 × 可变成本
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveParamsGroup('chargingStationPriceForm')">保存设置</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">充电站调度参数</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="chargingSchedulerForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="chargingSchedulerInterval" class="form-label">调度检查间隔（秒）</label>
+                                                <input type="number" class="form-control" id="CHARGING_SCHEDULER_INTERVAL" name="CHARGING_SCHEDULER_INTERVAL" step="5" min="5">
+                                                <div class="form-text">充电站调度器检查低电量车辆的间隔</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="maxChargingRetry" class="form-label">最大重试次数</label>
+                                                <input type="number" class="form-control" id="MAX_CHARGING_RETRY_COUNT" name="MAX_CHARGING_RETRY_COUNT" step="1" min="1">
+                                                <div class="form-text">超过此次数将发出警报</div>
+                                            </div>
+                                            </div>
+                                            </div>
+                                    
+                                    <div class="row">
+                            
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="lowBatteryUpdateInterval" class="form-label">低电量状态更新频率（秒）</label>
+                                                <input type="number" class="form-control" id="LOW_BATTERY_UPDATE_INTERVAL" name="LOW_BATTERY_UPDATE_INTERVAL" step="0.1" min="0.1">
+                                                <div class="form-text">低电量状态更新频率</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveParamsGroup('chargingSchedulerForm')">保存设置</button>
+                                </form>
+                            </div>
+                        </div>
+                                        </div>
+                                    </div>
+                                    
+                <!-- 订单参数设置 -->
+                <div class="tab-pane fade" id="order-params">
+                    <!-- 加载指示器 -->
+                    <div id="order-params-loading" class="text-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">加载系统参数...</p>
+                    </div>
+                    
+                    <div id="order-params-content" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>订单参数设置</h4>
+                            <button type="button" class="btn btn-outline-secondary" id="refreshOrderParams">
+                                <i class="bi bi-arrow-repeat me-1"></i> 刷新参数
+                            </button>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">订单价格计算参数</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="orderPriceForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="orderBasePrice" class="form-label">起步价（元）</label>
+                                                <input type="number" class="form-control" id="ORDER_BASE_PRICE" name="ORDER_BASE_PRICE" step="0.01" min="0">
+                                                <div class="form-text">订单基础价格</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="pricePerKm" class="form-label">每公里价格（元）</label>
+                                                <input type="number" class="form-control" id="ORDER_PRICE_PER_KM" name="ORDER_PRICE_PER_KM" step="0.01" min="0">
+                                                <div class="form-text">基于距离的计价因子</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="orderBaseKm" class="form-label">起步距离（公里）</label>
+                                                <input type="number" class="form-control" id="ORDER_BASE_KM" name="ORDER_BASE_KM" step="0.1" min="0">
+                                                <div class="form-text">起步价包含的最大行驶距离</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="saveParamsGroup('orderPriceForm')">保存设置</button>
+                                </form>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>订单价格 = 
+                                <ul class="mb-0 mt-2">
+                                    <li>当行驶距离 ≤ 起步距离时：起步价</li>
+                                    <li>当行驶距离 > 起步距离时：起步价 + (行驶距离 - 起步距离) × 每公里价格</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        
+                    </div>
+                </div>
+
+                <!-- 城市参数设置 -->
+                <div class="tab-pane fade" id="city-params">
+                    <!-- 加载指示器 -->
+                    <div id="city-params-loading" class="text-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">加载城市参数...</p>
+                    </div>
+                    
+                    <div id="city-params-content" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>城市参数设置</h4>
+                            <button type="button" class="btn btn-outline-secondary" id="refreshCityParams">
+                                <i class="bi bi-arrow-repeat me-1"></i> 刷新参数
+                            </button>
+                        </div>
+                        
+                        <!-- 城市选择器 - 放在最上面 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">选择城市</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="city-selector">
+                                    <p class="text-muted mb-3">请选择要配置的城市，下方所有参数将显示该城市的配置</p>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="上海市">上海市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="北京市">北京市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="广州市">广州市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="深圳市">深圳市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="杭州市">杭州市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="南京市">南京市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="成都市">成都市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="重庆市">重庆市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="武汉市">武汉市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="西安市">西安市</button>
+                                        <button type="button" class="btn btn-outline-primary city-btn" data-city="沈阳市">沈阳市</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- 当前选中城市显示 -->
+                                <div id="current-city-display" class="mt-3" style="display: none;">
+                                    <div class="alert alert-primary">
+                                        <i class="bi bi-geo-alt-fill me-2"></i>
+                                        当前选择的城市: <strong id="selected-city-name">未选择</strong>
+                                    </div>
+                                </div>
+                                
+                                <!-- 初始提示 -->
+                                <div id="city-initial-message" class="text-center py-3 mt-3">
+                                    <i class="bi bi-arrow-up-circle fs-2 text-muted"></i>
+                                    <p class="mt-2 text-muted">请选择一个城市进行参数配置</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 参数卡片容器 - 初始隐藏，选择城市后显示 -->
+                        <div id="city-parameters-container" style="display: none;">
+                            <!-- 新增：城市地图参数设置 -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">城市地图参数设置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="cityMapParamsForm">
+                                        <input type="hidden" id="currentCityForMapParams" name="currentCityForMapParams" value="">
+                                        
+                                        <!-- 城市中心点坐标设置 -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <h6 class="border-bottom pb-2 mb-3">中心点坐标</h6>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityCenterLng" class="form-label">经度</label>
+                                                    <input type="number" class="form-control" id="cityCenterLng" name="cityCenterLng" step="0.000001" min="73" max="135">
+                                                    <div class="form-text">中国范围内的经度值（73°-135°）</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityCenterLat" class="form-label">纬度</label>
+                                                    <input type="number" class="form-control" id="cityCenterLat" name="cityCenterLat" step="0.000001" min="18" max="53">
+                                                    <div class="form-text">中国范围内的纬度值（18°-53°）</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 缩放比例和缩放级别设置 -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <h6 class="border-bottom pb-2 mb-3">缩放设置</h6>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityScaleFactor" class="form-label">缩放比例</label>
+                                                    <input type="number" class="form-control" id="cityScaleFactor" name="cityScaleFactor" step="0.01" min="0.05" max="0.5">
+                                                    <div class="form-text">值越大，地图上车辆分布范围越大（建议0.1-0.4）</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityZoomLevel" class="form-label">地图缩放级别</label>
+                                                    <input type="number" class="form-control" id="cityZoomLevel" name="cityZoomLevel" step="1" min="8" max="18">
+                                                    <div class="form-text">初始地图缩放级别（8-18，值越大显示越详细）</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            这些设置会影响地图查看页面中车辆和充电站的显示位置。点击预览可以查看当前设置的效果。
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-primary" id="saveMapParams">保存地图参数</button>
+                             
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- 距离转换比例设置 -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">城市距离转换比例设置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="cityParamForm">
+                                        <input type="hidden" id="currentCity" name="currentCity" value="">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityDistanceRatio" class="form-label">距离转换比例</label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control" id="cityDistanceRatio" name="cityDistanceRatio" step="0.01" min="0.01">
+                                                        <span class="input-group-text">公里/单位</span>
+                                                    </div>
+                                                    <div class="form-text">坐标距离单位与实际公里数的转换比例</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            距离转换比例用于计算实际行驶公里数。例如，比例为0.1时，坐标距离10单位等于实际距离1公里。
+                                        </div>
+                                        <button type="button" class="btn btn-primary" id="saveCityParam">保存设置</button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- 城市物价系数 -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">城市物价系数设置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="cityPriceFactorForm">
+                                        <input type="hidden" id="currentCityForPriceFactor" name="currentCityForPriceFactor" value="">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityOrderPriceFactor" class="form-label">订单价格系数</label>
+                                                    <input type="number" class="form-control" id="cityOrderPriceFactor" name="cityOrderPriceFactor" step="0.01" min="0.5" max="2.0">
+                                                    <div class="form-text">调整城市订单价格的相对系数</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityChargingPriceFactor" class="form-label">充电价格系数</label>
+                                                    <input type="number" class="form-control" id="cityChargingPriceFactor" name="cityChargingPriceFactor" step="0.01" min="0.5" max="2.0">
+                                                    <div class="form-text">调整城市充电站价格的相对系数</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityMaintenanceFactor" class="form-label">维护系数</label>
+                                                    <input type="number" class="form-control" id="cityMaintenanceFactor" name="cityMaintenanceFactor" step="0.01" min="0.5" max="2.0">
+                                                    <div class="form-text">调整城市车辆维护成本的相对系数</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityVehiclePriceFactor" class="form-label">车辆购置系数</label>
+                                                    <input type="number" class="form-control" id="cityVehiclePriceFactor" name="cityVehiclePriceFactor" step="0.01" min="0.5" max="2.0">
+                                                    <div class="form-text">调整城市车辆购置价格的相对系数</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="cityChargingStationPriceFactor" class="form-label">充电站价格系数</label>
+                                                    <input type="number" class="form-control" id="cityChargingStationPriceFactor" name="cityChargingStationPriceFactor" step="0.01" min="0.5" max="2.0">
+                                                    <div class="form-text">调整城市充电站建设价格的相对系数</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            物价系数会影响城市内的各种价格。以沈阳市和武汉市为基准(系数1.0)，其他城市根据当地物价水平进行调整。
+                                        </div>
+                                        <button type="button" class="btn btn-primary" id="saveCityPriceFactors">保存设置</button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- 支付方式偏好系数 -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">支付方式偏好系数设置</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="paymentPreferenceForm">
+                                        <input type="hidden" id="currentCityForPayment" name="currentCityForPayment" value="">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="cityWechatPayFactor" class="form-label">微信支付系数</label>
+                                                    <input type="number" class="form-control" id="cityWechatPayFactor" name="cityWechatPayFactor" step="0.1" min="0.1" max="2.8">
+                                                    <div class="form-text">微信支付在该城市的使用偏好系数</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="cityAlipayFactor" class="form-label">支付宝系数</label>
+                                                    <input type="number" class="form-control" id="cityAlipayFactor" name="cityAlipayFactor" step="0.1" min="0.1" max="2.8">
+                                                    <div class="form-text">支付宝在该城市的使用偏好系数</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="cityBalancePayFactor" class="form-label">余额支付系数</label>
+                                                    <input type="number" class="form-control" id="cityBalancePayFactor" name="cityBalancePayFactor" step="0.1" min="0.1" max="2.8">
+                                                    <div class="form-text">余额支付在该城市的使用偏好系数</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-3">
+                                            <div class="progress-bar" id="paymentFactorProgressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            支付方式偏好系数影响用户在该城市选择支付方式的概率。三种支付方式的系数之和应为3.0。
+                                            <div id="paymentFactorSum" class="mt-2">当前总和: <span id="paymentFactorSumValue">0</span>/3.0</div>
+                                        </div>
+                                        <button type="button" class="btn btn-primary" id="savePaymentFactors">保存设置</button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- 这里可以添加更多的城市参数卡片 -->
+                            <!-- 例如: 城市区域设置、高峰期设置、天气影响参数等 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 车型参数设置模态框 -->
+{% include 'settings/vehicle_modals.html' %}
+{% endblock %}
+
+{% block scripts %}
+<!-- 移除重复引入的Bootstrap JS，因为base.html已经包含了它 -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> -->
+<script>
+function showToast(message, type = 'info') {
+    // Toast notification function
+    const toastHTML = `
+        <div class="toast align-items-center text-white bg-${type} border-0 mb-3" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+    
+    // Create container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Add toast to container
+    toastContainer.innerHTML += toastHTML;
+    
+    // Initialize and show toast
+    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    const toastList = toastElList.map(function(toastEl) {
+        return new bootstrap.Toast(toastEl, {delay: 3000});
+    });
+    toastList.forEach(toast => toast.show());
+}
+
+// 辅助函数：从表单中收集参数数据
+function getFormParameters(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return {};
+    
+    const formData = {};
+    const elements = form.elements;
+    
+    for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        // 跳过按钮元素
+        if (element.tagName === 'BUTTON') continue;
+        
+        if (element.name) {
+            if (element.type === 'checkbox') {
+                formData[element.name] = element.checked;
+            } else if (element.type === 'select-one') {
+                formData[element.name] = element.value;
+            } else if (element.type === 'number') {
+                formData[element.name] = parseFloat(element.value);
+            } else {
+                formData[element.name] = element.value;
+            }
+        }
+    }
+    
+    return formData;
+}
+
+// 辅助函数：清理模态框背景和相关状态
+function cleanupModalBackdrops() {
+    console.log('清理所有模态框背景...');
+    
+    // 移除所有模态框背景
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.remove();
+    });
+    
+    // 检查body是否还有模态框打开
+    if (document.querySelectorAll('.modal.show').length === 0) {
+        // 如果没有打开的模态框，移除body上的modal-open类
+        document.body.classList.remove('modal-open');
+    }
+}
+
+// 车型参数保存函数
+function saveVehicleParams(formId) {
+    const parameters = getFormParameters(formId);
+    const formElement = document.getElementById(formId);
+    if (!formElement) {
+        console.error(`找不到表单元素: ${formId}`);
+        showToast('保存参数时发生错误: 找不到表单', 'danger');
+        return;
+    }
+    
+    const modalElement = formElement.closest('.modal');
+    if (!modalElement) {
+        console.error(`找不到模态框元素: 表单 ${formId} 不在模态框内`);
+        showToast('保存参数时发生错误: 模态框不存在', 'danger');
+        return;
+    }
+    
+    // 查找模态框中的保存按钮（可能是primary、success或danger类型）
+    const submitBtn = modalElement.querySelector('.modal-footer .btn-primary') || 
+                      modalElement.querySelector('.modal-footer .btn-success') || 
+                      modalElement.querySelector('.modal-footer .btn-danger');
+                      
+    if (!submitBtn) {
+        console.error(`找不到保存按钮: 模态框 ${modalElement.id}`);
+        showToast('保存参数时发生错误: 找不到保存按钮', 'danger');
+        return;
+    }
+    
+    const originalText = submitBtn.innerHTML;
+    
+    // 禁用按钮，显示加载状态
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...';
+    
+    // 发送请求保存参数
+    fetch('/api/v1/system_parameters', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({ parameters })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('网络请求错误');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showToast('车型参数保存成功', 'success');
+            
+            // 关闭模态框
+            try {
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) {
+                    modalInstance.hide();
+                    console.log(`模态框已关闭: ${modalElement.id}`);
+                    
+                    // 使用辅助函数清理背景
+                    cleanupModalBackdrops();
+                } else {
+                    console.warn(`无法获取模态框实例: ${modalElement.id}`);
+                    // 手动关闭
+                    modalElement.classList.remove('show');
+                    modalElement.style.display = 'none';
+                    
+                    // 使用辅助函数清理背景
+                    cleanupModalBackdrops();
+                }
+            } catch (error) {
+                console.error(`关闭模态框时出错:`, error);
+                // 尝试手动关闭
+                modalElement.classList.remove('show');
+                modalElement.style.display = 'none';
+                
+                // 使用辅助函数清理背景
+                cleanupModalBackdrops();
+            }
+        } else {
+            showToast(data.message || '保存失败', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('保存参数时出错:', error);
+        showToast('保存参数时发生错误', 'danger');
+    })
+    .finally(() => {
+        // 恢复按钮状态
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
+// 加载系统参数并填充表单
+function loadSystemParameters(formId) {
+    // 显示加载指示器
+    document.getElementById(`${formId}-loading`).style.display = 'block';
+    document.getElementById(`${formId}-content`).style.display = 'none';
+    
+    // 发送请求获取系统参数
+    fetch('/api/v1/system_parameters')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // 填充表单字段
+                Object.keys(data.parameters).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = data.parameters[key];
+                        } else if (element.type === 'select-one') {
+                            element.value = data.parameters[key];
+                        } else {
+                            element.value = data.parameters[key];
+                        }
+                    }
+                    
+                    // 更新价格显示
+                    if (key.endsWith('_PRICE')) {
+                        // 更新模态框中的价格显示
+                        const displayElement = document.getElementById(`${key}_display`);
+                        if (displayElement) {
+                            displayElement.textContent = `¥${data.parameters[key].toLocaleString()}`;
+                        }
+                        
+                        // 更新卡片中的价格显示
+                        const priceValue = document.getElementById(key.toLowerCase() + '_value');
+                        if (priceValue) {
+                            priceValue.textContent = data.parameters[key].toLocaleString();
+                        }
+                    }
+                });
+                
+                // 隐藏加载指示器，显示内容
+                document.getElementById(`${formId}-loading`).style.display = 'none';
+                document.getElementById(`${formId}-content`).style.display = 'block';
+                
+                console.log('系统参数加载完成');
+                
+                // 初始化车型模态框参数
+                initVehicleModalParameters(data.parameters);
+                
+            } else {
+                showToast(data.message || '加载系统参数失败', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('加载系统参数时出错:', error);
+            showToast('加载系统参数时发生错误', 'danger');
+            // 隐藏加载指示器
+            document.getElementById(`${formId}-loading`).style.display = 'none';
+        });
+}
+
+// 初始化车型模态框的参数
+function initVehicleModalParameters(parameters) {
+    // 定义所有车型和参数字段
+    const vehicleModels = [
+        'Alpha_X1', 'Alpha_Nexus', 'Alpha_Voyager',
+        'Nova_S1', 'Nova_Quantum', 'Nova_Pulse',
+        'Neon_500', 'Neon_Zero'
+    ];
+    
+    const paramFields = [
+        'PRICE', 'SPEED', 'ORDER_PRICE', 'CAPACITY',
+        'CHARGING_SPEED', 'MAINTENANCE_COST', 'ENERGY_CONSUMPTION_COEFFICIENT',
+        'CHARGING_EFFICIENCY'
+    ];
+    
+    // 遍历所有车型和参数，设置表单值
+    vehicleModels.forEach(model => {
+        paramFields.forEach(field => {
+            const paramName = `${model}_${field}`;
+            const element = document.getElementById(paramName);
+            if (element && parameters[paramName] !== undefined) {
+                element.value = parameters[paramName];
+            }
+        });
+    });
+}
+
+// 保存表单参数组
+function saveParamsGroup(formId) {
+    const parameters = getFormParameters(formId);
+    const submitBtn = document.querySelector(`#${formId} button[type="button"]`);
+    const originalText = submitBtn.innerHTML;
+    
+    // 禁用按钮，显示加载状态
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...';
+    
+    // 发送请求保存参数
+    fetch('/api/v1/system_parameters', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken() // 获取CSRF令牌的函数
+        },
+        body: JSON.stringify({ parameters })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('网络请求错误');
+        }
+        return response.json();
+    })
+ 
+    .catch(error => {
+        console.error('保存参数时出错:', error);
+        showToast('保存参数时发生错误', 'danger');
+    })
+    .finally(() => {
+        // 恢复按钮状态
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
+// 获取CSRF令牌
+function getCsrfToken() {
+    // 从cookie中获取CSRF令牌
+    const name = 'csrf_token=';
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookieArray = decodedCookie.split(';');
+    for (let i = 0; i < cookieArray.length; i++) {
+        let cookie = cookieArray[i].trim();
+        if (cookie.indexOf(name) === 0) {
+            return cookie.substring(name.length, cookie.length);
+        }
+    }
+    return '';
+}
+
+// 在页面加载时绑定事件
+document.addEventListener('DOMContentLoaded', function() {
+    // 调试信息：检查页面上是否存在模态框元素
+    console.log('页面加载完成，开始检查模态框元素...');
+    
+    // 页面加载时自动加载车辆参数
+    loadSystemParameters('vehicle-params');
+    
+    // 车型模态框ID列表
+    const vehicleModalIds = [
+        'alphaX1Modal', 'alphaNexusModal', 'alphaVoyagerModal',
+        'novaS1Modal', 'novaQuantumModal', 'novaPulseModal',
+        'neon500Modal', 'neonZeroModal'
+    ];
+    
+    // 验证模态框元素是否存在
+    vehicleModalIds.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            console.log(`✓ 找到模态框: ${id}`);
+            
+            // 为每个模态框添加隐藏事件监听器，确保背景被正确清理
+            element.addEventListener('hidden.bs.modal', function() {
+                console.log(`模态框隐藏事件触发: ${id}`);
+                // 使用辅助函数清理背景
+                cleanupModalBackdrops();
+            });
+        } else {
+            console.error(`✗ 找不到模态框: ${id}`);
+        }
+    });
+    
+    // 全局监听模态框隐藏事件
+    document.addEventListener('hidden.bs.modal', function(event) {
+        console.log('全局模态框隐藏事件触发:', event.target.id);
+        // 清理所有背景元素
+        setTimeout(function() {
+            // 双重检查确保所有背景元素都被删除
+            if (document.querySelectorAll('.modal-backdrop').length > 0) {
+                console.log('发现残留的模态框背景，正在清理...');
+                cleanupModalBackdrops();
+            }
+        }, 150);
+    });
+    
+    // 检查Bootstrap库是否正确加载
+    if (typeof bootstrap === 'undefined') {
+        console.error('错误: Bootstrap库未加载，模态框将无法正常工作');
+        showToast('系统错误: 无法加载必要的JavaScript库，请刷新页面或联系管理员', 'danger');
+        return;
+    } else {
+        console.log('Bootstrap库已加载，版本:', bootstrap.Modal.VERSION);
+    }
+    
+    // 使用Bootstrap的事件委托方式监听tab切换事件
+    const tabContainer = document.getElementById('settings-tab');
+    
+    // 监听所有标签页切换完成后的事件
+    document.addEventListener('shown.bs.tab', function(event) {
+        // 获取激活的标签ID
+        const activeTabId = event.target.getAttribute('data-bs-target');
+        
+        // 根据激活的标签加载相应的参数
+        if (activeTabId === '#vehicle-params') {
+            loadSystemParameters('vehicle-params');
+        } else if (activeTabId === '#charging-params') {
+            loadSystemParameters('charging-params');
+        } else if (activeTabId === '#order-params') {
+            loadSystemParameters('order-params');
+        } else if (activeTabId === '#city-params') {
+            loadCityParameters();
+        }
+    });
+    
+    // 为刷新按钮添加事件监听器
+    document.getElementById('refreshParams').addEventListener('click', function() {
+        loadSystemParameters('vehicle-params');
+    });
+    
+    document.getElementById('refreshChargingParams').addEventListener('click', function() {
+        loadSystemParameters('charging-params');
+    });
+    
+    document.getElementById('refreshOrderParams').addEventListener('click', function() {
+        loadSystemParameters('order-params');
+    });
+    
+    document.getElementById('refreshCityParams').addEventListener('click', function() {
+        loadCityParameters();
+    });
+    
+    // 初始化所有车型模态框
+    const vehicleModals = [
+        'alphaX1Modal', 'alphaNexusModal', 'alphaVoyagerModal',
+        'novaS1Modal', 'novaQuantumModal', 'novaPulseModal',
+        'neon500Modal', 'neonZeroModal'
+    ];
+    
+    // 初始化模态框
+    vehicleModals.forEach(modalId => {
+        const modalElement = document.getElementById(modalId);
+        if (modalElement) {
+            try {
+                // 先检查是否已经初始化
+                if (!bootstrap.Modal.getInstance(modalElement)) {
+                    console.log(`初始化模态框: ${modalId}`);
+                    // 创建新的模态框实例
+                    new bootstrap.Modal(modalElement, {
+                        backdrop: true,
+                        keyboard: true,
+                        focus: true
+                    });
+                } else {
+                    console.log(`模态框 ${modalId} 已经初始化`);
+                }
+            } catch (error) {
+                console.error(`初始化模态框 ${modalId} 时出错:`, error);
+            }
+        } else {
+            console.warn(`找不到模态框元素: ${modalId}`);
+        }
+    });
+    
+    // 为每个模态框按钮添加点击监听器
+    document.querySelectorAll('[data-bs-toggle="modal"]').forEach(button => {
+        const targetModalId = button.getAttribute('data-bs-target').substring(1); // 去掉前面的#
+        console.log(`找到模态框按钮, 目标: ${targetModalId}`);
+        
+        button.addEventListener('click', function(e) {
+            // 阻止默认行为，我们将手动控制模态框显示
+            e.preventDefault();
+            console.log(`点击按钮，准备打开模态框: ${targetModalId}`);
+            
+            const modalElement = document.getElementById(targetModalId);
+            if (!modalElement) {
+                console.error(`找不到模态框元素: ${targetModalId}`);
+                showToast(`找不到详情窗口: ${targetModalId}`, 'danger');
+                return;
+            }
+            
+            try {
+                // 确保先清除任何已存在的模态框和背景
+                const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+                existingBackdrops.forEach(backdrop => backdrop.remove());
+                
+                // 尝试先关闭任何已打开的模态框
+                document.querySelectorAll('.modal.show').forEach(modal => {
+                    try {
+                        const instance = bootstrap.Modal.getInstance(modal);
+                        if (instance) instance.hide();
+                    } catch (err) {
+                        console.warn('关闭已有模态框时出错:', err);
+                        modal.classList.remove('show');
+                        modal.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                    }
+                });
+                
+                // 手动设置模态框样式，确保可见
+                modalElement.style.display = 'block';
+                modalElement.style.zIndex = '1050';
+                modalElement.classList.add('show');
+                
+                // 添加模态框背景
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                backdrop.style.zIndex = '1040';
+                document.body.appendChild(backdrop);
+                
+                // 添加body类
+                document.body.classList.add('modal-open');
+                
+                // 如果需要，也可以尝试使用bootstrap的方式
+                try {
+                    let modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (!modalInstance) {
+                        console.log(`模态框实例不存在，创建新实例: ${targetModalId}`);
+                        modalInstance = new bootstrap.Modal(modalElement, {
+                            backdrop: true,
+                            keyboard: true,
+                            focus: true
+                        });
+                        // 显示模态框
+                        modalInstance.show();
+                    } else {
+                        // 重新显示
+                        modalInstance.show();
+                    }
+                    console.log(`模态框已显示: ${targetModalId}`);
+                } catch (error) {
+                    console.error(`使用Bootstrap方式打开模态框时出错:`, error);
+                    // 已经使用手动方式处理，不需要额外操作
+                }
+                
+                // 为关闭按钮添加事件监听器
+                const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"]');
+                closeButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        // 手动清理模态框状态
+                        modalElement.classList.remove('show');
+                        modalElement.style.display = 'none';
+                        
+                        // 使用辅助函数清理背景
+                        cleanupModalBackdrops();
+                    });
+                });
+                
+                // 也为bootstrap模态框的隐藏事件添加监听器
+                modalElement.addEventListener('hidden.bs.modal', function() {
+                    console.log(`模态框隐藏事件触发: ${modalElement.id}`);
+                    // 使用辅助函数清理背景
+                    cleanupModalBackdrops();
+                });
+                
+            } catch (error) {
+                console.error(`打开模态框时出错:`, error);
+                showToast(`无法打开详情窗口，请刷新页面后重试`, 'warning');
+            }
+        });
+    });
+});
+
+// 加载城市参数
+function loadCityParameters() {
+    // 显示加载指示器
+    document.getElementById('city-params-loading').style.display = 'block';
+    document.getElementById('city-params-content').style.display = 'none';
+    
+    // 发送请求获取系统参数
+    fetch('/api/v1/system_parameters')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // 绑定城市按钮点击事件
+                bindCityButtonEvents(data.parameters);
+                
+                // 隐藏加载指示器，显示内容
+                document.getElementById('city-params-loading').style.display = 'none';
+                document.getElementById('city-params-content').style.display = 'block';
+                
+                console.log('城市参数加载完成');
+            } else {
+                showToast(data.message || '加载城市参数失败', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('加载城市参数时出错:', error);
+            showToast('加载城市参数时发生错误', 'danger');
+            // 隐藏加载指示器
+            document.getElementById('city-params-loading').style.display = 'none';
+        });
+}
+
+// 绑定城市按钮点击事件
+function bindCityButtonEvents(parameters) {
+    const cityButtons = document.querySelectorAll('.city-btn');
+    const initialMessage = document.getElementById('city-initial-message');
+    const cityParamsContainer = document.getElementById('city-parameters-container');
+    const currentCityDisplay = document.getElementById('current-city-display');
+    const selectedCityName = document.getElementById('selected-city-name');
+    const currentCityInput = document.getElementById('currentCity');
+    const cityDistanceRatioInput = document.getElementById('cityDistanceRatio');
+    
+    // 同步所有表单中的当前城市输入字段
+    const currentCityForPriceFactor = document.getElementById('currentCityForPriceFactor');
+    const currentCityForPayment = document.getElementById('currentCityForPayment');
+    const currentCityForMapParams = document.getElementById('currentCityForMapParams'); // 新增
+    
+    // 为每个城市按钮添加点击事件
+    cityButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // 移除其他按钮的active类
+            cityButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // 添加当前按钮的active类
+            this.classList.add('active');
+            
+            // 获取选中的城市
+            const city = this.getAttribute('data-city');
+            
+            // 设置所有表单中的当前城市输入值
+            currentCityInput.value = city;
+            if (currentCityForPriceFactor) currentCityForPriceFactor.value = city;
+            if (currentCityForPayment) currentCityForPayment.value = city;
+            if (currentCityForMapParams) currentCityForMapParams.value = city; // 新增
+            
+            // 显示当前选中的城市
+            selectedCityName.textContent = city;
+            
+            // 隐藏初始提示，显示城市提示和参数容器
+            initialMessage.style.display = 'none';
+            currentCityDisplay.style.display = 'block';
+            cityParamsContainer.style.display = 'block';
+            
+            // 加载城市参数
+            loadCitySpecificParameters(city, parameters);
+        });
+    });
+    
+    // 绑定各类保存按钮事件
+    const saveDistanceButton = document.getElementById('saveCityParam');
+    if (saveDistanceButton) {
+        saveDistanceButton.addEventListener('click', function() {
+            saveCityParameter();
+        });
+    }
+    
+    const savePriceFactorsButton = document.getElementById('saveCityPriceFactors');
+    if (savePriceFactorsButton) {
+        savePriceFactorsButton.addEventListener('click', function() {
+            saveCityPriceFactors();
+        });
+    }
+    
+    const savePaymentFactorsButton = document.getElementById('savePaymentFactors');
+    if (savePaymentFactorsButton) {
+        savePaymentFactorsButton.addEventListener('click', function() {
+            saveCityPaymentFactors();
+        });
+    }
+    
+    // 新增：绑定保存地图参数按钮
+    const saveMapParamsButton = document.getElementById('saveMapParams');
+    if (saveMapParamsButton) {
+        saveMapParamsButton.addEventListener('click', function() {
+            saveCityMapParameters();
+        });
+    }
+    
+    // 新增：绑定预览地图按钮
+    const previewMapParamsButton = document.getElementById('previewMapParams');
+    if (previewMapParamsButton) {
+        previewMapParamsButton.addEventListener('click', function() {
+            previewCityMap();
+        });
+    }
+    
+    // 为支付方式系数输入框添加实时验证
+    const paymentFactorInputs = [
+        document.getElementById('cityWechatPayFactor'),
+        document.getElementById('cityAlipayFactor'),
+        document.getElementById('cityBalancePayFactor')
+    ];
+    
+    paymentFactorInputs.forEach(input => {
+        if (input) {
+            input.addEventListener('input', updatePaymentFactorsSum);
+        }
+    });
+}
+
+// 新增：保存城市地图参数
+function saveCityMapParameters() {
+    const city = document.getElementById('currentCityForMapParams').value;
+    
+    if (!city) {
+        showToast('请选择一个城市', 'warning');
+        return;
+    }
+    
+    // 获取表单值
+    const centerLng = parseFloat(document.getElementById('cityCenterLng').value);
+    const centerLat = parseFloat(document.getElementById('cityCenterLat').value);
+    const scaleFactor = parseFloat(document.getElementById('cityScaleFactor').value);
+    const zoomLevel = parseInt(document.getElementById('cityZoomLevel').value);
+    
+    // 验证经纬度值
+    if (isNaN(centerLng) || centerLng < 73 || centerLng > 135) {
+        showToast('请输入有效的经度值（73°-135°之间）', 'warning');
+        return;
+    }
+    
+    if (isNaN(centerLat) || centerLat < 18 || centerLat > 53) {
+        showToast('请输入有效的纬度值（18°-53°之间）', 'warning');
+        return;
+    }
+    
+    // 验证缩放比例
+    if (isNaN(scaleFactor) || scaleFactor < 0.05 || scaleFactor > 0.5) {
+        showToast('请输入有效的缩放比例（0.05-0.5之间）', 'warning');
+        return;
+    }
+    
+    // 验证缩放级别
+    if (isNaN(zoomLevel) || zoomLevel < 8 || zoomLevel > 18) {
+        showToast('请输入有效的缩放级别（8-18之间）', 'warning');
+        return;
+    }
+    
+    const saveButton = document.getElementById('saveMapParams');
+    const originalText = saveButton.innerHTML;
+    
+    // 禁用按钮，显示加载状态
+    saveButton.disabled = true;
+    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...';
+    
+    // 获取当前城市地图参数
+    fetch('/api/v1/system_parameters')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // 获取现有参数
+                let cityCenters = data.parameters['city_centers'] || getDefaultCityCenters();
+                let cityScaleFactors = data.parameters['city_scale_factors'] || getDefaultCityScaleFactors();
+                let cityZoomLevels = data.parameters['city_zoom_levels'] || getDefaultCityZoomLevels();
+                
+                // 更新当前城市的参数
+                cityCenters[city] = [centerLng, centerLat];
+                cityScaleFactors[city] = scaleFactor;
+                cityZoomLevels[city] = zoomLevel;
+                
+                // 构建要保存的参数对象
+                const parameters = {
+                    'city_centers': cityCenters,
+                    'city_scale_factors': cityScaleFactors,
+                    'city_zoom_levels': cityZoomLevels
+                };
+                
+                // 发送请求保存参数
+                return fetch('/api/v1/system_parameters', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ parameters })
+                });
+            } else {
+                throw new Error(data.message || '获取参数失败');
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast(`${city}地图参数保存成功`, 'success');
+            } else {
+                showToast(data.message || '保存失败', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('保存城市地图参数时出错:', error);
+            showToast('保存城市地图参数时发生错误: ' + error.message, 'danger');
+        })
+        .finally(() => {
+            // 恢复按钮状态
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalText;
+        });
+}
+
+// 新增：预览城市地图
+function previewCityMap() {
+    const city = document.getElementById('currentCityForMapParams').value;
+    
+    if (!city) {
+        showToast('请选择一个城市', 'warning');
+        return;
+    }
+    
+    // 获取表单值
+    const centerLng = parseFloat(document.getElementById('cityCenterLng').value);
+    const centerLat = parseFloat(document.getElementById('cityCenterLat').value);
+    
+    // 验证经纬度值
+    if (isNaN(centerLng) || centerLng < 73 || centerLng > 135 || 
+        isNaN(centerLat) || centerLat < 18 || centerLat > 53) {
+        showToast('请输入有效的经纬度值', 'warning');
+        return;
+    }
+    
+    // 使用高德地图API打开新窗口预览位置
+    const mapUrl = `https://uri.amap.com/marker?position=${centerLng},${centerLat}&name=${city}中心点&callnative=0`;
+    window.open(mapUrl, '_blank');
+}
+
+// 新增：加载城市地图参数
+function loadCityMapParameters(city, parameters) {
+    // 加载城市中心点坐标
+    const cityCenters = parameters['city_centers'] || {};
+    if (city in cityCenters) {
+        document.getElementById('cityCenterLng').value = cityCenters[city][0] || 0;
+        document.getElementById('cityCenterLat').value = cityCenters[city][1] || 0;
+    } else {
+        // 设置默认值
+        const defaultCenters = getDefaultCityCenters();
+        if (city in defaultCenters) {
+            document.getElementById('cityCenterLng').value = defaultCenters[city][0];
+            document.getElementById('cityCenterLat').value = defaultCenters[city][1];
+        } else {
+            // 保守默认值
+            document.getElementById('cityCenterLng').value = 116.39;
+            document.getElementById('cityCenterLat').value = 39.91;
+        }
+    }
+    
+    // 加载城市缩放比例
+    const cityScaleFactors = parameters['city_scale_factors'] || {};
+    if (city in cityScaleFactors) {
+        document.getElementById('cityScaleFactor').value = cityScaleFactors[city] || 0.2;
+    } else {
+        // 设置默认值
+        const defaultScaleFactors = getDefaultCityScaleFactors();
+        document.getElementById('cityScaleFactor').value = defaultScaleFactors[city] || 0.2;
+    }
+    
+    // 加载城市缩放级别
+    const cityZoomLevels = parameters['city_zoom_levels'] || {};
+    if (city in cityZoomLevels) {
+        document.getElementById('cityZoomLevel').value = cityZoomLevels[city] || 12;
+    } else {
+        // 设置默认值
+        const defaultZoomLevels = getDefaultCityZoomLevels();
+        document.getElementById('cityZoomLevel').value = defaultZoomLevels[city] || 12;
+    }
+}
+
+// 新增：获取默认城市中心点
+function getDefaultCityCenters() {
+    return {
+        '沈阳市': [123.427171, 41.790598],  
+        '北京市': [116.397428, 39.909190],
+        '上海市': [121.458044, 31.190706],
+        '广州市': [113.200637, 23.085178],
+        '深圳市': [114.045947, 22.617],
+        '杭州市': [120.260070, 30.270084], 
+        '南京市': [118.806877, 32.050255],  
+        '成都市': [104.065901, 30.657372],  
+        '重庆市': [106.49724305, 29.53466598],  
+        '武汉市': [114.31797981, 30.59307521], 
+        '西安市': [108.94349813, 34.28514470]
+    };
+}
+
+// 新增：获取默认城市缩放比例
+function getDefaultCityScaleFactors() {
+    return {
+        '沈阳市': 0.18,
+        '北京市': 0.21,
+        '上海市': 0.37,
+        '广州市': 0.11,
+        '深圳市': 0.10,
+        '杭州市': 0.22,
+        '南京市': 0.21,
+        '成都市': 0.12,
+        '重庆市': 0.10,
+        '武汉市': 0.23,
+        '西安市': 0.19
+    };
+}
+
+// 新增：获取默认城市缩放级别
+function getDefaultCityZoomLevels() {
+    return {
+        '沈阳市': 12,
+        '北京市': 11,
+        '上海市': 13,
+        '广州市': 12,
+        '深圳市': 13,
+        '杭州市': 12,
+        '南京市': 12,
+        '成都市': 11,
+        '重庆市': 11,
+        '武汉市': 12,
+        '西安市': 11
+    };
+}
+
+// 更新支付方式系数总和显示
+function updatePaymentFactorsSum() {
+    const wechatFactor = parseFloat(document.getElementById('cityWechatPayFactor').value) || 0;
+    const alipayFactor = parseFloat(document.getElementById('cityAlipayFactor').value) || 0;
+    const balanceFactor = parseFloat(document.getElementById('cityBalancePayFactor').value) || 0;
+    
+    const sum = wechatFactor + alipayFactor + balanceFactor;
+    const sumElement = document.getElementById('paymentFactorSumValue');
+    const progressBar = document.getElementById('paymentFactorProgressBar');
+    
+    if (sumElement) {
+        sumElement.textContent = sum.toFixed(1);
+        
+        // 根据总和变更颜色
+        if (sum === 3.0) {
+            sumElement.style.color = 'green';
+        } else if (sum > 3.0) {
+            sumElement.style.color = 'red';
+        } else {
+            sumElement.style.color = 'orange';
+        }
+    }
+    
+    if (progressBar) {
+        const percentage = Math.min((sum / 3.0) * 100, 100);
+        progressBar.style.width = `${percentage}%`;
+        progressBar.setAttribute('aria-valuenow', percentage);
+        progressBar.textContent = `${percentage.toFixed(0)}%`;
+        
+        // 根据总和调整进度条颜色
+        if (sum === 3.0) {
+            progressBar.classList.remove('bg-danger', 'bg-warning');
+            progressBar.classList.add('bg-success');
+        } else if (sum > 3.0) {
+            progressBar.classList.remove('bg-success', 'bg-warning');
+            progressBar.classList.add('bg-danger');
+        } else {
+            progressBar.classList.remove('bg-success', 'bg-danger');
+            progressBar.classList.add('bg-warning');
+        }
+    }
+}
+
+// 加载特定城市的参数
+function loadCitySpecificParameters(city, parameters) {
+    // 设置表单中的城市值
+    const hiddenCityInputs = [
+        document.getElementById('currentCity'),
+        document.getElementById('currentCityForPriceFactor'),
+        document.getElementById('currentCityForPayment'),
+        document.getElementById('currentCityForMapParams') // 新增
+    ];
+    
+    // 设置所有表单中的城市值
+    hiddenCityInputs.forEach(input => {
+        if (input) input.value = city;
+    });
+    
+    // 距离转换比例
+    const distanceRatio = parameters[city] || 0.1;
+    document.getElementById('cityDistanceRatio').value = distanceRatio;
+    
+    // 城市物价系数
+    const cityPriceFactors = parameters['CITY_PRICE_FACTORS'] || defaultCityPriceFactors();
+    if (city in cityPriceFactors) {
+        document.getElementById('cityOrderPriceFactor').value = cityPriceFactors[city].orderPrice || 1.0;
+        document.getElementById('cityChargingPriceFactor').value = cityPriceFactors[city].chargingPrice || 1.0;
+        document.getElementById('cityMaintenanceFactor').value = cityPriceFactors[city].maintenance || 1.0;
+        document.getElementById('cityVehiclePriceFactor').value = cityPriceFactors[city].vehiclePrice || 1.0;
+        document.getElementById('cityChargingStationPriceFactor').value = cityPriceFactors[city].chargingStationPrice || 1.0;
+    } else {
+        // 设置默认值，根据当地物价水平
+        const defaultPriceFactor = getDefaultPriceFactor(city);
+        document.getElementById('cityOrderPriceFactor').value = defaultPriceFactor;
+        document.getElementById('cityChargingPriceFactor').value = defaultPriceFactor;
+        document.getElementById('cityMaintenanceFactor').value = defaultPriceFactor;
+        document.getElementById('cityVehiclePriceFactor').value = defaultPriceFactor;
+        document.getElementById('cityChargingStationPriceFactor').value = defaultPriceFactor;
+    }
+    
+    // 支付方式偏好系数
+    const paymentFactors = parameters['CITY_PAYMENT_FACTORS'] || defaultCityPaymentFactors();
+    if (city in paymentFactors) {
+        document.getElementById('cityWechatPayFactor').value = paymentFactors[city].wechat || 1.0;
+        document.getElementById('cityAlipayFactor').value = paymentFactors[city].alipay || 1.0;
+        document.getElementById('cityBalancePayFactor').value = paymentFactors[city].balance || 1.0;
+    } else {
+        // 设置默认值，总和为3.0
+        document.getElementById('cityWechatPayFactor').value = 1.2;
+        document.getElementById('cityAlipayFactor').value = 1.2;
+        document.getElementById('cityBalancePayFactor').value = 0.6;
+    }
+    
+    // 更新支付方式系数总和
+    updatePaymentFactorsSum();
+    
+    // 新增：加载城市地图参数
+    loadCityMapParameters(city, parameters);
+}
+
+// 获取默认物价系数
+function getDefaultPriceFactor(city) {
+    const priceFactors = {
+        '上海市': 1.5,
+        '北京市': 1.45,
+        '深圳市': 1.4,
+        '广州市': 1.35,
+        '杭州市': 1.35,
+        '南京市': 1.25,
+        '成都市': 1.2,
+        '武汉市': 1.0,
+        '重庆市': 1.1,
+        '西安市': 1.1,
+        '沈阳市': 1.0
+    };
+    
+    return priceFactors[city] || 1.0;
+}
+
+// 默认城市物价系数
+function defaultCityPriceFactors() {
+    const cities = ['上海市', '北京市', '深圳市', '广州市', '杭州市', '南京市', '成都市', '武汉市', '重庆市', '西安市', '沈阳市'];
+    const factors = {};
+    
+    cities.forEach(city => {
+        const priceFactor = getDefaultPriceFactor(city);
+        factors[city] = {
+            orderPrice: priceFactor,
+            chargingPrice: priceFactor,
+            maintenance: priceFactor,
+            vehiclePrice: priceFactor,
+            chargingStationPrice: priceFactor
+        };
+    });
+    
+    return factors;
+}
+
+// 默认支付方式偏好系数
+function defaultCityPaymentFactors() {
+    const cities = ['上海市', '北京市', '深圳市', '广州市', '杭州市', '南京市', '成都市', '武汉市', '重庆市', '西安市', '沈阳市'];
+    const factors = {};
+    
+    // 默认配置，可以根据城市特点进行调整
+    const defaultConfigs = {
+        '上海市': { wechat: 1.0, alipay: 1.4, balance: 0.6 },
+        '北京市': { wechat: 1.2, alipay: 1.2, balance: 0.6 },
+        '深圳市': { wechat: 1.1, alipay: 1.3, balance: 0.6 },
+        '广州市': { wechat: 1.1, alipay: 1.3, balance: 0.6 },
+        '杭州市': { wechat: 0.8, alipay: 1.6, balance: 0.6 },
+        '南京市': { wechat: 1.0, alipay: 1.4, balance: 0.6 },
+        '成都市': { wechat: 1.3, alipay: 1.1, balance: 0.6 },
+        '武汉市': { wechat: 1.2, alipay: 1.2, balance: 0.6 },
+        '重庆市': { wechat: 1.3, alipay: 1.1, balance: 0.6 },
+        '西安市': { wechat: 1.2, alipay: 1.2, balance: 0.6 },
+        '沈阳市': { wechat: 1.2, alipay: 1.2, balance: 0.6 }
+    };
+    
+    cities.forEach(city => {
+        if (city in defaultConfigs) {
+            factors[city] = defaultConfigs[city];
+        } else {
+            factors[city] = { wechat: 1.2, alipay: 1.2, balance: 0.6 };
+        }
+    });
+    
+    return factors;
+}
+
+// 保存城市距离转换比例
+function saveCityParameter() {
+    const city = document.getElementById('currentCity').value;
+    const ratio = parseFloat(document.getElementById('cityDistanceRatio').value);
+    
+    if (!city) {
+        showToast('请选择一个城市', 'warning');
+        return;
+    }
+    
+    if (isNaN(ratio) || ratio <= 0) {
+        showToast('请输入有效的距离转换比例', 'warning');
+        return;
+    }
+    
+    const saveButton = document.getElementById('saveCityParam');
+    const originalText = saveButton.innerHTML;
+    
+    // 禁用按钮，显示加载状态
+    saveButton.disabled = true;
+    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...';
+    
+    // 构建参数对象，只包含当前城市的参数
+    const parameters = {};
+    parameters[city] = ratio;
+    
+    // 发送请求保存参数
+    fetch('/api/v1/system_parameters', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({ parameters })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('网络请求错误');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showToast(`${city}距离转换比例保存成功`, 'success');
+        } else {
+            showToast(data.message || '保存失败', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('保存城市参数时出错:', error);
+        showToast('保存城市参数时发生错误', 'danger');
+    })
+    .finally(() => {
+        // 恢复按钮状态
+        saveButton.disabled = false;
+        saveButton.innerHTML = originalText;
+    });
+}
+
+// 保存城市物价系数
+function saveCityPriceFactors() {
+    const city = document.getElementById('currentCityForPriceFactor').value;
+    
+    if (!city) {
+        showToast('请选择一个城市', 'warning');
+        return;
+    }
+    
+    // 获取表单值
+    const orderPriceFactor = parseFloat(document.getElementById('cityOrderPriceFactor').value);
+    const chargingPriceFactor = parseFloat(document.getElementById('cityChargingPriceFactor').value);
+    const maintenanceFactor = parseFloat(document.getElementById('cityMaintenanceFactor').value);
+    const vehiclePriceFactor = parseFloat(document.getElementById('cityVehiclePriceFactor').value);
+    const chargingStationPriceFactor = parseFloat(document.getElementById('cityChargingStationPriceFactor').value);
+    
+    // 验证数值
+    if ([orderPriceFactor, chargingPriceFactor, maintenanceFactor, vehiclePriceFactor, chargingStationPriceFactor]
+        .some(value => isNaN(value) || value < 0.5 || value > 2.0)) {
+        showToast('请输入有效的系数值（0.5-2.0之间）', 'warning');
+        return;
+    }
+    
+    const saveButton = document.getElementById('saveCityPriceFactors');
+    const originalText = saveButton.innerHTML;
+    
+    // 禁用按钮，显示加载状态
+    saveButton.disabled = true;
+    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...';
+    
+    // 获取当前城市物价系数
+    fetch('/api/v1/system_parameters')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // 获取现有物价系数字典
+                let cityPriceFactors = data.parameters['CITY_PRICE_FACTORS'] || defaultCityPriceFactors();
+                
+                // 更新当前城市的系数
+                cityPriceFactors[city] = {
+                    orderPrice: orderPriceFactor,
+                    chargingPrice: chargingPriceFactor,
+                    maintenance: maintenanceFactor,
+                    vehiclePrice: vehiclePriceFactor,
+                    chargingStationPrice: chargingStationPriceFactor
+                };
+                
+                // 构建要保存的参数对象
+                const parameters = {
+                    'CITY_PRICE_FACTORS': cityPriceFactors
+                };
+                
+                // 发送请求保存参数
+                return fetch('/api/v1/system_parameters', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ parameters })
+                });
+            } else {
+                throw new Error(data.message || '获取参数失败');
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast(`${city}物价系数保存成功`, 'success');
+            } else {
+                showToast(data.message || '保存失败', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('保存城市物价系数时出错:', error);
+            showToast('保存城市物价系数时发生错误', 'danger');
+        })
+        .finally(() => {
+            // 恢复按钮状态
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalText;
+        });
+}
+
+// 保存城市支付方式偏好系数
+function saveCityPaymentFactors() {
+    const city = document.getElementById('currentCityForPayment').value;
+    
+    if (!city) {
+        showToast('请选择一个城市', 'warning');
+        return;
+    }
+    
+    // 获取表单值
+    const wechatFactor = parseFloat(document.getElementById('cityWechatPayFactor').value);
+    const alipayFactor = parseFloat(document.getElementById('cityAlipayFactor').value);
+    const balanceFactor = parseFloat(document.getElementById('cityBalancePayFactor').value);
+    
+    // 验证总和为3.0
+    const sum = wechatFactor + alipayFactor + balanceFactor;
+    if (Math.abs(sum - 3.0) > 0.01) {
+        showToast('三种支付方式的系数之和必须为3.0', 'warning');
+        return;
+    }
+    
+    // 验证每个系数在合理范围内
+    if ([wechatFactor, alipayFactor, balanceFactor].some(value => isNaN(value) || value < 0.1 || value > 2.8)) {
+        showToast('请输入有效的系数值（0.1-2.8之间）', 'warning');
+        return;
+    }
+    
+    const saveButton = document.getElementById('savePaymentFactors');
+    const originalText = saveButton.innerHTML;
+    
+    // 禁用按钮，显示加载状态
+    saveButton.disabled = true;
+    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...';
+    
+    // 获取当前支付方式偏好系数
+    fetch('/api/v1/system_parameters')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // 获取现有支付方式偏好系数字典
+                let paymentFactors = data.parameters['CITY_PAYMENT_FACTORS'] || defaultCityPaymentFactors();
+                
+                // 更新当前城市的系数
+                paymentFactors[city] = {
+                    wechat: wechatFactor,
+                    alipay: alipayFactor,
+                    balance: balanceFactor
+                };
+                
+                // 构建要保存的参数对象
+                const parameters = {
+                    'CITY_PAYMENT_FACTORS': paymentFactors
+                };
+                
+                // 发送请求保存参数
+                return fetch('/api/v1/system_parameters', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ parameters })
+                });
+            } else {
+                throw new Error(data.message || '获取参数失败');
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast(`${city}支付方式偏好系数保存成功`, 'success');
+            } else {
+                showToast(data.message || '保存失败', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('保存城市支付方式偏好系数时出错:', error);
+            showToast('保存城市支付方式偏好系数时发生错误', 'danger');
+        })
+        .finally(() => {
+            // 恢复按钮状态
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalText;
+        });
+}
+</script>
+{% endblock %}

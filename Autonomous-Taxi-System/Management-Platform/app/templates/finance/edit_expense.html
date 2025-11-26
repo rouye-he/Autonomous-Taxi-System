@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}编辑支出记录 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/finance/expense.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>{{ _("编辑支出记录") }}</h2>
+            <p class="text-muted">修改支出记录 ID: {{ expense.id }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('finance.expense', page=request.args.get('return_page', '1')) }}{% for key, value in request.args.items() %}{% if key != 'return_page' and key != 'expense_id' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> {{ _("返回支出管理") }}</a>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _("支出信息") }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('finance.edit_expense', expense_id=expense.id) }}">
+                        <!-- 添加隐藏字段保存return_page和搜索参数 -->
+                        <input type="hidden" name="return_page" value="{{ request.args.get('return_page', '1') }}">
+                        {% for key, value in request.args.items() %}
+                            {% if key != 'return_page' and key != 'expense_id' %}
+                            <input type="hidden" name="search_param_{{ key }}" value="{{ value }}">
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="amount" class="form-label">金额 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">￥</span>
+                                    <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" value="{{ expense.amount }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="date" class="form-label">日期 <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="date" name="date" value="{{ expense.date }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="expense_type" class="form-label">支出类型 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="expense_type" name="expense_type" required>
+                                    <option value="">{{ _("-- 请选择支出类型 --") }}</option>
+                                    <option value="车辆支出" {% if expense.type == '车辆支出' %}selected{% endif %}>{{ _("车辆支出") }}</option>
+                                    <option value="充电站支出" {% if expense.type == '充电站支出' %}selected{% endif %}>{{ _("充电站支出") }}</option>
+                                    <option value="其他支出" {% if expense.type == '其他支出' %}selected{% endif %}>{{ _("其他支出") }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="user_id" class="form-label">{{ _("关联用户") }}</label>
+                                <select class="form-select" id="user_id" name="user_id">
+                                    <option value="">{{ _("-- 不关联用户 --") }}</option>
+                                    {% for user in users %}
+                                    <option value="{{ user.user_id }}" {% if expense.user_id == user.user_id %}selected{% endif %}>{{ user.username }} (ID: {{ user.user_id }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="vehicle_id" class="form-label">{{ _("关联车辆") }}</label>
+                                <select class="form-select" id="vehicle_id" name="vehicle_id">
+                                    <option value="">{{ _("-- 不关联车辆 --") }}</option>
+                                    {% for vehicle in vehicles %}
+                                    <option value="{{ vehicle.vehicle_id }}" {% if expense.vehicle_id == vehicle.vehicle_id %}selected{% endif %}>{{ vehicle.plate_number }} (ID: {{ vehicle.vehicle_id }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="charging_station_id" class="form-label">{{ _("关联充电站") }}</label>
+                                <select class="form-select" id="charging_station_id" name="charging_station_id">
+                                    <option value="">{{ _("-- 不关联充电站 --") }}</option>
+                                    {% for station in stations %}
+                                    <option value="{{ station.station_id }}" {% if expense.charging_station_id == station.station_id %}selected{% endif %}>{{ station.station_name }} (ID: {{ station.station_id }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">{{ _("描述") }}</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ expense.description }}</textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('finance.expense', page=request.args.get('return_page', '1')) }}{% for key, value in request.args.items() %}{% if key != 'return_page' and key != 'expense_id' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline-secondary me-md-2"><i class="bi bi-x-circle"></i> {{ _("取消") }}</a>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {{ _("保存修改") }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _("填写帮助") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle-fill me-2"></i> 字段说明</h6>
+                        <ul class="mb-0">
+                            <li><strong>金额</strong>: 支出金额（元）</li>
+                            <li><strong>日期</strong>: 支出发生的日期</li>
+                            <li><strong>支出类型</strong>: 支出的分类（车辆支出、充电站支出、其他支出）</li>
+                            <li><strong>关联车辆</strong>: 与此支出相关的车辆</li>
+                            <li><strong>关联充电站</strong>: 与此支出相关的充电站</li>
+                            <li><strong>关联用户</strong>: 与此支出相关的用户</li>
+                            <li><strong>描述</strong>: 支出的详细说明</li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle-fill me-2"></i> 注意事项</h6>
+                        <ul class="mb-0">
+                            <li>标有 <span class="text-danger">*</span> 的字段为必填项</li>
+                            <li>金额必须大于等于0</li>
+                            <li>日期不能为未来日期</li>
+                            <li>至少关联车辆、充电站或用户其中之一</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _("支出记录元数据") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="fw-bold">ID:</span> {{ expense.id }}
+                    </div>
+                    <div class="mb-2">
+                        <span class="fw-bold">{{ _("创建时间:") }}</span> {{ expense.created_at }}
+                    </div>
+                    <div>
+                        <span class="fw-bold">{{ _("最后更新:") }}</span> {{ expense.updated_at }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 表单验证
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            const amount = document.getElementById('amount').value;
+            const date = document.getElementById('date').value;
+            const expense_type = document.getElementById('expense_type').value;
+            const vehicle_id = document.getElementById('vehicle_id').value;
+            const charging_station_id = document.getElementById('charging_station_id').value;
+            
+            let isValid = true;
+            let errorMessage = '';
+            
+            if (!amount || parseFloat(amount) < 0) {
+                errorMessage = '金额必须大于等于0';
+                isValid = false;
+            } else if (!date) {
+                errorMessage = '请选择日期';
+                isValid = false;
+            } else if (!expense_type) {
+                errorMessage = '请选择支出类型';
+                isValid = false;
+            }
+            
+            // 根据支出类型辅助用户选择关联项
+            if (expense_type === '车辆支出' && !vehicle_id) {
+                if (confirm('您选择了车辆支出，但未选择关联车辆，确定继续提交吗？')) {
+                    // 用户确认继续提交
+                } else {
+                    isValid = false;
+                }
+            } else if (expense_type === '充电站支出' && !charging_station_id) {
+                if (confirm('您选择了充电站支出，但未选择关联充电站，确定继续提交吗？')) {
+                    // 用户确认继续提交
+                } else {
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+                if (errorMessage) {
+                    alert(errorMessage);
+                }
+            }
+        });
+        
+        // 支出类型选择变化时，辅助用户选择关联项
+        const typeSelect = document.getElementById('expense_type');
+        typeSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            
+            // 为不同类型的支出提供视觉反馈
+            const vehicleField = document.getElementById('vehicle_id').closest('.col-md-6');
+            const chargingStationField = document.getElementById('charging_station_id').closest('.col-md-6');
+            
+            // 重置所有高亮
+            vehicleField.style.background = '';
+            chargingStationField.style.background = '';
+            
+            // 根据选择类型进行高亮
+            if (selectedType === '车辆支出') {
+                vehicleField.style.background = 'rgba(0, 123, 255, 0.1)';
+            } else if (selectedType === '充电站支出') {
+                chargingStationField.style.background = 'rgba(0, 123, 255, 0.1)';
+            }
+        });
+        
+        // 页面加载时初始化高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialType = document.getElementById('expense_type').value;
+            if (initialType) {
+                const vehicleField = document.getElementById('vehicle_id').closest('.col-md-6');
+                const chargingStationField = document.getElementById('charging_station_id').closest('.col-md-6');
+                
+                if (initialType === '车辆支出') {
+                    vehicleField.style.background = 'rgba(0, 123, 255, 0.1)';
+                } else if (initialType === '充电站支出') {
+                    chargingStationField.style.background = 'rgba(0, 123, 255, 0.1)';
+                }
+            }
+            
+            // 限制日期不能为未来
+            const dateInput = document.getElementById('date');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.max = today;
+        });
+    });
+</script>
+{% endblock %} 

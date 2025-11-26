@@ -1,0 +1,6 @@
+<view class="notification {{visible ? 'show' : ''}}" wx:if="{{message}}">
+  <view class="notification-content notification-{{type}}">
+    <text class="notification-icon">{{icon}}</text>
+    <text class="notification-text">{{message}}</text>
+  </view>
+</view> 

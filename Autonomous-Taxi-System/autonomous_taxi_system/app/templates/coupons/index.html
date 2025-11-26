@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}优惠券管理{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 标签页样式 */
+    #coupons-tab .nav-link {
+        padding: 1rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-radius: 0;
+        border-bottom: 3px solid transparent;
+    }
+
+    #coupons-tab .nav-link.active {
+        border-bottom: 3px solid #0d6efd;
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+
+    #coupons-tab .nav-link:hover:not(.active) {
+        background-color: rgba(0, 0, 0, 0.03);
+        border-bottom: 3px solid #dee2e6;
+    }
+
+    /* 标签页内容区域样式 */
+    .tab-content {
+        padding-top: 20px;
+    }
+
+    /* 标签页图标样式 */
+    #coupons-tab .nav-link i {
+        font-size: 1.1rem;
+    }
+
+    /* 标签页特定颜色 */
+    #coupon-package-tab.active { border-bottom-color: #0d6efd !important; background-color: rgba(13, 110, 253, 0.1) !important; color: #0d6efd !important; }
+    #coupon-list-tab.active { border-bottom-color: #198754 !important; background-color: rgba(25, 135, 84, 0.1) !important; color: #198754 !important; }
+    #coupon-types-tab.active { border-bottom-color: #dc3545 !important; background-color: rgba(220, 53, 69, 0.1) !important; color: #dc3545 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-4">优惠券管理</h2>
+            <p class="text-muted mb-3">管理优惠券套和用户优惠券列表</p>
+
+            <!-- Toast容器 -->
+            <div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container"></div>
+
+            <!-- 标签页导航 -->
+            <ul class="nav nav-pills mb-4" id="coupons-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="coupon-package-tab" href="{{ url_for('admin.coupons.packages') }}">
+                        <i class="bi bi-box2-fill me-2"></i>优惠券套餐
+                    </a>
+                </li>
+                
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="coupon-types-tab" href="{{ url_for('admin.coupons.types') }}">
+                        <i class="bi bi-tags-fill me-2"></i>优惠券种类
+                    </a>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="coupon-list-tab" href="{{ url_for('admin.coupons.list') }}">
+                        <i class="bi bi-ticket-perforated-fill me-2"></i>优惠券列表
+                    </a>
+                </li>
+            </ul>
+
+            <!-- 标签页内容 -->
+            <div class="tab-content p-4 bg-white rounded shadow-sm" id="coupons-tabContent">
+                <!-- 主内容区域 -->
+                <div class="p-3">
+                    {% block content_area %}
+                    <!-- 此处将被继承的模板替换 -->
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 显示Toast消息
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toast-container');
+        const toastId = 'toast-' + Date.now();
+        const bgClass = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger';
+        
+        const toast = `
+            <div id="${toastId}" class="toast align-items-center ${bgClass} text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toast);
+        const toastElement = document.getElementById(toastId);
+        const bsToast = new bootstrap.Toast(toastElement, {
+            animation: true,
+            autohide: true,
+            delay: 3000
+        });
+        bsToast.show();
+    }
+
+    // 设置当前页面的标签高亮
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            // 根据当前URL路径来判断哪个标签应该高亮
+            const currentPath = window.location.pathname;
+            
+            // 默认激活优惠券套餐标签
+            let activeTabId = 'coupon-package-tab';
+            
+            // 如果URL包含list，则激活优惠券列表标签
+            if (currentPath.includes('/list')) {
+                activeTabId = 'coupon-list-tab';
+            } else if (currentPath.includes('/types')) {
+                activeTabId = 'coupon-types-tab';
+            }
+            
+            // 移除所有标签的active类
+            document.querySelectorAll('#coupons-tab .nav-link').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 为当前激活的标签添加active类
+            const activeTab = document.getElementById(activeTabId);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+            
+        } catch (error) {
+            console.error('Error in tab initialization:', error);
+        }
+    });
+</script>
+{% endblock %} 

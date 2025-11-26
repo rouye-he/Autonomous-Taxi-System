@@ -1,0 +1,66 @@
+<navigation-bar title="订单评价" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<view class="profile-container">
+  <!-- 订单信息卡片 -->
+  <view class="info-list">
+    <view class="info-item">
+      <text class="info-label">订单号</text>
+      <text class="info-value">{{orderNumber}}</text>
+    </view>
+  </view>
+  
+  <!-- 评分区域 -->
+  <view class="section-title">服务评分</view>
+  <view class="form-section">
+    <view class="rating-container">
+      <view class="stars">
+        <view class="star {{rating >= 1 ? 'active' : ''}}" bindtap="onStarTap" data-rating="1">★</view>
+        <view class="star {{rating >= 2 ? 'active' : ''}}" bindtap="onStarTap" data-rating="2">★</view>
+        <view class="star {{rating >= 3 ? 'active' : ''}}" bindtap="onStarTap" data-rating="3">★</view>
+        <view class="star {{rating >= 4 ? 'active' : ''}}" bindtap="onStarTap" data-rating="4">★</view>
+        <view class="star {{rating >= 5 ? 'active' : ''}}" bindtap="onStarTap" data-rating="5">★</view>
+      </view>
+      <view class="rating-text">
+        <text wx:if="{{rating === 0}}">请选择评分</text>
+        <text wx:elif="{{rating === 1}}">很不满意</text>
+        <text wx:elif="{{rating === 2}}">不满意</text>
+        <text wx:elif="{{rating === 3}}">一般</text>
+        <text wx:elif="{{rating === 4}}">满意</text>
+        <text wx:elif="{{rating === 5}}">非常满意</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 评价内容区域 -->
+  <view class="section-title">评价内容</view>
+  <view class="form-section">
+    <textarea 
+      class="comment-input" 
+      placeholder="{{hasEvaluated ? '您已评价过此订单' : '请分享您的乘车体验，如车辆状况、路线规划、服务质量等...'}}"
+      value="{{comment}}"
+      bindinput="onCommentInput"
+      maxlength="200"
+      show-confirm-bar="{{false}}"
+      disabled="{{hasEvaluated}}"
+    ></textarea>
+    <view class="char-count">{{comment.length}}/200</view>
+  </view>
+  
+  <!-- 已评价提示 -->
+  <view class="evaluated-tip" wx:if="{{hasEvaluated}}">
+    <text class="tip-text">您已经对此订单评价过了，每个订单只能评价一次</text>
+  </view>
+  
+  <!-- 底部按钮区域 -->
+  <view class="bottom-buttons">
+    <!-- 提交按钮 -->
+    <view wx:if="{{!hasEvaluated}}" class="button-row">
+      <button 
+        class="profile-btn {{rating > 0 ? '' : 'disabled'}}" 
+        bindtap="onSubmit"
+        disabled="{{submitting || rating === 0}}"
+      >
+        {{submitting ? '提交中...' : '提交评价'}}
+      </button>
+    </view>
+  </view>
+</view> 

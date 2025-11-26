@@ -1,0 +1,602 @@
+{% extends "analytics/index.html" %}
+
+{% block content_area %}
+<!-- CSS样式 -->
+<style>
+.card-header {
+    position: relative;
+}
+.chart-info-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 0 0 10px 10px;
+    font-size: 14px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    line-height: 1.5;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    max-height: 300px;
+    overflow-y: auto;
+}
+.card-header:hover .chart-info-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 图表操作按钮样式 */
+.chart-actions .btn {
+    padding: 0.25rem 0.5rem;
+    margin-left: 5px;
+}
+
+.chart-actions .btn i {
+    font-size: 0.9rem;
+}
+
+/* 图表加载效果 */
+.chart-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 10;
+    border-radius: 0 0 15px 15px;
+}
+
+/* 热力图暗色背景样式 */
+#user-tag-heatmap {
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #1a1a2e);
+    border-radius: 0 0 15px 15px;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+}
+
+/* 信用分变化路径图暗色背景样式 */
+#credit-score-path-chart {
+    background: linear-gradient(135deg, #0f1642, #251038, #3d0f3d);
+    border-radius: 0 0 15px 15px;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+}
+
+/* 为图表容器添加发光边框效果 */
+.chart-container {
+    position: relative;
+}
+#user-tag-heatmap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 0 15px rgba(255, 0, 100, 0.2), 
+                inset 0 0 15px rgba(255, 0, 100, 0.2);
+    pointer-events: none;
+    z-index: 1;
+}
+#credit-score-path-chart::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 0 15px rgba(255, 0, 150, 0.2), 
+                inset 0 0 15px rgba(255, 0, 150, 0.2);
+    pointer-events: none;
+    z-index: 1;
+}
+</style>
+
+<!-- 用户行为和营销指标卡片 -->
+<div class="category-title">用户行为和营销</div>
+<div class="row mb-4 g-3">
+    <div class="col-md-4">
+        <div class="card metric-card">
+            <div class="metric-card-content">
+                <div class="metric-icon bg-primary">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">{{ repeat_usage_rate }}%</div>
+                    <div class="metric-label">用户重复使用率</div>
+                </div>
+            </div>
+            <div class="metric-tooltip">
+                计算公式：所选时间段内，总下单2次以上用户数 ÷ 总下单用户数 × 100%（%）
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card metric-card">
+            <div class="metric-card-content">
+                <div class="metric-icon bg-info">
+                    <i class="bi bi-person-plus"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">{{ new_user_conversion }}%</div>
+                    <div class="metric-label">新用户转化率</div>
+                </div>
+            </div>
+            <div class="metric-tooltip">
+                计算公式：所选时间段内，新注册并下单用户 ÷ 新注册用户总数 × 100%（%）
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card metric-card">
+            <div class="metric-card-content">
+                <div class="metric-icon bg-warning">
+                    <i class="bi bi-cart3"></i>
+                </div>
+                <div class="metric-info">
+                    <div class="metric-value">￥{{ customer_unit_price }}</div>
+                    <div class="metric-label">客单价</div>
+                </div>
+            </div>
+            <div class="metric-tooltip">
+                计算公式：所选时间段内，总收入 ÷ 订单数（元/单）
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 第一行：用户活跃度转化漏斗图 (一行一个) -->
+<div class="row mb-4">
+    <div class="col-md-12 mb-4">
+        <div class="card h-100" style="border-radius:15px; border: 1px solid rgba(100,100,255,0.3); box-shadow: 0 0 15px rgba(0,100,255,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(25,35,125,0.8), rgba(45,85,255,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white"><i class="bi bi-funnel-fill me-2"></i>用户活跃度转化漏斗图</h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="user-funnel-chart" data-bs-toggle="tooltip" title="刷新数据">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="user-funnel-chart" data-bs-toggle="tooltip" title="下载图表">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> users (registration_time, last_login_time), orders (user_id, create_time)</p>
+                    <p><strong>分析目的:</strong> 直观展示用户从注册到活跃（如近30天登录）、再到下单（首次下单、近期下单）各阶段的转化率和流失情况。</p>
+                    <p><strong>图表说明:</strong> 漏斗图清晰地可视化了用户生命周期中的关键转化节点，便于快速定位用户流失环节。</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="chart-loading" id="user-funnel-chartLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                <div id="user-funnel-chart" class="chart-container" style="height: 420px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 第二行：优惠券领取-使用转化桑基图 (一行一个) -->
+<div class="row mb-4">
+    <div class="col-md-12 mb-4">
+        <div class="card h-100" style="border-radius:15px; border: 1px solid rgba(255,200,100,0.3); box-shadow: 0 0 15px rgba(255,150,0,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(125,85,25,0.8), rgba(255,165,45,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white"><i class="bi bi-shuffle me-2"></i>优惠券领取-使用转化桑基图</h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="coupon-sankey-diagram" data-bs-toggle="tooltip" title="刷新数据">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="coupon-sankey-diagram" data-bs-toggle="tooltip" title="下载图表">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> coupons (coupon_id, status, source, coupon_type_id), coupon_types (type_name)</p>
+                    <p><strong>分析目的:</strong> 可视化优惠券从不同来源（如平台发放、活动赠送、套餐购买）到不同类型，再到最终状态（未使用、已使用、已过期）的数量流动和转化情况。</p>
+                    <p><strong>图表说明:</strong> 桑基图是展示流量分布和转化的利器，视觉冲击力强，能清晰追踪优惠券的生命周期。</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="chart-loading" id="coupon-sankey-diagramLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                <div id="coupon-sankey-diagram" class="chart-container" style="height: 450px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 第三行：用户标签共现关系热力图 (一行一个) -->
+<div class="row mb-4">
+    <div class="col-md-12 mb-4">
+        <div class="card h-100" style="border-radius:15px; border: 1px solid rgba(255,100,100,0.3); box-shadow: 0 0 15px rgba(255,0,100,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(125,35,35,0.8), rgba(255,85,85,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white"><i class="bi bi-grid-3x3-gap-fill me-2"></i>用户标签共现关系热力图</h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="user-tag-heatmap" data-bs-toggle="tooltip" title="刷新数据">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="user-tag-heatmap" data-bs-toggle="tooltip" title="下载图表">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> users (tags)</p>
+                    <p><strong>分析目的:</strong> 分析用户标签之间的关联强度，例如 "周末出行" 和 "家庭用户" 是否经常同时出现。颜色深浅表示共现频率高低。</p>
+                    <p><strong>图表说明:</strong> 热力图能直观地揭示用户群体内部不同特征标签之间的隐藏关联，帮助进行用户分群。</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="chart-loading" id="user-tag-heatmapLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                <div id="user-tag-heatmap" class="chart-container" style="height: 450px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 第五行：新用户首次下单时间分布图 和 用户生命周期价值分布图 (一行两个) -->
+<div class="row mb-4">
+    <!-- 新用户首次下单时间分布图 -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100" style="border-radius:15px; border: 1px solid rgba(255,150,100,0.3); box-shadow: 0 0 15px rgba(255,100,0,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(125,55,25,0.8), rgba(255,125,45,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white"><i class="bi bi-clock-history me-2"></i>首次下单时间分布图</h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="first-order-time-distribution" data-bs-toggle="tooltip" title="刷新数据">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="first-order-time-distribution" data-bs-toggle="tooltip" title="下载图表">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> users (user_id, registration_time), orders (user_id, create_time)</p>
+                    <p><strong>分析目的:</strong> 统计用户从注册到首次下单所需的时间分布（如1天内、1-3天、3-7天等），评估新用户转化效率。</p>
+                    <p><strong>图表说明:</strong> 使用核密度估计图(KDE Plot)展示分布形态，视觉效果比普通柱状图更平滑、更专业。</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="chart-loading" id="first-order-time-distributionLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                <div id="first-order-time-distribution" class="chart-container" style="height: 380px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 用户生命周期价值分布图 -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100" style="border-radius:15px; border: 1px solid rgba(100,255,150,0.3); box-shadow: 0 0 15px rgba(0,255,100,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(25,125,65,0.8), rgba(45,255,125,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white"><i class="bi bi-cash-coin me-2"></i>用户生命周期价值分布图</h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="user-ltv-distribution" data-bs-toggle="tooltip" title="刷新数据">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="user-ltv-distribution" data-bs-toggle="tooltip" title="下载图表">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> users (user_id), income (user_id, amount) 或 order_details (user_id, amount)</p>
+                    <p><strong>分析目的:</strong> 计算每个用户的累计消费金额（作为LTV的近似值），展示整体用户的价值分布情况。</p>
+                    <p><strong>图表说明:</strong> 使用小提琴图(Violin Plot)不仅能展示LTV的中位数、四分位数，还能清晰地显示数据的分布形状和潜在的离群高价值用户。</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="chart-loading" id="user-ltv-distributionLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                <div id="user-ltv-distribution" class="chart-container" style="height: 380px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 第六行：优惠券使用偏好雷达图 和 不同注册渠道用户活跃时段对比图 (一行两个) -->
+<div class="row mb-4">
+    <!-- 优惠券使用偏好雷达图 -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100" style="border-radius:15px; border: 1px solid rgba(200,100,255,0.3); box-shadow: 0 0 15px rgba(150,0,255,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(85,25,125,0.8), rgba(175,85,255,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white"><i class="bi bi-diagram-3-fill me-2"></i>优惠券使用偏好雷达图</h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="coupon-preference-radar" data-bs-toggle="tooltip" title="刷新数据">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="coupon-preference-radar" data-bs-toggle="tooltip" title="下载图表">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> coupons (user_id, coupon_type_id, status='已使用'), coupon_types (id, type_name, coupon_category)</p>
+                    <p><strong>分析目的:</strong> 从多个维度（如满减券、折扣券、特定活动券等）比较用户对不同类型优惠券的使用频率或金额贡献。</p>
+                    <p><strong>图表说明:</strong> 雷达图适合展示多维数据的对比，可以清晰看出用户群体的优惠券偏好模式。</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="chart-loading" id="coupon-preference-radarLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                <div id="coupon-preference-radar" class="chart-container" style="height: 380px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 不同注册渠道用户活跃时段对比图 -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100" style="border-radius:15px; border: 1px solid rgba(150,255,200,0.3); box-shadow: 0 0 15px rgba(100,255,150,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(25,125,75,0.8), rgba(75,255,145,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white"><i class="bi bi-bar-chart-steps me-2"></i>渠道用户活跃时段对比图</h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="channel-activity-comparison" data-bs-toggle="tooltip" title="刷新数据">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="channel-activity-comparison" data-bs-toggle="tooltip" title="下载图表">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> users (user_id, registration_channel), orders (user_id, create_time)</p>
+                    <p><strong>分析目的:</strong> 对比通过不同渠道（如App、网站、小程序）注册的用户，他们在一天内各个时段（或工作日/周末）的下单活跃度是否存在差异。</p>
+                    <p><strong>图表说明:</strong> 使用分组柱状图或堆叠面积图，清晰对比不同用户群体的行为模式差异。</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="chart-loading" id="channel-activity-comparisonLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                <div id="channel-activity-comparison" class="chart-container" style="height: 380px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 第七行：用户复购间隔时间分布图 (一行一个) -->
+<div class="row mb-4">
+    <div class="col-md-12 mb-4">
+        <div class="card h-100" style="border-radius:15px; border: 1px solid rgba(100,200,255,0.3); box-shadow: 0 0 15px rgba(0,150,255,0.1);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(25,75,125,0.8), rgba(45,165,255,0.5)); border-bottom: none; border-radius: 15px 15px 0 0;">
+                <h5 class="card-title mb-0 text-white"><i class="bi bi-arrow-repeat me-2"></i>用户复购间隔时间分布图</h5>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-light refresh-chart" data-chart="repurchase-interval-chart" data-bs-toggle="tooltip" title="刷新数据">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light download-chart" data-chart="repurchase-interval-chart" data-bs-toggle="tooltip" title="下载图表">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-info-tooltip">
+                    <p><strong>数据来源:</strong> orders (user_id, create_time)</p>
+                    <p><strong>分析目的:</strong> 计算用户连续两次下单之间的时间间隔，了解用户的平均回购周期和频率分布。</p>
+                    <p><strong>图表说明:</strong> 使用直方图配合核密度估计曲线，可以平滑地展示复购间隔的概率密度，找出用户最可能的回购时间点。</p>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="chart-loading" id="repurchase-interval-chartLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+                <div id="repurchase-interval-chart" class="chart-container" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- 引入Bootstrap库 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- 引入ECharts库 -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<!-- 引入用户营销页面JS文件 -->
+<script src="{{ url_for('static', filename='js/user_marketing_funnel.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user_marketing_sankey.js') }}"></script>
+<!-- 引入新增的图表JS文件 -->
+<script src="{{ url_for('static', filename='js/user_marketing_charts.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 确保用户行为和营销标签页为活跃状态
+    const tabLinks = document.querySelectorAll('#analytics-tab .nav-link');
+    tabLinks.forEach(link => link.classList.remove('active'));
+    const userMarketingTab = document.getElementById('user-marketing-tab');
+    if(userMarketingTab) {
+        userMarketingTab.classList.add('active');
+    }
+    
+    // 初始化工具提示
+    var tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltips.map(function(el) {
+        return new bootstrap.Tooltip(el);
+    });
+    
+    // 保存图表对象的引用
+    const chartObjects = {};
+    
+    // 建立图表ID与加载区域ID的映射
+    const chartToLoadingMap = {
+        'user-funnel-chart': 'user-funnel-chartLoading',
+        'coupon-sankey-diagram': 'coupon-sankey-diagramLoading',
+        'user-tag-heatmap': 'user-tag-heatmapLoading',
+        'first-order-time-distribution': 'first-order-time-distributionLoading',
+        'user-ltv-distribution': 'user-ltv-distributionLoading',
+        'coupon-preference-radar': 'coupon-preference-radarLoading',
+        'channel-activity-comparison': 'channel-activity-comparisonLoading',
+        'repurchase-interval-chart': 'repurchase-interval-chartLoading'
+    };
+    
+    // 获取所有图表实例，这应该在图表初始化后进行
+    // 假设已有函数初始化了这些图表，我们获取它们的实例
+    function getChartInstances() {
+        // 这里需要根据实际情况从相应的JS文件中获取图表实例
+        // 以下是一个例子，实际应取决于user_marketing_funnel.js等文件中如何暴露图表对象
+        setTimeout(() => {
+            const chartContainers = document.querySelectorAll('.chart-container');
+            chartContainers.forEach(container => {
+                const chartId = container.id;
+                // 尝试获取图表实例，这取决于图表如何初始化
+                // 如果图表是使用echarts.init初始化的，可以通过以下方式获取
+                try {
+                    const chart = echarts.getInstanceByDom(container);
+                    if (chart) {
+                        chartObjects[chartId] = chart;
+                    }
+                } catch (err) {
+                    console.error(`获取图表实例失败: ${chartId}`, err);
+                }
+            });
+        }, 500); // 延迟500ms以确保图表已初始化
+    }
+    
+    // 调用函数获取图表实例
+    getChartInstances();
+    
+    // 刷新按钮事件处理
+    document.querySelectorAll('.refresh-chart').forEach(button => {
+        button.addEventListener('click', function() {
+            const chartId = this.getAttribute('data-chart');
+            const loadingId = chartToLoadingMap[chartId];
+            
+            if (loadingId) {
+                // 显示加载动画
+                document.getElementById(loadingId).style.display = 'flex';
+                
+                // 模拟加载延迟，实际项目中应该是AJAX请求新数据
+                setTimeout(function() {
+                    // 隐藏加载动画
+                    document.getElementById(loadingId).style.display = 'none';
+                    
+                    // 如果有对应的图表对象，调用其刷新方法
+                    if (chartObjects[chartId]) {
+                        // 这里可以调用图表的刷新方法，取决于具体实现
+                        chartObjects[chartId].resize();
+                    }
+                }, 800);
+            }
+        });
+    });
+    
+    // 下载按钮事件处理
+    document.querySelectorAll('.download-chart').forEach(button => {
+        button.addEventListener('click', function() {
+            const chartId = this.getAttribute('data-chart');
+            const chartDom = document.getElementById(chartId);
+            const chartName = chartDom.closest('.card').querySelector('.card-title').textContent.trim();
+            
+            try {
+                const chart = chartObjects[chartId];
+                
+                if (!chart) {
+                    console.error('找不到图表对象:', chartId);
+                    alert('当前图表不支持下载，请稍后重试');
+                    return;
+                }
+                
+                // 针对ECharts的导出方法
+                const url = chart.getDataURL({
+                    pixelRatio: 3,
+                    backgroundColor: '#fff'
+                });
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                link.download = `${chartName.replace(/\s+/g, '_')}.png`;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+            } catch (err) {
+                console.error('导出图表错误:', err);
+                alert('导出图表失败，请重试');
+            }
+        });
+    });
+    
+    // 设置日期范围选择器表单提交目标
+    const dateForm = document.getElementById('date-range-form');
+    if(dateForm) {
+        // 更新表单提交目标，确保提交到当前页面
+        dateForm.action = '{{ url_for("analytics.user_marketing") }}';
+        
+        // 表单提交前处理
+        dateForm.addEventListener('submit', function(e) {
+            // 标记日期范围来源
+            localStorage.setItem('last_date_filter_page', 'user-marketing');
+        });
+        
+        // 确保日期范围选择器事件正常工作
+        const dateRangeSelect = document.getElementById('date-range');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        
+        if(dateRangeSelect) {
+            // 设置日期范围下拉框的初始值
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('date_range')) {
+                dateRangeSelect.value = urlParams.get('date_range');
+            }
+            
+            // 日期范围选择变化时更新日期输入框
+            dateRangeSelect.addEventListener('change', function() {
+                const today = new Date();
+                let startDate = new Date(today);
+                
+                switch(this.value) {
+                    case 'last_3_days':
+                        startDate.setDate(today.getDate() - 3);
+                        break;
+                    case 'last_7_days':
+                        startDate.setDate(today.getDate() - 7);
+                        break;
+                    case 'last_30_days':
+                        startDate.setDate(today.getDate() - 30);
+                        break;
+                    case 'last_90_days':
+                        startDate.setDate(today.getDate() - 90);
+                        break;
+                    case 'last_180_days':
+                        startDate.setDate(today.getDate() - 180);
+                        break;
+                    case 'custom':
+                        // 自定义模式下不修改日期
+                        return;
+                }
+                
+                endDateInput.value = today.toISOString().split('T')[0];
+                startDateInput.value = startDate.toISOString().split('T')[0];
+            });
+        }
+    }
+});
+</script>
+{% endblock %}

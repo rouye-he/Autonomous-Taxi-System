@@ -1,0 +1,83 @@
+<view class="container">
+  <!-- 头部导航 -->
+  <view class="header">
+    <view class="title">对话历史</view>
+    <view class="date-filter">
+      <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+        <view class="date-picker">
+          <text>{{selectedDate || '选择日期'}}</text>
+          <text class="icon">📅</text>
+        </view>
+      </picker>
+      <button class="clear-filter" bindtap="clearDateFilter" wx:if="{{selectedDate}}">清除日期筛选</button>
+    </view>
+  </view>
+
+  <!-- 可用日期提示 -->
+  <view class="available-dates" wx:if="{{availableDates.length > 0}}">
+    <text class="label">有对话记录的日期：</text>
+    <scroll-view class="dates-scroll" scroll-x>
+      <view class="date-item {{item === selectedDate ? 'active' : ''}}" 
+            wx:for="{{availableDates}}" 
+            wx:key="*this"
+            bindtap="selectDate"
+            data-date="{{item}}">
+        {{item}}
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 对话记录列表 -->
+  <scroll-view class="chat-list" scroll-y scroll-top="{{scrollTop}}" scroll-into-view="{{toView}}">
+    <view class="empty-state" wx:if="{{chatHistory.length === 0 && !loading}}">
+      <text class="empty-icon">💬</text>
+      <text class="empty-text">{{selectedDate ? '该日期暂无对话记录' : '暂无对话记录'}}</text>
+    </view>
+    
+    <view class="date-group" wx:if="{{chatHistory.length > 0}}">
+      <view class="date-header" wx:if="{{selectedDate}}">{{selectedDate}}</view>
+      
+      <view class="message-item {{item.role}}" 
+            wx:for="{{chatHistory}}" 
+            wx:key="id"
+            id="msg-{{item.id}}">
+        
+        <!-- 助手消息 -->
+        <view class="message-wrapper" wx:if="{{item.role === 'assistant'}}">
+          <view class="message-avatar">
+            <image class="avatar" src="{{robotAvatar}}" mode="aspectFill" 
+                   binderror="onRobotAvatarError" wx:if="{{showRobotImage}}" />
+            <text class="icon" wx:else>🤖</text>
+          </view>
+          <view class="message-content">
+            <view class="message-bubble">{{item.message}}</view>
+            <view class="message-time">{{item.time}}</view>
+          </view>
+        </view>
+
+        <!-- 用户消息 -->
+        <view class="message-wrapper" wx:else>
+          <view class="message-content">
+            <view class="message-bubble">{{item.message}}</view>
+            <view class="message-time">{{item.time}}</view>
+          </view>
+          <view class="message-avatar">
+            <image class="avatar" src="{{userAvatar}}" mode="aspectFill" 
+                   binderror="onUserAvatarError" wx:if="{{showUserImage}}" />
+            <text class="icon" wx:else>👤</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore && !loading}}">
+      <button class="load-btn" bindtap="loadMore">加载更多</button>
+    </view>
+    
+    <view class="loading" wx:if="{{loading}}">
+      <text class="loading-icon">⏳</text>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </scroll-view>
+</view> 

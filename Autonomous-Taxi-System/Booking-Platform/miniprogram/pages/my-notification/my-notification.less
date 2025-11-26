@@ -1,0 +1,274 @@
+@import '../../styles/tab-navigation.less';
+@import '../../static/styles/profile.less'; /* 导入统一样式 */
+
+/* 页面特定样式 */
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+
+/* 确保内容区域正确使用flex布局 */
+.content-area {
+  margin-top: 0;
+}
+
+/* 确保内容列表能够撑满剩余空间 */
+.content-list {
+  margin-top: 20rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 覆盖通用导航栏样式 */
+.tab-navigation {
+  margin: 20rpx 0 30rpx 0;
+  width: 90vw;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 通知项样式 - 使用profile.less的info-list样式 */
+.notification-item {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.08), 
+              0 4rpx 15rpx rgba(0, 0, 0, 0.05),
+              inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  margin-bottom: 20rpx;
+  padding: 30rpx;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 90vw;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+.notification-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.notification-item:active {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  transform: translateY(-2rpx);
+}
+
+.notification-item:active::before {
+  width: 6rpx;
+}
+
+/* 空状态卡片特殊样式 */
+.notification-item.empty-card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+  border: 2rpx dashed rgba(102, 126, 234, 0.3);
+  opacity: 0.8;
+}
+
+.notification-item.empty-card .notification-title {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.notification-item.empty-card .notification-text {
+  color: #999;
+  font-style: italic;
+}
+
+.notification-item.empty-card .notification-type {
+  background: rgba(102, 126, 234, 0.15);
+  color: #667eea;
+}
+
+.notification-item.read {
+  opacity: 0.8;
+}
+
+/* 通知头部信息 */
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+  position: relative;
+}
+
+.notification-header::before {
+  content: '';
+  position: absolute;
+  left: -30rpx;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transition: width 0.3s ease;
+}
+
+.notification-item:active .notification-header::before {
+  width: 6rpx;
+}
+
+.notification-info {
+  flex: 1;
+}
+
+.notification-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.notification-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 右侧信息区域 */
+.right-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.notification-date {
+  font-size: 22rpx;
+  color: #888;
+  margin-bottom: 8rpx;
+}
+
+.unread-badge {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background-color: #ff4d4f;
+  margin-top: 6rpx;
+}
+
+/* 通知内容 */
+.notification-content {
+  margin-bottom: 20rpx;
+}
+
+.notification-text {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* 通知页脚 */
+.notification-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.notification-type {
+  font-size: 24rpx;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 6rpx 14rpx;
+  border-radius: 20rpx;
+}
+
+.read-time {
+  font-size: 24rpx;
+  color: #777;
+  padding: 6rpx 14rpx;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10rpx;
+}
+
+.read-time-debug {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 8rpx;
+  display: block;
+  background: #f5f5f5;
+  padding: 4rpx 8rpx;
+  border-radius: 4rpx;
+}
+
+/* 加载状态 */
+.loading-state {
+  text-align: center;
+  padding: 60rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 30rpx;
+}
+
+.load-more-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 没有更多 */
+.no-more {
+  text-align: center;
+  padding: 30rpx;
+}
+
+.no-more-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .notification-item {
+    padding: 24rpx;
+    margin-bottom: 16rpx;
+  }
+  
+  .notification-title {
+    font-size: 26rpx;
+  }
+  
+  .notification-time {
+    font-size: 28rpx;
+  }
+}
+
+@media (max-width: 320px) {
+  .notification-item {
+    padding: 20rpx;
+    margin-bottom: 12rpx;
+  }
+  
+  .notification-title {
+    font-size: 24rpx;
+  }
+  
+  .notification-text {
+    font-size: 26rpx;
+  }
+} 

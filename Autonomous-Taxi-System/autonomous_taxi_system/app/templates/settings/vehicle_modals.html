@@ -1,0 +1,582 @@
+<!-- 车型参数设置模态框 -->
+<!-- Alpha X1 详情与参数设置模态框 -->
+<div class="modal fade" id="alphaX1Modal" tabindex="-1" aria-labelledby="alphaX1ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="alphaX1ModalLabel">Alpha X1 详情与参数设置</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-center bg-light p-3 rounded">
+              <i class="fas fa-car-side fa-5x text-primary mb-3"></i>
+              <h4>Alpha X1</h4>
+              <span class="badge bg-primary fs-5" id="Alpha_X1_PRICE_display">¥235,000</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h4>入门级豪华车型</h4>
+            <p>Alpha X1是我们的入门级豪华车型，结合了卓越性能与舒适体验，定位于追求品质的年轻精英客户。采用碳纤维车身和高强度铝合金底盘，搭载高密度智能电池组，实现长续航与快速充电。</p>
+          </div>
+        </div>
+        
+        <h5 class="border-bottom pb-2 mb-3">参数设置</h5>
+        <form id="alphaX1ParamsForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="Alpha_X1_ORDER_PRICE" class="form-label">订单价格系数</label>
+              <input type="number" class="form-control" id="Alpha_X1_ORDER_PRICE" name="Alpha_X1_ORDER_PRICE" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">高端车型，基本价格上浮</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_X1_SPEED" class="form-label">速度系数</label>
+              <input type="number" class="form-control" id="Alpha_X1_SPEED" name="Alpha_X1_SPEED" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">优秀的动力性能</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_X1_CAPACITY" class="form-label">电池容量系数</label>
+              <input type="number" class="form-control" id="Alpha_X1_CAPACITY" name="Alpha_X1_CAPACITY" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">高密度电池技术</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_X1_CHARGING_SPEED" class="form-label">充电速度系数</label>
+              <input type="number" class="form-control" id="Alpha_X1_CHARGING_SPEED" name="Alpha_X1_CHARGING_SPEED" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">搭载快充技术</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_X1_MAINTENANCE_COST" class="form-label">维护成本系数</label>
+              <input type="number" class="form-control" id="Alpha_X1_MAINTENANCE_COST" name="Alpha_X1_MAINTENANCE_COST" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">高端材料和技术，维护成本较高</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_X1_ENERGY_CONSUMPTION_COEFFICIENT" class="form-label">能耗系数</label>
+              <input type="number" class="form-control" id="Alpha_X1_ENERGY_CONSUMPTION_COEFFICIENT" name="Alpha_X1_ENERGY_CONSUMPTION_COEFFICIENT" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">采用高效节能设计</div>
+            </div>
+            
+            
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" onclick="saveVehicleParams('alphaX1ParamsForm')">保存参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alpha Nexus 详情与参数设置模态框 -->
+<div class="modal fade" id="alphaNexusModal" tabindex="-1" aria-labelledby="alphaNexusModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="alphaNexusModalLabel">Alpha Nexus 详情与参数设置</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-center bg-light p-3 rounded">
+              <i class="fas fa-car fa-5x text-primary mb-3"></i>
+              <h4>Alpha Nexus</h4>
+              <span class="badge bg-primary fs-5" id="Alpha_Nexus_PRICE_display">¥245,000</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h4>面向科技爱好者的智能豪华车型</h4>
+            <p>Alpha Nexus是面向科技爱好者的智能豪华车型，集成了最新自动驾驶辅助系统和增强现实导航。采用石墨烯增强复合电极技术，电池容量大且寿命长，实现超长续航里程和强大性能。</p>
+          </div>
+        </div>
+        
+        <h5 class="border-bottom pb-2 mb-3">参数设置</h5>
+        <form id="alphaNexusParamsForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="Alpha_Nexus_ORDER_PRICE" class="form-label">订单价格系数</label>
+              <input type="number" class="form-control" id="Alpha_Nexus_ORDER_PRICE" name="Alpha_Nexus_ORDER_PRICE" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">科技豪华定位</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_Nexus_SPEED" class="form-label">速度系数</label>
+              <input type="number" class="form-control" id="Alpha_Nexus_SPEED" name="Alpha_Nexus_SPEED" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">平衡性能与科技</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_Nexus_CAPACITY" class="form-label">电池容量系数</label>
+              <input type="number" class="form-control" id="Alpha_Nexus_CAPACITY" name="Alpha_Nexus_CAPACITY" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">尖端电池技术</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_Nexus_CHARGING_SPEED" class="form-label">充电速度系数</label>
+              <input type="number" class="form-control" id="Alpha_Nexus_CHARGING_SPEED" name="Alpha_Nexus_CHARGING_SPEED" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">尖端充电技术</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_Nexus_MAINTENANCE_COST" class="form-label">维护成本系数</label>
+              <input type="number" class="form-control" id="Alpha_Nexus_MAINTENANCE_COST" name="Alpha_Nexus_MAINTENANCE_COST" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">高端科技维护复杂</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="Alpha_Nexus_ENERGY_CONSUMPTION_COEFFICIENT" class="form-label">能耗系数</label>
+              <input type="number" class="form-control" id="Alpha_Nexus_ENERGY_CONSUMPTION_COEFFICIENT" name="Alpha_Nexus_ENERGY_CONSUMPTION_COEFFICIENT" step="0.01" min="0.5" max="2.0">
+              <div class="form-text">多项节能技术</div>
+            </div>
+            
+            
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" onclick="saveVehicleParams('alphaNexusParamsForm')">保存参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alpha Voyager 详情与参数设置模态框 -->
+<div class="modal fade" id="alphaVoyagerModal" tabindex="-1" aria-labelledby="alphaVoyagerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="alphaVoyagerModalLabel">Alpha Voyager 详情与参数设置</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-center bg-light p-3 rounded">
+              <i class="fas fa-car-side fa-5x text-primary mb-3"></i>
+              <h4>Alpha Voyager</h4>
+              <span class="badge bg-primary fs-5">¥260,000</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h4>顶级豪华SUV</h4>
+            <p>Alpha Voyager是我们的顶级豪华SUV，为追求极致体验的商务精英打造。搭载双层大容量智能电池阵列，提供同级最佳的续航能力，即使在开启全车豪华设备的情况下仍能保持出色续航表现。</p>
+          </div>
+        </div>
+        
+        <h5 class="border-bottom pb-2 mb-3">参数设置</h5>
+        <form id="alphaVoyagerParamsForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="orderPriceCoef" class="form-label">订单价格系数</label>
+              <input type="number" class="form-control" id="ORDER_PRICE_COEF_ALPHA_VOYAGER" name="ORDER_PRICE_COEF_ALPHA_VOYAGER" step="0.01" min="0.5" max="2.0" value="1.30">
+              <div class="form-text">顶级豪华定位</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="speedCoef" class="form-label">速度系数</label>
+              <input type="number" class="form-control" id="SPEED_COEF_ALPHA_VOYAGER" name="SPEED_COEF_ALPHA_VOYAGER" step="0.01" min="0.5" max="2.0" value="1.10">
+              <div class="form-text">大型车身但动力充足</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="batteryCapacityCoef" class="form-label">电池容量系数</label>
+              <input type="number" class="form-control" id="BATTERY_CAPACITY_COEF_ALPHA_VOYAGER" name="BATTERY_CAPACITY_COEF_ALPHA_VOYAGER" step="0.01" min="0.5" max="2.0" value="1.35">
+              <div class="form-text">超大容量电池组</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="chargingSpeedCoef" class="form-label">充电速度系数</label>
+              <input type="number" class="form-control" id="CHARGING_SPEED_COEF_ALPHA_VOYAGER" name="CHARGING_SPEED_COEF_ALPHA_VOYAGER" step="0.01" min="0.5" max="2.0" value="1.15">
+              <div class="form-text">高容量电池兼顾充电效率</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="maintenanceCostCoef" class="form-label">维护成本系数</label>
+              <input type="number" class="form-control" id="MAINTENANCE_COST_COEF_ALPHA_VOYAGER" name="MAINTENANCE_COST_COEF_ALPHA_VOYAGER" step="0.01" min="0.5" max="2.0" value="1.40">
+              <div class="form-text">顶级材料与定制部件</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="energyConsumptionCoef" class="form-label">能耗系数</label>
+              <input type="number" class="form-control" id="ENERGY_CONSUMPTION_COEF_ALPHA_VOYAGER" name="ENERGY_CONSUMPTION_COEF_ALPHA_VOYAGER" step="0.01" min="0.5" max="2.0" value="1.05">
+              <div class="form-text">优先舒适性，能耗略高</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" onclick="saveVehicleParams('alphaVoyagerParamsForm')">保存参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Nova S1 详情与参数设置模态框 -->
+<div class="modal fade" id="novaS1Modal" tabindex="-1" aria-labelledby="novaS1ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="novaS1ModalLabel">Nova S1 详情与参数设置</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-center bg-light p-3 rounded">
+              <i class="fas fa-car fa-5x text-success mb-3"></i>
+              <h4>Nova S1</h4>
+              <span class="badge bg-success fs-5">¥160,000</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h4>经济实惠的家用车型</h4>
+            <p>Nova S1是经济实惠的家用车型，专为城市通勤设计。采用紧凑型高效磷酸铁锂电池，重量轻、寿命长，安全性高，虽然容量不及高端车型，但满足日常城市通勤需求。</p>
+          </div>
+        </div>
+        
+        <h5 class="border-bottom pb-2 mb-3">参数设置</h5>
+        <form id="novaS1ParamsForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="orderPriceCoef" class="form-label">订单价格系数</label>
+              <input type="number" class="form-control" id="ORDER_PRICE_COEF_NOVA_S1" name="ORDER_PRICE_COEF_NOVA_S1" step="0.01" min="0.5" max="2.0" value="0.90">
+              <div class="form-text">价格亲民</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="speedCoef" class="form-label">速度系数</label>
+              <input type="number" class="form-control" id="SPEED_COEF_NOVA_S1" name="SPEED_COEF_NOVA_S1" step="0.01" min="0.5" max="2.0" value="0.95">
+              <div class="form-text">满足日常需求</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="batteryCapacityCoef" class="form-label">电池容量系数</label>
+              <input type="number" class="form-control" id="BATTERY_CAPACITY_COEF_NOVA_S1" name="BATTERY_CAPACITY_COEF_NOVA_S1" step="0.01" min="0.5" max="2.0" value="0.90">
+              <div class="form-text">经济型电池设计</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="chargingSpeedCoef" class="form-label">充电速度系数</label>
+              <input type="number" class="form-control" id="CHARGING_SPEED_COEF_NOVA_S1" name="CHARGING_SPEED_COEF_NOVA_S1" step="0.01" min="0.5" max="2.0" value="0.95">
+              <div class="form-text">标准充电表现</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="maintenanceCostCoef" class="form-label">维护成本系数</label>
+              <input type="number" class="form-control" id="MAINTENANCE_COST_COEF_NOVA_S1" name="MAINTENANCE_COST_COEF_NOVA_S1" step="0.01" min="0.5" max="2.0" value="0.85">
+              <div class="form-text">维护简单，成本低</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="energyConsumptionCoef" class="form-label">能耗系数</label>
+              <input type="number" class="form-control" id="ENERGY_CONSUMPTION_COEF_NOVA_S1" name="ENERGY_CONSUMPTION_COEF_NOVA_S1" step="0.01" min="0.5" max="2.0" value="0.80">
+              <div class="form-text">优秀的能源效率</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-success" onclick="saveVehicleParams('novaS1ParamsForm')">保存参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Nova Quantum 详情与参数设置模态框 -->
+<div class="modal fade" id="novaQuantumModal" tabindex="-1" aria-labelledby="novaQuantumModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="novaQuantumModalLabel">Nova Quantum 详情与参数设置</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-center bg-light p-3 rounded">
+              <i class="fas fa-car fa-5x text-success mb-3"></i>
+              <h4>Nova Quantum</h4>
+              <span class="badge bg-success fs-5">¥175,000</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h4>面向高效商务人士的智能中端轿车</h4>
+            <p>Nova Quantum是面向高效商务人士的智能中端轿车，强调驾驶辅助与工作便利性。采用优化的三元锂电池组，实现均衡的容量与充电性能，配备智能电池管理系统。</p>
+          </div>
+        </div>
+        
+        <h5 class="border-bottom pb-2 mb-3">参数设置</h5>
+        <form id="novaQuantumParamsForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="orderPriceCoef" class="form-label">订单价格系数</label>
+              <input type="number" class="form-control" id="ORDER_PRICE_COEF_NOVA_QUANTUM" name="ORDER_PRICE_COEF_NOVA_QUANTUM" step="0.01" min="0.5" max="2.0" value="0.95">
+              <div class="form-text">中端商务定位</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="speedCoef" class="form-label">速度系数</label>
+              <input type="number" class="form-control" id="SPEED_COEF_NOVA_QUANTUM" name="SPEED_COEF_NOVA_QUANTUM" step="0.01" min="0.5" max="2.0" value="1.00">
+              <div class="form-text">标准性能表现</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="batteryCapacityCoef" class="form-label">电池容量系数</label>
+              <input type="number" class="form-control" id="BATTERY_CAPACITY_COEF_NOVA_QUANTUM" name="BATTERY_CAPACITY_COEF_NOVA_QUANTUM" step="0.01" min="0.5" max="2.0" value="1.00">
+              <div class="form-text">均衡的电池方案</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="chargingSpeedCoef" class="form-label">充电速度系数</label>
+              <input type="number" class="form-control" id="CHARGING_SPEED_COEF_NOVA_QUANTUM" name="CHARGING_SPEED_COEF_NOVA_QUANTUM" step="0.01" min="0.5" max="2.0" value="1.05">
+              <div class="form-text">商务需求充电优化</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="maintenanceCostCoef" class="form-label">维护成本系数</label>
+              <input type="number" class="form-control" id="MAINTENANCE_COST_COEF_NOVA_QUANTUM" name="MAINTENANCE_COST_COEF_NOVA_QUANTUM" step="0.01" min="0.5" max="2.0" value="0.95">
+              <div class="form-text">标准维护成本</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="energyConsumptionCoef" class="form-label">能耗系数</label>
+              <input type="number" class="form-control" id="ENERGY_CONSUMPTION_COEF_NOVA_QUANTUM" name="ENERGY_CONSUMPTION_COEF_NOVA_QUANTUM" step="0.01" min="0.5" max="2.0" value="0.90">
+              <div class="form-text">商务模式能效优化</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-success" onclick="saveVehicleParams('novaQuantumParamsForm')">保存参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Nova Pulse 详情与参数设置模态框 -->
+<div class="modal fade" id="novaPulseModal" tabindex="-1" aria-labelledby="novaPulseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="novaPulseModalLabel">Nova Pulse 详情与参数设置</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-center bg-light p-3 rounded">
+              <i class="fas fa-car-side fa-5x text-success mb-3"></i>
+              <h4>Nova Pulse</h4>
+              <span class="badge bg-success fs-5">¥190,000</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h4>面向年轻家庭的多功能中端SUV</h4>
+            <p>Nova Pulse是面向年轻家庭的多功能中端SUV，兼顾空间与动力。配备可扩展模块化电池系统，可选装增程电池包，灵活适应不同场景，是家庭出行的理想选择。</p>
+          </div>
+        </div>
+        
+        <h5 class="border-bottom pb-2 mb-3">参数设置</h5>
+        <form id="novaPulseParamsForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="orderPriceCoef" class="form-label">订单价格系数</label>
+              <input type="number" class="form-control" id="ORDER_PRICE_COEF_NOVA_PULSE" name="ORDER_PRICE_COEF_NOVA_PULSE" step="0.01" min="0.5" max="2.0" value="1.00">
+              <div class="form-text">中高端家用定位</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="speedCoef" class="form-label">速度系数</label>
+              <input type="number" class="form-control" id="SPEED_COEF_NOVA_PULSE" name="SPEED_COEF_NOVA_PULSE" step="0.01" min="0.5" max="2.0" value="0.95">
+              <div class="form-text">SUV车身略牺牲速度</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="batteryCapacityCoef" class="form-label">电池容量系数</label>
+              <input type="number" class="form-control" id="BATTERY_CAPACITY_COEF_NOVA_PULSE" name="BATTERY_CAPACITY_COEF_NOVA_PULSE" step="0.01" min="0.5" max="2.0" value="1.05">
+              <div class="form-text">模块化扩展电池</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="chargingSpeedCoef" class="form-label">充电速度系数</label>
+              <input type="number" class="form-control" id="CHARGING_SPEED_COEF_NOVA_PULSE" name="CHARGING_SPEED_COEF_NOVA_PULSE" step="0.01" min="0.5" max="2.0" value="1.00">
+              <div class="form-text">标准充电表现</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="maintenanceCostCoef" class="form-label">维护成本系数</label>
+              <input type="number" class="form-control" id="MAINTENANCE_COST_COEF_NOVA_PULSE" name="MAINTENANCE_COST_COEF_NOVA_PULSE" step="0.01" min="0.5" max="2.0" value="1.00">
+              <div class="form-text">SUV结构略高维护成本</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="energyConsumptionCoef" class="form-label">能耗系数</label>
+              <input type="number" class="form-control" id="ENERGY_CONSUMPTION_COEF_NOVA_PULSE" name="ENERGY_CONSUMPTION_COEF_NOVA_PULSE" step="0.01" min="0.5" max="2.0" value="0.95">
+              <div class="form-text">家庭用车能效优化</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-success" onclick="saveVehicleParams('novaPulseParamsForm')">保存参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Neon 500 详情与参数设置模态框 -->
+<div class="modal fade" id="neon500Modal" tabindex="-1" aria-labelledby="neon500ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="neon500ModalLabel">Neon 500 详情与参数设置</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-center bg-light p-3 rounded">
+              <i class="fas fa-car-side fa-5x text-danger mb-3"></i>
+              <h4>Neon 500</h4>
+              <span class="badge bg-danger fs-5">¥220,000</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h4>面向年轻精英的运动轿跑</h4>
+            <p>Neon 500是面向年轻精英的运动轿跑，标志性的流线型设计与双色车身彰显个性。采用高输出密度性能电池，搭载赛车技术加持的散热系统，确保持续高功率输出不衰减。</p>
+          </div>
+        </div>
+        
+        <h5 class="border-bottom pb-2 mb-3">参数设置</h5>
+        <form id="neon500ParamsForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="orderPriceCoef" class="form-label">订单价格系数</label>
+              <input type="number" class="form-control" id="ORDER_PRICE_COEF_NEON_500" name="ORDER_PRICE_COEF_NEON_500" step="0.01" min="0.5" max="2.0" value="1.15">
+              <div class="form-text">精品运动定位</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="speedCoef" class="form-label">速度系数</label>
+              <input type="number" class="form-control" id="SPEED_COEF_NEON_500" name="SPEED_COEF_NEON_500" step="0.01" min="0.5" max="2.0" value="1.25">
+              <div class="form-text">强劲动力输出</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="batteryCapacityCoef" class="form-label">电池容量系数</label>
+              <input type="number" class="form-control" id="BATTERY_CAPACITY_COEF_NEON_500" name="BATTERY_CAPACITY_COEF_NEON_500" step="0.01" min="0.5" max="2.0" value="0.95">
+              <div class="form-text">轻量化牺牲部分容量</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="chargingSpeedCoef" class="form-label">充电速度系数</label>
+              <input type="number" class="form-control" id="CHARGING_SPEED_COEF_NEON_500" name="CHARGING_SPEED_COEF_NEON_500" step="0.01" min="0.5" max="2.0" value="1.15">
+              <div class="form-text">性能导向快充</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="maintenanceCostCoef" class="form-label">维护成本系数</label>
+              <input type="number" class="form-control" id="MAINTENANCE_COST_COEF_NEON_500" name="MAINTENANCE_COST_COEF_NEON_500" step="0.01" min="0.5" max="2.0" value="1.20">
+              <div class="form-text">性能部件维护成本高</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="energyConsumptionCoef" class="form-label">能耗系数</label>
+              <input type="number" class="form-control" id="ENERGY_CONSUMPTION_COEF_NEON_500" name="ENERGY_CONSUMPTION_COEF_NEON_500" step="0.01" min="0.5" max="2.0" value="1.10">
+              <div class="form-text">性能优先，能耗较高</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-danger" onclick="saveVehicleParams('neon500ParamsForm')">保存参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Neon Zero 详情与参数设置模态框 -->
+<div class="modal fade" id="neonZeroModal" tabindex="-1" aria-labelledby="neonZeroModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="neonZeroModalLabel">Neon Zero 详情与参数设置</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-center bg-light p-3 rounded">
+              <i class="fas fa-car-side fa-5x text-danger mb-3"></i>
+              <h4>Neon Zero</h4>
+              <span class="badge bg-danger fs-5">¥250,000</span>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h4>顶级电动跑车</h4>
+            <p>Neon Zero是顶级电动跑车，零百加速仅需3.5秒，为速度爱好者打造。采用赛车级固态电池技术，具备超高功率密度与充电速度，提供极致性能表现，是街道上的赛道利器。</p>
+          </div>
+        </div>
+        
+        <h5 class="border-bottom pb-2 mb-3">参数设置</h5>
+        <form id="neonZeroParamsForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="orderPriceCoef" class="form-label">订单价格系数</label>
+              <input type="number" class="form-control" id="ORDER_PRICE_COEF_NEON_ZERO" name="ORDER_PRICE_COEF_NEON_ZERO" step="0.01" min="0.5" max="2.0" value="1.25">
+              <div class="form-text">顶级性能定价</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="speedCoef" class="form-label">速度系数</label>
+              <input type="number" class="form-control" id="SPEED_COEF_NEON_ZERO" name="SPEED_COEF_NEON_ZERO" step="0.01" min="0.5" max="2.0" value="1.35">
+              <div class="form-text">极致加速与速度</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="batteryCapacityCoef" class="form-label">电池容量系数</label>
+              <input type="number" class="form-control" id="BATTERY_CAPACITY_COEF_NEON_ZERO" name="BATTERY_CAPACITY_COEF_NEON_ZERO" step="0.01" min="0.5" max="2.0" value="0.90">
+              <div class="form-text">为性能牺牲部分容量</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="chargingSpeedCoef" class="form-label">充电速度系数</label>
+              <input type="number" class="form-control" id="CHARGING_SPEED_COEF_NEON_ZERO" name="CHARGING_SPEED_COEF_NEON_ZERO" step="0.01" min="0.5" max="2.0" value="1.30">
+              <div class="form-text">顶级快充技术</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="maintenanceCostCoef" class="form-label">维护成本系数</label>
+              <input type="number" class="form-control" id="MAINTENANCE_COST_COEF_NEON_ZERO" name="MAINTENANCE_COST_COEF_NEON_ZERO" step="0.01" min="0.5" max="2.0" value="1.40">
+              <div class="form-text">赛车级专业维护</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="energyConsumptionCoef" class="form-label">能耗系数</label>
+              <input type="number" class="form-control" id="ENERGY_CONSUMPTION_COEF_NEON_ZERO" name="ENERGY_CONSUMPTION_COEF_NEON_ZERO" step="0.01" min="0.5" max="2.0" value="1.20">
+              <div class="form-text">高性能高能耗</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-danger" onclick="saveVehicleParams('neonZeroParamsForm')">保存参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 其他车型的模态框可以按照类似结构添加 --> 

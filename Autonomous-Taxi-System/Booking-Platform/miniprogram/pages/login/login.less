@@ -1,0 +1,112 @@
+/* login.less */
+@import "../../static/styles/auth.less";
+
+/* 登录页面特定样式 */
+.auth-page {
+  background-image: url('/static/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 60rpx;
+}
+
+.logo-icon {
+  width: 180rpx;
+  height: 180rpx;
+  margin-bottom: 30rpx;
+  background: linear-gradient(45deg, rgba(52, 152, 219, 0.8), rgba(41, 128, 185, 0.8));
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite ease-in-out;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logo-icon .iconfont {
+  font-size: 100rpx;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 登录方式切换 */
+.login-type-switcher {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40rpx;
+  border-radius: 8rpx;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 4rpx;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-type-switcher view {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  padding: 20rpx 0;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 6rpx;
+  transition: all 0.3s;
+}
+
+.login-type-switcher view.active {
+  background-color: rgba(52, 152, 219, 0.8);
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+}
+
+/* 验证码输入框 */
+.verify-code-container {
+  display: flex;
+  align-items: center;
+}
+
+.verify-code-input {
+  flex: 1;
+  margin-right: 20rpx;
+}
+
+.verify-code-btn {
+  width: 200rpx !important;
+  height: 76rpx;
+  line-height: 76rpx;
+  font-size: 24rpx;
+  padding: 0;
+  margin: 0;
+  background-color: rgba(52, 152, 219, 0.8);
+  color: white;
+  border: none;
+  border-radius: 8rpx;
+  backdrop-filter: blur(5px);
+}
+
+.verify-code-btn.disabled {
+  background-color: rgba(179, 212, 231, 0.4);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.footer {
+  margin-top: auto;
+  padding: 40rpx 0;
+  text-align: center;
+}
+
+.footer-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+} 

@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}编辑收入记录 - 无人驾驶出租车管理平台{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/finance/income.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>{{ _("编辑收入记录") }}</h2>
+            <p class="text-muted">修改收入记录 ID: {{ income.id }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('finance.income', page=request.args.get('return_page', '1')) }}{% for key, value in request.args.items() %}{% if key != 'return_page' and key != 'income_id' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> {{ _("返回收入管理") }}</a>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _("收入信息") }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('finance.edit_income', income_id=income.id) }}">
+                        <!-- 添加隐藏字段保存return_page和搜索参数 -->
+                        <input type="hidden" name="return_page" value="{{ request.args.get('return_page', '1') }}">
+                        {% for key, value in request.args.items() %}
+                            {% if key != 'return_page' and key != 'income_id' %}
+                            <input type="hidden" name="search_param_{{ key }}" value="{{ value }}">
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="amount" class="form-label">金额 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">￥</span>
+                                    <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" value="{{ income.amount }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="source" class="form-label">收入来源 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="source" name="source" required>
+                                    <option value="">{{ _("-- 选择收入来源 --") }}</option>
+                                    <option value="充值收入" {% if income.source == '充值收入' %}selected{% endif %}>{{ _("充值收入") }}</option>
+                                    <option value="车费收入" {% if income.source == '车费收入' %}selected{% endif %}>{{ _("车费收入") }}</option>
+                                    <option value="其他" {% if income.source == '其他' %}selected{% endif %}>{{ _("其他") }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="user_id" class="form-label">{{ _("关联用户") }}</label>
+                                <select class="form-select" id="user_id" name="user_id">
+                                    <option value="">{{ _("-- 不关联用户 --") }}</option>
+                                    {% for user in users %}
+                                    <option value="{{ user.user_id }}" {% if income.user_id == user.user_id %}selected{% endif %}>{{ user.username }} (ID: {{ user.user_id }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="date" class="form-label">日期 <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="date" name="date" value="{{ income.date }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">{{ _("描述") }}</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ income.description }}</textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('finance.income', page=request.args.get('return_page', '1')) }}{% for key, value in request.args.items() %}{% if key != 'return_page' and key != 'income_id' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline-secondary me-md-2"><i class="bi bi-x-circle"></i> {{ _("取消") }}</a>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> {{ _("保存修改") }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _("填写帮助") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle-fill me-2"></i> 字段说明</h6>
+                        <ul class="mb-0">
+                            <li><strong>金额</strong>: 收入金额（元）</li>
+                            <li><strong>收入来源</strong>: 收入的类型</li>
+                            <li><strong>关联用户</strong>: 关联到特定用户的收入</li>
+                            <li><strong>日期</strong>: 收入发生的日期</li>
+                            <li><strong>描述</strong>: 收入的详细说明</li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle-fill me-2"></i> 注意事项</h6>
+                        <ul class="mb-0">
+                            <li>标有 <span class="text-danger">*</span> 的字段为必填项</li>
+                            <li>金额必须大于等于0</li>
+                            <li>日期不能为未来日期</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _("收入记录元数据") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="fw-bold">ID:</span> {{ income.id }}
+                    </div>
+                    <div class="mb-2">
+                        <span class="fw-bold">{{ _("创建时间:") }}</span> {{ income.created_at }}
+                    </div>
+                    <div>
+                        <span class="fw-bold">{{ _("最后更新:") }}</span> {{ income.updated_at }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取表单元素
+        const form = document.querySelector('form');
+        const sourceSelect = document.getElementById('source');
+        const userSelect = document.getElementById('user_id');
+        const amountInput = document.getElementById('amount');
+        const descriptionField = document.getElementById('description');
+        
+        // 记录原始值，用于检测变更
+        const originalSource = sourceSelect.value;
+        const originalUserId = userSelect.value;
+        const originalAmount = amountInput.value;
+        
+        // 用于显示充值提示的函数
+        function showRechargeNotice() {
+            // 移除已存在的提示(如果有)
+            const existingNotice = document.getElementById('recharge-notice');
+            if (existingNotice) {
+                existingNotice.remove();
+            }
+            
+            const currentSource = sourceSelect.value;
+            const currentUserId = userSelect.value;
+            const currentAmount = amountInput.value;
+            
+            // 如果是充值收入且选择了用户
+            if (currentSource === '充值收入' && currentUserId) {
+                // 创建基本提示
+                const notice = document.createElement('div');
+                notice.id = 'recharge-notice';
+                notice.className = 'alert alert-info mt-3';
+                
+                let message = '<i class="bi bi-info-circle-fill me-2"></i><strong>注意:</strong> ';
+                
+                // 根据原始情况和当前情况生成不同的提示信息
+                if (originalSource === '充值收入' && originalUserId === currentUserId) {
+                    // 只是金额变化
+                    if (parseFloat(originalAmount) !== parseFloat(currentAmount)) {
+                        const diff = parseFloat(currentAmount) - parseFloat(originalAmount);
+                        if (diff > 0) {
+                            message += `将为用户余额增加 ¥${diff.toFixed(2)}`;
+                        } else {
+                            message += `将从用户余额中减少 ¥${Math.abs(diff).toFixed(2)}`;
+                        }
+                    } else {
+                        message += '用户余额将保持不变';
+                    }
+                } else if (originalSource === '充值收入' && originalUserId !== currentUserId) {
+                    // 原本是充值但用户变化
+                    message += `将从原用户余额中减去 ¥${parseFloat(originalAmount).toFixed(2)}，并为当前选择的用户余额增加 ¥${parseFloat(currentAmount).toFixed(2)}`;
+                } else {
+                    // 原本不是充值或没有用户
+                    message += `将为所选用户余额增加 ¥${parseFloat(currentAmount).toFixed(2)}`;
+                }
+                
+                notice.innerHTML = message;
+                
+                // 添加到表单中
+                form.insertBefore(notice, form.querySelector('.d-grid'));
+            } 
+            // 如果原本是充值但现在不是或没选用户
+            else if (originalSource === '充值收入' && originalUserId) {
+                if (currentSource !== '充值收入' || !currentUserId) {
+                    const notice = document.createElement('div');
+                    notice.id = 'recharge-notice';
+                    notice.className = 'alert alert-warning mt-3';
+                    notice.innerHTML = `
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>注意:</strong> 将从原用户余额中减去 ¥${parseFloat(originalAmount).toFixed(2)}
+                    `;
+                    
+                    // 添加到表单中
+                    form.insertBefore(notice, form.querySelector('.d-grid'));
+                }
+            }
+        }
+        
+        // 监听收入来源、用户选择和金额变化
+        sourceSelect.addEventListener('change', showRechargeNotice);
+        userSelect.addEventListener('change', showRechargeNotice);
+        amountInput.addEventListener('input', showRechargeNotice);
+        
+        // 页面加载时检查一次
+        showRechargeNotice();
+        
+        // 表单验证
+        form.addEventListener('submit', function(event) {
+            const amount = document.getElementById('amount').value;
+            const source = document.getElementById('source').value;
+            const date = document.getElementById('date').value;
+            
+            let isValid = true;
+            let errorMessage = '';
+            
+            if (!amount || parseFloat(amount) < 0) {
+                errorMessage = '金额必须大于等于0';
+                isValid = false;
+            } else if (!source) {
+                errorMessage = '请选择收入来源';
+                isValid = false;
+            } else if (!date) {
+                errorMessage = '请选择日期';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+                alert(errorMessage);
+            }
+        });
+        
+        // 限制日期不能为未来
+        const dateInput = document.getElementById('date');
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.max = today;
+    });
+</script>
+{% endblock %} 

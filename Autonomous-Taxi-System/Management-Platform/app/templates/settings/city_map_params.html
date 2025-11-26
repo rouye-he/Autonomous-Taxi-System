@@ -1,0 +1,245 @@
+<!-- 城市地图参数设置 -->
+<div class="tab-pane fade" id="city-params">
+    <div id="city-params-loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">{{ _("加载中...") }}</span>
+        </div>
+        <p class="mt-2">{{ _("加载城市地图参数...") }}</p>
+    </div>
+    
+    <div id="city-params-content" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>{{ _("城市地图参数设置") }}</h4>
+            <button type="button" class="btn btn-outline-secondary" id="refreshCityParams"><i class="bi bi-arrow-repeat me-1"></i> {{ _("刷新参数") }}</button>
+        </div>
+        
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            设置城市的中心点坐标和缩放比例，影响车辆和充电桩在地图上的显示位置。中心点为WGS-84坐标系下的经纬度。
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ _("城市中心点设置") }}</h5>
+            </div>
+            <div class="card-body">
+                <form id="cityCentersForm">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <p class="text-muted">{{ _("中心点坐标使用经度、纬度的格式（例如：123.429092, 41.796768）") }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 沈阳市设置 -->
+                    <div class="row mb-3 city-setting">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ _("城市") }}</label>
+                            <input type="text" class="form-control" value="沈阳市" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="syLng" class="form-label">{{ _("中心点经度") }}</label>
+                            <input type="text" class="form-control" id="syLng" name="sy_lng" value="123.412171">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="syLat" class="form-label">{{ _("中心点纬度") }}</label>
+                            <input type="text" class="form-control" id="syLat" name="sy_lat" value="41.790598">
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary" onclick="mapPreview('沈阳市')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 北京市设置 -->
+                    <div class="row mb-3 city-setting">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ _("城市") }}</label>
+                            <input type="text" class="form-control" value="北京市" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="bjLng" class="form-label">{{ _("中心点经度") }}</label>
+                            <input type="text" class="form-control" id="bjLng" name="bj_lng" value="116.397428">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="bjLat" class="form-label">{{ _("中心点纬度") }}</label>
+                            <input type="text" class="form-control" id="bjLat" name="bj_lat" value="39.909190">
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary" onclick="mapPreview('北京市')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 上海市设置 -->
+                    <div class="row mb-3 city-setting">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ _("城市") }}</label>
+                            <input type="text" class="form-control" value="上海市" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="shLng" class="form-label">{{ _("中心点经度") }}</label>
+                            <input type="text" class="form-control" id="shLng" name="sh_lng" value="121.472644">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="shLat" class="form-label">{{ _("中心点纬度") }}</label>
+                            <input type="text" class="form-control" id="shLat" name="sh_lat" value="31.231706">
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary" onclick="mapPreview('上海市')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 广州市设置 -->
+                    <div class="row mb-3 city-setting">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ _("城市") }}</label>
+                            <input type="text" class="form-control" value="广州市" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="gzLng" class="form-label">{{ _("中心点经度") }}</label>
+                            <input type="text" class="form-control" id="gzLng" name="gz_lng" value="113.280637">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="gzLat" class="form-label">{{ _("中心点纬度") }}</label>
+                            <input type="text" class="form-control" id="gzLat" name="gz_lat" value="23.125178">
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary" onclick="mapPreview('广州市')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 深圳市设置 -->
+                    <div class="row mb-3 city-setting">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ _("城市") }}</label>
+                            <input type="text" class="form-control" value="深圳市" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="szLng" class="form-label">{{ _("中心点经度") }}</label>
+                            <input type="text" class="form-control" id="szLng" name="sz_lng" value="114.085947">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="szLat" class="form-label">{{ _("中心点纬度") }}</label>
+                            <input type="text" class="form-control" id="szLat" name="sz_lat" value="22.547">
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-secondary" onclick="mapPreview('深圳市')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary" id="saveCityCentersBtn">{{ _("保存中心点设置") }}</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ _("缩放比例设置") }}</h5>
+            </div>
+            <div class="card-body">
+                <form id="cityScaleForm">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <p class="text-muted">{{ _("缩放比例值越大，车辆坐标映射到实际经纬度的范围越大；值越小，车辆在地图上越集中。") }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 沈阳市设置 -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{{ _("沈阳市") }}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="syScale" class="form-label">{{ _("缩放比例") }}</label>
+                            <input type="number" class="form-control" id="syScale" name="sy_scale" value="0.397" step="0.01" min="0.01" max="0.5">
+                            <div class="form-text">0.01-0.5之间的值，推荐0.1-0.3</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="syZoom" class="form-label">{{ _("地图缩放级别") }}</label>
+                            <input type="number" class="form-control" id="syZoom" name="sy_zoom" value="12" min="8" max="18">
+                            <div class="form-text">8-18之间的值，值越大显示越详细</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 北京市设置 -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{{ _("北京市") }}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="bjScale" class="form-label">{{ _("缩放比例") }}</label>
+                            <input type="number" class="form-control" id="bjScale" name="bj_scale" value="0.25" step="0.01" min="0.01" max="0.5">
+                            <div class="form-text">0.01-0.5之间的值，推荐0.1-0.3</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="bjZoom" class="form-label">{{ _("地图缩放级别") }}</label>
+                            <input type="number" class="form-control" id="bjZoom" name="bj_zoom" value="11" min="8" max="18">
+                            <div class="form-text">8-18之间的值，值越大显示越详细</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 上海市设置 -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{{ _("上海市") }}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="shScale" class="form-label">{{ _("缩放比例") }}</label>
+                            <input type="number" class="form-control" id="shScale" name="sh_scale" value="0.18" step="0.01" min="0.01" max="0.5">
+                            <div class="form-text">0.01-0.5之间的值，推荐0.1-0.3</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="shZoom" class="form-label">{{ _("地图缩放级别") }}</label>
+                            <input type="number" class="form-control" id="shZoom" name="sh_zoom" value="13" min="8" max="18">
+                            <div class="form-text">8-18之间的值，值越大显示越详细</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 广州市设置 -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{{ _("广州市") }}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="gzScale" class="form-label">{{ _("缩放比例") }}</label>
+                            <input type="number" class="form-control" id="gzScale" name="gz_scale" value="0.22" step="0.01" min="0.01" max="0.5">
+                            <div class="form-text">0.01-0.5之间的值，推荐0.1-0.3</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="gzZoom" class="form-label">{{ _("地图缩放级别") }}</label>
+                            <input type="number" class="form-control" id="gzZoom" name="gz_zoom" value="12" min="8" max="18">
+                            <div class="form-text">8-18之间的值，值越大显示越详细</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 深圳市设置 -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{{ _("深圳市") }}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="szScale" class="form-label">{{ _("缩放比例") }}</label>
+                            <input type="number" class="form-control" id="szScale" name="sz_scale" value="0.15" step="0.01" min="0.01" max="0.5">
+                            <div class="form-text">0.01-0.5之间的值，推荐0.1-0.3</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="szZoom" class="form-label">{{ _("地图缩放级别") }}</label>
+                            <input type="number" class="form-control" id="szZoom" name="sz_zoom" value="13" min="8" max="18">
+                            <div class="form-text">8-18之间的值，值越大显示越详细</div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary" id="saveCityScaleBtn">{{ _("保存缩放设置") }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div> 

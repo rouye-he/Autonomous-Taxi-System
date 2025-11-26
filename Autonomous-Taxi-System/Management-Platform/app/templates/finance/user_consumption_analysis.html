@@ -1,0 +1,2117 @@
+{% extends "finance/analysis_base.html" %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .info-tooltip .bi-info-circle-fill {
+        font-size: 1rem;
+        margin-left: 5px;
+        vertical-align: middle;
+    }
+    .card-header {
+        display: flex;
+        align-items: center;
+    }
+    .card-header a.info-tooltip {
+        margin-left: auto;
+    }
+    .bs-tooltip-auto[data-popper-placement^=top] .tooltip-inner, 
+    .bs-tooltip-top .tooltip-inner {
+        max-width: 300px;
+        text-align: left;
+        padding: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block analysis_content %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-bar-chart me-1"></i>
+                                <span>{{ _("用户消费分布") }}</span>
+                                <a href="javascript:void(0);" class="ms-2 text-decoration-none info-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   title="{{ _("<div style='text-align:left'>用户消费分布：展示不同消费区间的用户数量分布情况。<br/>统计范围：包含用户通过微信支付、支付宝和余额支付的所有消费金额。</div>") }}">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 350px;">
+                                    <canvas id="balanceDistChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line me-1"></i>
+                                <span>{{ _("支付方式分析") }}</span>
+                                <a href="javascript:void(0);" class="ms-2 text-decoration-none info-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   title="{{ _("<div style='text-align:left'>支付方式分析：展示用户选择不同支付方式的金额分布和数量分布。</div>") }}">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 350px;">
+                                    <canvas id="paymentMethodChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line me-1"></i>
+                                <span>{{ _("用户充值与消费关联") }}</span>
+                                <a href="javascript:void(0);" class="ms-2 text-decoration-none info-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   title="{{ _("<div style='text-align:left'>用户充值与消费关联：分析用户充值金额与消费金额之间的相关性。<br/>统计方式：横轴为用户充值金额，纵轴为用户消费金额，气泡大小代表用户数量。</div>") }}">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 350px;">
+                                    <div id="topupConsumptionChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line me-1"></i>
+                                <span>{{ _("单位里程收益分析") }}</span>
+                                <a href="javascript:void(0);" class="ms-2 text-decoration-none info-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   title="{{ _("<div style='text-align:left'>单位里程收益分析：展示不同行程距离下的单位里程收益分布情况。<br/>计算方法：订单总金额/行程距离(元/公里)。<br/>业务价值：指导优化定价模型。</div>") }}">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 350px;">
+                                    <div id="unitRevenueChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+  
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // 用户消费分析页面的图表初始化代码
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM加载完成，开始初始化...');
+        
+        // 初始化Bootstrap tooltips
+        setTimeout(function() {
+            try {
+                if (typeof bootstrap === 'undefined') {
+                    // 如果bootstrap未定义，加载它
+                    console.warn('Bootstrap未加载，正在尝试加载...');
+                    const bootstrapScript = document.createElement('script');
+                    bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js';
+                    document.head.appendChild(bootstrapScript);
+                    
+                    bootstrapScript.onload = function() {
+                        console.log('Bootstrap加载成功，初始化tooltips');
+                        initTooltips();
+                    };
+                } else {
+                    initTooltips();
+                }
+            } catch (error) {
+                console.error('初始化tooltip时出错:', error);
+            }
+        }, 300);
+        
+        // 初始化tooltips的函数
+        function initTooltips() {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            console.log(`找到${tooltipTriggerList.length}个tooltip元素`);
+            
+            // 注册所有tooltip
+            if (tooltipTriggerList.length > 0) {
+                tooltipTriggerList.forEach(tooltipTriggerEl => {
+                    try {
+                        new bootstrap.Tooltip(tooltipTriggerEl, {
+                            html: true,
+                            container: 'body'
+                        });
+                    } catch (e) {
+                        console.error('创建tooltip失败:', e);
+                    }
+                });
+                console.log('Tooltip初始化完成');
+            }
+        }
+        
+        // 等待一段时间再检查库，给CDN加载留出足够时间
+        setTimeout(function() {
+            initializeCharts();
+        }, 500);
+        
+        // 定义refreshAnalysisData函数，供父模板调用
+        window.refreshAnalysisData = function(startDate, endDate) {
+            console.log(`开始加载用户消费数据，日期范围: ${startDate} 至 ${endDate}`);
+            // 刷新用户消费分布和支付方式分析图表
+            loadUserConsumptionData(startDate, endDate);
+            
+            // 刷新用户充值与消费关联图表
+            refreshTopupConsumptionChart(startDate, endDate);
+            
+            // 刷新单位里程收益分析图表
+            refreshUnitRevenueChart(startDate, endDate);
+            
+            // 这里可以添加其他需要刷新的图表
+        };
+        
+        function initializeCharts() {
+            // 检查库是否已经可用
+            let chartAvailable = typeof Chart !== 'undefined';
+            let echartsAvailable = typeof echarts !== 'undefined';
+            
+            // 如果两个库都可用，直接初始化
+            if (chartAvailable && echartsAvailable) {
+                initCharts();
+                return;
+            }
+            
+            // 否则，尝试重新加载库
+            console.log("图表库未完全加载，开始加载流程...");
+            checkAndLoadLibraries();
+        }
+        
+        // 检查所需的库是否加载
+        function checkAndLoadLibraries() {
+            // 定义需要加载的库和它们的URL
+            const requiredLibraries = [
+                { name: 'Chart', globalVar: 'Chart', url: 'https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js' },
+                { name: 'ECharts', globalVar: 'echarts', url: 'https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js' }
+            ];
+            
+            let allLoaded = true;
+            let loadingPromises = [];
+            
+            // 检查每个库
+            for (const lib of requiredLibraries) {
+                if (typeof window[lib.globalVar] === 'undefined') {
+                    allLoaded = false;
+                    console.error(`${lib.name}未能加载，尝试重新加载`);
+                    
+                    // 创建加载Promise
+                    const loadPromise = new Promise((resolve, reject) => {
+                        const scriptElement = document.createElement('script');
+                        scriptElement.src = lib.url;
+                        scriptElement.onload = () => {
+                            console.log(`${lib.name}加载成功`);
+                            resolve();
+                        };
+                        scriptElement.onerror = () => {
+                            console.error(`${lib.name}加载失败`);
+                            reject(new Error(`Failed to load ${lib.name}`));
+                        };
+                        document.head.appendChild(scriptElement);
+                    });
+                    
+                    loadingPromises.push(loadPromise);
+                }
+            }
+            
+            // 如果所有库都已加载，直接初始化图表
+            if (allLoaded) {
+                initCharts();
+                return;
+            }
+            
+            // 否则等待所有库加载完成后再初始化
+            Promise.all(loadingPromises)
+                .then(() => {
+                    console.log('所有图表库加载完成，开始初始化图表');
+                    initCharts();
+                })
+                .catch(error => {
+                    console.error('图表库加载失败:', error);
+                    // 显示加载失败提示
+                    const chartContainers = document.querySelectorAll('.card-body div[style*="height: 350px;"]');
+                    chartContainers.forEach(container => {
+                        container.innerHTML = '<div class="alert alert-danger text-center">图表加载失败，请刷新页面重试</div>';
+                    });
+                });
+        }
+        
+        // 初始化所有图表
+        function initCharts() {
+            console.log('初始化图表...');
+            
+            // 确保图表容器存在
+            prepareChartContainers();
+            
+            // 获取当前日期设置并加载初始数据
+            const dateRangeSelect = document.getElementById('date-range');
+            const customDateFrom = document.getElementById('custom-date-from');
+            const customDateTo = document.getElementById('custom-date-to');
+            
+            let startDate, endDate;
+            
+            if (customDateFrom && customDateTo && customDateFrom.value && customDateTo.value) {
+                console.log('初始加载数据: ', customDateFrom.value, customDateTo.value);
+                startDate = customDateFrom.value;
+                endDate = customDateTo.value;
+                loadUserConsumptionData(startDate, endDate);
+            } else {
+                // 如果没有设置日期或日期元素不存在，使用当前月份作为默认值
+                const today = new Date();
+                const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                const nextMonthFirstDay = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+                
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+                
+                startDate = formatDate(firstDay);
+                endDate = formatDate(nextMonthFirstDay);
+                
+                console.log('使用默认日期范围加载数据: ', startDate, endDate);
+                loadUserConsumptionData(startDate, endDate);
+            }
+            
+            // 初始化其他图表
+            initTopupConsumptionChart();
+            initUnitRevenueChart();
+            
+            // 加载支付时间分析数据
+            if (startDate && endDate) {
+                refreshPaymentTimeAnalysis(startDate, endDate);
+            }
+        }
+        
+        // 准备图表容器
+        function prepareChartContainers() {
+            // 确保两个主图表的容器存在
+            // 用户消费分布图表容器
+            let consumptionCard = null;
+            // 使用可靠的方法查找
+            const headers = document.querySelectorAll('.card-header');
+            for (const header of headers) {
+                if (header.textContent.trim().includes('用户消费分布')) {
+                    consumptionCard = header.closest('.card');
+                    break;
+                }
+            }
+            
+            if (consumptionCard) {
+                const chartContainer = consumptionCard.querySelector('div[style*="height: 350px;"]');
+                if (chartContainer && !chartContainer.querySelector('#balanceDistChart')) {
+                    chartContainer.innerHTML = '<canvas id="balanceDistChart"></canvas>';
+                }
+            }
+            
+            // 支付方式分析图表容器
+            let paymentCard = null;
+            for (const header of headers) {
+                if (header.textContent.trim().includes('支付方式分析')) {
+                    paymentCard = header.closest('.card');
+                    break;
+                }
+            }
+            
+            if (paymentCard) {
+                const chartContainer = paymentCard.querySelector('div[style*="height: 350px;"]');
+                if (chartContainer && !chartContainer.querySelector('#paymentMethodChart')) {
+                    // 为ECharts创建适当的容器
+                    chartContainer.innerHTML = '<div id="paymentMethodChart" style="width: 100%; height: 350px;"></div>';
+                }
+            }
+        }
+        
+        // 加载用户消费数据
+        function loadUserConsumptionData(startDate, endDate) {
+            // 构建API请求URL，添加日期参数
+            let apiUrl = '/finance/api/user_consumption_data';
+            const params = new URLSearchParams();
+            
+            // 添加日期参数
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            
+            // 构建最终URL
+            const finalUrl = `${apiUrl}?${params.toString()}`;
+            
+            console.log(`正在请求用户消费数据，URL: ${finalUrl}`);
+            
+            // 显示加载状态
+            showLoadingState();
+            
+            // 发送API请求
+            fetch(finalUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`网络错误 (${response.status})`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('获取数据成功:', data);
+                    
+                    // 恢复图表容器
+                    resetChartContainers();
+                    
+                    // 用数据更新图表
+                    renderConsumptionDistChart(data);
+                    
+                    // 独立请求支付方式时段分析数据
+                    loadPaymentTimeAnalysisData(startDate, endDate);
+                })
+                .catch(error => {
+                    console.error('获取用户消费数据失败:', error);
+                    // 显示加载失败提示
+                    showErrorMessage(null, error.message);
+                });
+        }
+        
+        // 渲染用户消费分布图表
+        function renderConsumptionDistChart(data) {
+            const balanceDistChart = document.getElementById('balanceDistChart');
+            if (!balanceDistChart) {
+                console.error('找不到用户消费分布图表容器');
+                return;
+            }
+            
+            console.log('Chart.js状态:', typeof Chart !== 'undefined' ? '已加载' : '未加载');
+            
+            if (typeof Chart !== 'undefined') {
+                try {
+                    const balanceCtx = balanceDistChart.getContext('2d');
+                    if (!balanceCtx) {
+                        console.error('无法获取图表2D上下文');
+                        return;
+                    }
+                    
+                    console.log('准备渲染图表数据:', data.consumption_distribution);
+                    
+        new Chart(balanceCtx, {
+            type: 'bar',
+            data: {
+                            labels: data.consumption_distribution.labels,
+                datasets: [{
+                    label: '用户数量',
+                                data: data.consumption_distribution.counts,
+                    backgroundColor: 'rgba(23, 162, 184, 0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                                    display: false,
+                                    text: `用户消费分布 (${data.total_users}位用户)${data.period ? ` ${data.period.start_date} 至 ${data.period.end_date}` : ''}`
+                    },
+                    legend: {
+                        display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        title: function(tooltipItems) {
+                                            return tooltipItems[0].label;
+                                        },
+                                        label: function(context) {
+                                            return `用户数: ${context.parsed.y} 人`;
+                                        }
+                                    }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '用户数量'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                                        text: '消费区间(元)'
+                        }
+                    }
+                }
+            }
+        });
+                    console.log('用户消费分布图表渲染完成');
+                    
+                    // 渲染支付方式分析图表
+                    renderPaymentMethodChart(data);
+                    
+                } catch (error) {
+                    console.error('渲染用户消费分布图表时出错:', error);
+                    // 显示错误信息
+                    balanceDistChart.parentElement.innerHTML = `<div class="alert alert-danger">图表渲染失败: ${error.message}</div>`;
+                }
+            } else {
+                console.error('Chart.js 库未加载');
+                // 显示错误信息
+                balanceDistChart.parentElement.innerHTML = '<div class="alert alert-danger">Chart.js库未加载，请刷新页面重试</div>';
+            }
+        }
+        
+        // 渲染支付方式分析图表
+        function renderPaymentMethodChart(data) {
+            const container = document.getElementById('paymentMethodChart');
+            if (!container) {
+                console.error('找不到支付方式分析图表容器');
+                return;
+            }
+            
+            // 清除加载状态
+            if (container.classList.contains('loading')) {
+                container.classList.remove('loading');
+            }
+            
+            try {
+                // 确保echarts已加载
+                if (typeof echarts === 'undefined') {
+                    console.error('ECharts库未加载');
+                    showErrorMessage('paymentMethodChart', 'ECharts库未加载，无法渲染图表');
+                    return;
+                }
+                
+                // 确保容器有正确的高度
+                if (container.offsetHeight === 0 || container.offsetHeight < 300) {
+                    console.warn('支付方式分析图表容器高度不足，设置为350px');
+                    container.style.height = '350px';
+                    
+                    // 如果容器在div内部，也设置父容器高度
+                    if (container.parentElement && container.parentElement.style.height) {
+                        container.parentElement.style.height = '350px';
+                    }
+                }
+                
+                // 初始化echarts实例
+                const chart = echarts.init(container);
+                
+                // 准备数据
+                const hours = Array.from({length: 24}, (_, i) => i);
+                const paymentMethods = data.payment_methods || ['微信支付', '支付宝', '余额支付'];
+                
+                // 颜色配置 - 为每种支付方式设置两种颜色（金额和次数）
+                const colors = {
+                    '微信支付': {
+                        amount: '#44bb11', // 绿色
+                        count: '#88ff44'   // 亮绿色
+                    },
+                    '支付宝': {
+                        amount: '#2266ff', // 蓝色
+                        count: '#77aaff'   // 亮蓝色
+                    },
+                    '余额支付': {
+                        amount: '#ff4422', // 红色
+                        count: '#ff8866'   // 亮红色
+                    }
+                };
+                
+                // 准备折线图系列
+                const series = [];
+                
+                // 添加金额系列
+                for (const method of paymentMethods) {
+                    if (data.amounts && data.amounts[method]) {
+                        series.push({
+                            name: `${method}金额`,
+                            type: 'line',
+                            yAxisIndex: 0,
+                            data: data.amounts[method],
+                            symbol: 'circle',
+                            symbolSize: 6,
+                            itemStyle: {
+                                color: colors[method].amount
+                            },
+                            lineStyle: {
+                                width: 2,
+                                color: colors[method].amount
+                            }
+                        });
+                    }
+                }
+                
+                // 添加次数系列
+                for (const method of paymentMethods) {
+                    if (data.counts && data.counts[method]) {
+                        series.push({
+                            name: `${method}次数`,
+                            type: 'line',
+                            yAxisIndex: 1,
+                            symbol: 'triangle',
+                            symbolSize: 6,
+                            data: data.counts[method],
+                            itemStyle: {
+                                color: colors[method].count
+                            },
+                            lineStyle: {
+                                width: 2,
+                                type: 'dashed',
+                                color: colors[method].count
+                            }
+                        });
+                    }
+                }
+                
+                // 图表配置
+                const option = {
+                    title: {
+                        text: '支付方式时段分析',
+                        left: 'center',
+                        subtext: data.period ? `${data.period.start_date} 至 ${data.period.end_date}` : ''
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross'
+                        },
+                        formatter: function (params) {
+                            let result = `${params[0].axisValue}:00 - ${(parseInt(params[0].axisValue) + 1) % 24}:00<br/>`;
+                            
+                            // 先显示金额
+                            for (const param of params) {
+                                if (param.seriesName.includes('金额')) {
+                                    result += `${param.marker} ${param.seriesName}: ${param.value.toFixed(2)}元<br/>`;
+                                }
+                            }
+                            
+                            // 再显示次数
+                            for (const param of params) {
+                                if (param.seriesName.includes('次数')) {
+                                    result += `${param.marker} ${param.seriesName}: ${param.value}次<br/>`;
+                                }
+                            }
+                            
+                            return result;
+                        }
+                    },
+                    legend: {
+                        data: series.map(s => s.name),
+                        top: 30
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '5%',
+                        bottom: '3%',
+                        top: 80,
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: hours.map(h => h.toString()),
+                        axisLabel: {
+                            formatter: '{value}:00'
+                        },
+                        name: '小时'
+                    },
+                    yAxis: [
+                        {
+                            type: 'value',
+                            name: '金额(元)',
+                            position: 'left',
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#5470c6'
+                                }
+                            },
+                            axisLabel: {
+                                formatter: '{value}元'
+                            }
+                        },
+                        {
+                            type: 'value',
+                            name: '次数',
+                            position: 'right',
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#ee6666'
+                                }
+                            },
+                            axisLabel: {
+                                formatter: '{value}次'
+                            }
+                        }
+                    ],
+                    series: series,
+                    toolbox: {
+                        feature: {
+                            dataZoom: {},
+                            magicType: {
+                                type: ['line', 'bar', 'stack']
+                            },
+                            saveAsImage: {}
+                        },
+                        right: 20,
+                        top: 20
+                    },
+                    dataZoom: [
+                        {
+                            type: 'inside',
+                            start: 0,
+                            end: 100
+                        },
+                        {
+                            type: 'slider',
+                            start: 0,
+                            end: 100,
+                            height: 20,
+                            bottom: 10
+                        }
+                    ]
+                };
+                
+                // 设置图表配置并渲染
+                chart.setOption(option);
+                
+                // 添加窗口调整大小事件监听
+                window.addEventListener('resize', () => {
+                    chart.resize();
+                });
+                
+                console.log('支付时间分析图表渲染完成');
+            } catch (error) {
+                console.error('渲染支付时间分析图表出错:', error);
+                showErrorMessage('paymentMethodChart', '渲染图表失败');
+            }
+        }
+        
+        // 显示加载状态
+        function showLoadingState(chartId) {
+            const loadingHtml = '<div class="d-flex justify-content-center align-items-center" style="height: 350px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("加载中...") }}</span></div></div>';
+            
+            if (chartId) {
+                // 为特定图表显示加载状态
+                const container = document.getElementById(chartId);
+                if (container) {
+                    // 如果是支付方式分析图表，重新创建容器
+                    if (chartId === 'paymentMethodChart') {
+                        const parentElement = container.parentElement;
+                        if (parentElement) {
+                            parentElement.innerHTML = '<div id="paymentMethodChart" style="width: 100%; height: 350px;"></div>';
+                            document.getElementById('paymentMethodChart').innerHTML = loadingHtml;
+                        } else {
+                            container.innerHTML = loadingHtml;
+                        }
+                    } else {
+                        container.innerHTML = loadingHtml;
+                    }
+                    container.classList.add('loading');
+                }
+                return;
+            }
+            
+            // 为用户消费分布图表和支付方式分析图表显示加载状态
+            const headers = document.querySelectorAll('.card-header');
+            headers.forEach(header => {
+                if (header.textContent.trim().includes('用户消费分布') || header.textContent.trim().includes('支付方式分析')) {
+                    const card = header.closest('.card');
+                    if (card) {
+                        const chartContainer = card.querySelector('div[style*="height: 350px;"]');
+                        if (chartContainer) {
+                            // 如果是支付方式分析图表，特殊处理
+                            if (header.textContent.trim().includes('支付方式分析')) {
+                                chartContainer.innerHTML = '<div id="paymentMethodChart" style="width: 100%; height: 350px;">' + loadingHtml + '</div>';
+                            } else {
+                                chartContainer.innerHTML = loadingHtml;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 重置图表容器
+        function resetChartContainers() {
+            // 重置用户消费分布图表容器
+            const headers = document.querySelectorAll('.card-header');
+            headers.forEach(header => {
+                const card = header.closest('.card');
+                if (!card) return;
+                
+                const chartContainer = card.querySelector('div[style*="height: 350px;"]');
+                if (!chartContainer) return;
+                
+                if (header.textContent.trim().includes('用户消费分布')) {
+                    chartContainer.innerHTML = '<canvas id="balanceDistChart"></canvas>';
+                } else if (header.textContent.trim().includes('支付方式分析')) {
+                    // 为ECharts准备一个纯容器，不使用Canvas
+                    chartContainer.innerHTML = '<div id="paymentMethodChart" style="width: 100%; height: 350px;"></div>';
+                }
+            });
+        }
+        
+        // 显示错误信息
+        function showErrorMessage(chartId, message) {
+            const errorHtml = `<div class="alert alert-danger text-center">数据加载失败: ${message || ''}</div>`;
+            
+            if (chartId) {
+                // 为特定图表显示错误信息
+                const container = document.getElementById(chartId);
+                if (container) {
+                    // 如果是支付方式分析图表，特殊处理
+                    if (chartId === 'paymentMethodChart') {
+                        const parentElement = container.parentElement;
+                        if (parentElement) {
+                            parentElement.innerHTML = '<div id="paymentMethodChart" style="width: 100%; height: 350px;">' + errorHtml + '</div>';
+                        } else {
+                            container.innerHTML = errorHtml;
+                        }
+                    } else {
+                        container.innerHTML = errorHtml;
+                    }
+                    container.classList.remove('loading');
+                }
+                return;
+            }
+            
+            // 为相关图表显示错误信息
+            const headers = document.querySelectorAll('.card-header');
+            headers.forEach(header => {
+                if (header.textContent.trim().includes('用户消费分布') || header.textContent.trim().includes('支付方式分析')) {
+                    const card = header.closest('.card');
+                    if (card) {
+                        const chartContainer = card.querySelector('div[style*="height: 350px;"]');
+                        if (chartContainer) {
+                            // 如果是支付方式分析图表，特殊处理
+                            if (header.textContent.trim().includes('支付方式分析')) {
+                                chartContainer.innerHTML = '<div id="paymentMethodChart" style="width: 100%; height: 350px;">' + errorHtml + '</div>';
+                            } else {
+                                chartContainer.innerHTML = errorHtml;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 加载支付方式时段分析数据
+        function loadPaymentTimeAnalysisData(startDate, endDate) {
+            // 显示加载状态
+            showLoadingState('paymentMethodChart');
+            
+            // 构建API URL
+            const url = `/finance/api/payment_time_analysis?start_date=${startDate}&end_date=${endDate}`;
+            
+            // 获取数据
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络请求失败');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('获取支付时间分析数据成功:', data);
+                    if (data) {
+                        renderPaymentTimeChart(data);
+                    } else {
+                        showErrorMessage('paymentMethodChart', '获取支付时间分析数据失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('获取支付时间分析数据出错:', error);
+                    showErrorMessage('paymentMethodChart', '获取数据出错，请稍后再试');
+                });
+        }
+        
+        function renderPaymentTimeChart(data) {
+            // 使用已有的支付方式图表容器
+            const container = document.getElementById('paymentMethodChart');
+            if (!container) {
+                console.error('找不到支付方式分析图表容器');
+                return;
+            }
+            
+            // 清除加载状态
+            if (container.classList.contains('loading')) {
+                container.classList.remove('loading');
+            }
+            
+            try {
+                // 确保echarts已加载
+                if (typeof echarts === 'undefined') {
+                    console.error('ECharts库未加载');
+                    showErrorMessage('paymentMethodChart', 'ECharts库未加载，无法渲染图表');
+                    return;
+                }
+                
+                // 确保容器有正确的高度
+                if (container.offsetHeight === 0 || container.offsetHeight < 300) {
+                    console.warn('支付方式分析图表容器高度不足，设置为350px');
+                    container.style.height = '350px';
+                    
+                    // 如果容器在div内部，也设置父容器高度
+                    if (container.parentElement && container.parentElement.style.height) {
+                        container.parentElement.style.height = '350px';
+                    }
+                }
+                
+                // 初始化echarts实例
+                const chart = echarts.init(container);
+                
+                // 准备数据
+                const hours = Array.from({length: 24}, (_, i) => i);
+                const paymentMethods = data.payment_methods || ['微信支付', '支付宝', '余额支付'];
+                
+                // 颜色配置 - 为每种支付方式设置两种颜色（金额和次数）
+                const colors = {
+                    '微信支付': {
+                        amount: '#44bb11', // 绿色
+                        count: '#88ff44'   // 亮绿色
+                    },
+                    '支付宝': {
+                        amount: '#2266ff', // 蓝色
+                        count: '#77aaff'   // 亮蓝色
+                    },
+                    '余额支付': {
+                        amount: '#ff4422', // 红色
+                        count: '#ff8866'   // 亮红色
+                    }
+                };
+                
+                // 准备折线图系列
+                const series = [];
+                
+                // 添加金额系列
+                for (const method of paymentMethods) {
+                    if (data.amounts && data.amounts[method]) {
+                        series.push({
+                            name: `${method}金额`,
+                            type: 'line',
+                            yAxisIndex: 0,
+                            data: data.amounts[method],
+                            symbol: 'circle',
+                            symbolSize: 6,
+                            itemStyle: {
+                                color: colors[method].amount
+                            },
+                            lineStyle: {
+                                width: 2,
+                                color: colors[method].amount
+                            }
+                        });
+                    }
+                }
+                
+                // 添加次数系列
+                for (const method of paymentMethods) {
+                    if (data.counts && data.counts[method]) {
+                        series.push({
+                            name: `${method}次数`,
+                            type: 'line',
+                            yAxisIndex: 1,
+                            symbol: 'triangle',
+                            symbolSize: 6,
+                            data: data.counts[method],
+                            itemStyle: {
+                                color: colors[method].count
+                            },
+                            lineStyle: {
+                                width: 2,
+                                type: 'dashed',
+                                color: colors[method].count
+                            }
+                        });
+                    }
+                }
+                
+                // 图表配置
+                const option = {
+
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross'
+                        },
+                        formatter: function (params) {
+                            let result = `${params[0].axisValue}:00 - ${(parseInt(params[0].axisValue) + 1) % 24}:00<br/>`;
+                            
+                            // 先显示金额
+                            for (const param of params) {
+                                if (param.seriesName.includes('金额')) {
+                                    result += `${param.marker} ${param.seriesName}: ${param.value.toFixed(2)}元<br/>`;
+                                }
+                            }
+                            
+                            // 再显示次数
+                            for (const param of params) {
+                                if (param.seriesName.includes('次数')) {
+                                    result += `${param.marker} ${param.seriesName}: ${param.value}次<br/>`;
+                                }
+                            }
+                            
+                            return result;
+                        }
+                    },
+                    legend: {
+                        data: series.map(s => s.name),
+                        top: 10,
+                        left:0,
+                        width:400
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '5%',
+                        bottom: '3%',
+                        top: 80,
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: hours.map(h => h.toString()),
+                        axisLabel: {
+                            formatter: '{value}:00'
+                        },
+                        name: '小时'
+                    },
+                    yAxis: [
+                        {
+                            type: 'value',
+                            name: '金额(元)',
+                            position: 'left',
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#5470c6'
+                                }
+                            },
+                            axisLabel: {
+                                formatter: '{value}元'
+                            }
+                        },
+                        {
+                            type: 'value',
+                            name: '次数',
+                            position: 'right',
+                            axisLine: {
+                                lineStyle: {
+                                    color: '#ee6666'
+                                }
+                            },
+                            axisLabel: {
+                                formatter: '{value}次'
+                            }
+                        }
+                    ],
+                    series: series,
+                    toolbox: {
+                        feature: {
+                            dataZoom: {},
+                            magicType: {
+                                type: ['line', 'bar', 'stack']
+                            },
+                            saveAsImage: {}
+                        },
+                        right: 0,
+                        top: 0
+                    },
+                    dataZoom: [
+                        {
+                            type: 'inside',
+                            start: 0,
+                            end: 100
+                        },
+                        {
+                            type: 'slider',
+                            start: 0,
+                            end: 100,
+                            height: 20,
+                            bottom: 10
+                        }
+                    ]
+                };
+                
+                // 设置图表配置并渲染
+                chart.setOption(option);
+                
+                // 添加窗口调整大小事件监听
+                window.addEventListener('resize', () => {
+                    chart.resize();
+                });
+                
+                console.log('支付时间分析图表渲染完成');
+            } catch (error) {
+                console.error('渲染支付时间分析图表出错:', error);
+                showErrorMessage('paymentMethodChart', '渲染图表失败');
+            }
+        }
+        
+        // 初始化用户充值与消费关联图表
+        function initTopupConsumptionChart() {
+        const topupDom = document.getElementById('topupConsumptionChart');
+            if (topupDom && typeof echarts !== 'undefined') {
+                try {
+                    // 确保容器有宽高
+                    if (topupDom.offsetHeight === 0) {
+                        console.warn('图表容器高度为0，设置默认高度');
+                        topupDom.style.height = '350px';
+                    }
+                    
+            const topupChart = echarts.init(topupDom);
+                    
+                    // 显示加载中状态
+                    topupChart.showLoading({
+                        text: '加载数据中...',
+                        maskColor: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: 14
+                    });
+                    
+                    // 获取日期参数
+                    const dateRangeSelect = document.getElementById('date-range');
+                    const customDateFrom = document.getElementById('custom-date-from');
+                    const customDateTo = document.getElementById('custom-date-to');
+                    
+                    let startDate, endDate;
+                    if (customDateFrom && customDateTo && customDateFrom.value && customDateTo.value) {
+                        startDate = customDateFrom.value;
+                        endDate = customDateTo.value;
+                    } else {
+                        // 使用当前月份作为默认值
+                        const today = new Date();
+                        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                        const nextMonthFirstDay = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+                        
+                        const formatDate = (date) => {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        };
+                        
+                        startDate = formatDate(firstDay);
+                        endDate = formatDate(nextMonthFirstDay);
+                    }
+                    
+                    // 构建API请求URL
+                    let apiUrl = '/finance/api/user_topup_consumption';
+                    const params = new URLSearchParams();
+                    
+                    if (startDate) params.append('start_date', startDate);
+                    if (endDate) params.append('end_date', endDate);
+                    
+                    const finalUrl = `${apiUrl}?${params.toString()}`;
+                    
+                    // 发送API请求获取数据
+                    fetch(finalUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`网络错误 (${response.status})`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('获取用户充值消费关联数据成功:', data);
+                            
+                            // 隐藏加载状态
+                            topupChart.hideLoading();
+                            
+                            // 提取图表所需数据
+                            const scatterData = data.scatter_data || [];
+                            const trendLine = data.trend_line || [];
+                            const statistics = data.statistics || {};
+                            const period = data.period || {};
+                            
+                            // 处理数据点分布，减少重叠，执行数据抖动处理
+                            const processedScatterData = processScatterData(scatterData);
+                            
+               
+                            // 准备相关性信息
+                            let correlationText = '';
+                            if (statistics.correlation !== undefined) {
+                                const corrValue = statistics.correlation;
+                                let corrLevel = '';
+                                if (corrValue >= 0.7) corrLevel = '强正相关';
+                                else if (corrValue >= 0.4) corrLevel = '中等正相关';
+                                else if (corrValue >= 0.2) corrLevel = '弱正相关';
+                                else if (corrValue >= -0.2) corrLevel = '几乎无相关';
+                                else if (corrValue >= -0.4) corrLevel = '弱负相关';
+                                else if (corrValue >= -0.7) corrLevel = '中等负相关';
+                                else corrLevel = '强负相关';
+                                
+                                correlationText = `\n相关系数: ${corrValue.toFixed(2)} (${corrLevel})`;
+                            }
+                            
+                            // 计算最大散点尺寸
+                            const maxBubbleSize = 50; // 最大气泡尺寸
+                            const minBubbleSize = 10; // 最小气泡尺寸
+                            
+                            // 获取用户数量的最大值
+                            const maxUsers = processedScatterData.length > 0 ? 
+                                Math.max(...processedScatterData.map(item => item[2])) : 1;
+                            
+                            // 配置图表选项
+            const option = {
+                title: {
+                                    left: 'center',
+                                    subtext: `总用户数: ${statistics.total_users || 0}人 | 平均充值: ${(statistics.avg_topup || 0).toFixed(2)}元 | 平均消费: ${(statistics.avg_consumption || 0).toFixed(2)}元${correlationText}`,
+                                    subtextStyle: {
+                                        color: '#666',
+                                        fontSize: 12
+                                    }
+                                },
+                                grid: {
+                                    left: '10%',
+                                    right: '10%',
+                                    top: 90,
+                                    bottom: '15%'
+                                },
+                                tooltip: {
+                                    trigger: 'item',
+                                    formatter: function(params) {
+                                        if (params.seriesIndex === 0) { // 散点图
+                                            return `充值金额: ${params.value[0]}元<br/>消费金额: ${params.value[1]}元<br/>用户数量: ${params.value[2]}人`;
+                                        } else { // 趋势线
+                                            return `趋势线<br/>充值金额: ${params.value[0].toFixed(2)}元<br/>消费金额: ${params.value[1].toFixed(2)}元`;
+                                        }
+                                    },
+                                    confine: true // 限制提示框在图表区域内
+                                },
+                                // 添加缩放功能
+                                dataZoom: [
+                                    {
+                                        type: 'inside',
+                                        xAxisIndex: 0,
+                                        filterMode: 'filter'
+                                    },
+                                    {
+                                        type: 'inside',
+                                        yAxisIndex: 0,
+                                        filterMode: 'filter'
+                                    },
+                                    {
+                                        type: 'slider',
+                                        xAxisIndex: 0,
+                                        bottom: 5,
+                                        height: 20,
+                                        handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                                        handleSize: '80%',
+                                        showDetail: false
+                                    }
+                                ],
+                                // 添加工具箱，包括数据视图、缩放等功能
+                                toolbox: {
+                                    feature: {
+                                        dataZoom: {
+                                            yAxisIndex: 'none'
+                                        },
+                                        restore: {},
+                                        saveAsImage: {}
+                                    },
+                                    right: 20,
+                                    top: 20
+                },
+                xAxis: {
+                    name: '充值金额(元)',
+                    nameLocation: 'middle',
+                                    nameGap: 40,
+                    type: 'value',
+                                    scale: true,
+                                    axisLabel: {
+                                        formatter: '{value} 元'
+                                    },
+                                    // 优化刻度，避免拥挤
+                                    splitLine: {
+                                        show: true,
+                                        lineStyle: {
+                                            type: 'dashed',
+                                            opacity: 0.5
+                                        }
+                                    }
+                },
+                yAxis: {
+                    name: '消费金额(元)',
+                    nameLocation: 'middle',
+                                    nameGap: 40,
+                    type: 'value',
+                                    scale: true,
+                                    axisLabel: {
+                                        formatter: '{value} 元'
+                                    },
+                                    // 优化刻度，避免拥挤
+                                    splitLine: {
+                                        show: true,
+                                        lineStyle: {
+                                            type: 'dashed',
+                                            opacity: 0.5
+                                        }
+                                    }
+                                },
+                                series: [
+                                    {
+                                        name: '用户分布',
+                    type: 'scatter',
+                                        data: processedScatterData,
+                                        // 控制气泡大小
+                                        symbolSize: function(data) {
+                                            const userCount = data[2];
+                                            // 调整基础气泡大小，减小重叠效果
+                                            const baseSize = 20; // 减小基础大小
+                                            const maxSize = 50; // 减小最大尺寸
+                                            // 计算气泡大小，基于用户数量的对数比例
+                                            return baseSize + (maxSize - baseSize) * (Math.log(userCount) / Math.log(maxUsers > 1 ? maxUsers : 2));
+                                        },
+                                        // 启用标签显示
+                                        label: {
+                                            show: true,
+                                            formatter: function(params) {
+                                                // 只显示用户数量，不显示其他数据
+                                                return params.data[2];
+                                            },
+                                            fontSize: 10,
+                                            color: '#fff',
+                                            position: 'inside'
+                                        },
+                                        // 增加散点图的透明度
+                    itemStyle: {
+                                            color: function(params) {
+                                                // 基于x和y值的比率设置颜色
+                                                const ratio = params.data[0] > 0 ? params.data[1] / params.data[0] : 1;
+                                                
+                                                if (ratio >= 1.2) return 'rgba(255, 69, 0, 0.6)';  // 消费明显高于充值：红色
+                                                else if (ratio >= 0.8) return 'rgba(0, 150, 136, 0.6)';  // 消费约等于充值：绿色
+                                                else return 'rgba(30, 144, 255, 0.6)';  // 消费低于充值：蓝色
+                                            },
+                                            borderColor: '#fff',
+                                            borderWidth: 1,
+                                            opacity: 0.8 // 提高透明度减轻重叠视觉效果
+                                        },
+                                        emphasis: {
+                                            itemStyle: {
+                                                shadowBlur: 10,
+                                                shadowColor: 'rgba(0, 0, 0, 0.5)',
+                                                opacity: 1
+                                            },
+                                            label: {
+                                                show: true,
+                                                formatter: function(params) {
+                                                    return params.data[2] + '人';
+                                                },
+                                                fontSize: 12,
+                                                fontWeight: 'bold'
+                                            }
+                                        },
+                                        // 添加抖动效果减少重叠
+                                        markPoint: {
+                                            symbolSize: 1,
+                                            symbol: 'circle',
+                                            label: {
+                                                show: false
+                                            }
+                                        }
+                                    }
+                                ]
+                            };
+                            
+                            // 添加视觉映射组件
+                            option.visualMap = {
+                                type: 'continuous',
+                                min: 1,
+                                max: maxUsers,
+                                dimension: 2, // 映射到气泡中的用户数量 (第三个值)
+                                inRange: {
+                                    opacity: [0.5, 0.9]
+                                },
+                                show: false
+                            };
+                            
+                            // 如果有趋势线数据，添加趋势线序列
+                            if (trendLine && trendLine.length > 1) {
+                                option.series.push({
+                                    name: '趋势线',
+                                    type: 'line',
+                                    data: trendLine,
+                                    smooth: true,
+                                    symbol: 'none',
+                                    lineStyle: {
+                                        color: '#ff7800',
+                                        width: 2,
+                                        type: 'dashed'
+                                    },
+                                    tooltip: {
+                                        formatter: '趋势线'
+                                    }
+                                });
+                                
+                                // 添加图例
+                                option.legend = {
+                                    data: ['用户分布', '趋势线'],
+                                    bottom: 10
+                                };
+                            }
+                            
+                            // 设置图表选项
+            topupChart.setOption(option);
+                            
+                            // 保存图表实例到window对象，方便后续访问
+                            window.topupChart = topupChart;
+                        })
+                        .catch(error => {
+                            console.error('获取用户充值消费关联数据失败:', error);
+                            
+                            // 隐藏加载状态
+                            topupChart.hideLoading();
+                            
+                            // 显示错误信息
+                            topupChart.setOption({
+                                title: {
+                                    text: '用户充值与消费关联',
+                                    left: 'center',
+                                    subtext: '数据加载失败: ' + error.message,
+                                    subtextStyle: {
+                                        color: '#ff0000'
+                                    }
+                                },
+                                graphic: [
+                                    {
+                                        type: 'text',
+                                        left: 'center',
+                                        top: 'middle',
+                                        style: {
+                                            text: '数据加载失败，请重试',
+                                            fill: '#999',
+                                            font: '14px Microsoft YaHei'
+                                        }
+                                    }
+                                ]
+                            });
+                        });
+            
+            // 响应窗口大小变化
+            window.addEventListener('resize', function() {
+                        if (window.topupChart) {
+                            window.topupChart.resize();
+                        }
+                    });
+                } catch (error) {
+                    console.error('初始化用户充值与消费关联图表失败:', error);
+                    topupDom.innerHTML = `<div class="alert alert-warning text-center">图表初始化失败: ${error.message}</div>`;
+                }
+            }
+        }
+        
+        // 用于刷新用户充值与消费关联图表的函数
+        function refreshTopupConsumptionChart(startDate, endDate) {
+            const topupDom = document.getElementById('topupConsumptionChart');
+            if (!topupDom || typeof echarts === 'undefined' || !window.topupChart) {
+                console.error('找不到用户充值与消费关联图表或echarts未加载');
+                // 如果图表还未初始化，则尝试初始化
+                if (typeof initTopupConsumptionChart === 'function') {
+                    initTopupConsumptionChart();
+                }
+                return;
+            }
+            
+            // 显示加载中状态
+            window.topupChart.showLoading({
+                text: '刷新数据中...',
+                maskColor: 'rgba(255, 255, 255, 0.8)',
+                fontSize: 14
+            });
+            
+            // 构建API请求URL
+            let apiUrl = '/finance/api/user_topup_consumption';
+            const params = new URLSearchParams();
+            
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            
+            const finalUrl = `${apiUrl}?${params.toString()}`;
+            
+            console.log(`正在请求用户充值消费关联数据，URL: ${finalUrl}`);
+            
+            // 发送API请求获取数据
+            fetch(finalUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`网络错误 (${response.status})`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('获取用户充值消费关联数据成功:', data);
+                    
+                    // 隐藏加载状态
+                    window.topupChart.hideLoading();
+                    
+                    // 提取图表所需数据
+                    const scatterData = data.scatter_data || [];
+                    const trendLine = data.trend_line || [];
+                    const statistics = data.statistics || {};
+                    const period = data.period || {};
+                    
+                    // 处理数据点分布，减少重叠，执行数据抖动处理
+                    const processedScatterData = processScatterData(scatterData);
+                    
+                    // 设置图表标题
+                    let title = '用户充值与消费关联';
+                    if (period.start_date && period.end_date) {
+                        title += ` (${period.start_date} 至 ${period.end_date})`;
+                    }
+                    
+                    // 准备相关性信息
+                    let correlationText = '';
+                    if (statistics.correlation !== undefined) {
+                        const corrValue = statistics.correlation;
+                        let corrLevel = '';
+                        if (corrValue >= 0.7) corrLevel = '强正相关';
+                        else if (corrValue >= 0.4) corrLevel = '中等正相关';
+                        else if (corrValue >= 0.2) corrLevel = '弱正相关';
+                        else if (corrValue >= -0.2) corrLevel = '几乎无相关';
+                        else if (corrValue >= -0.4) corrLevel = '弱负相关';
+                        else if (corrValue >= -0.7) corrLevel = '中等负相关';
+                        else corrLevel = '强负相关';
+                        
+                        correlationText = `\n相关系数: ${corrValue.toFixed(2)} (${corrLevel})`;
+                    }
+                    
+                    // 计算最大散点尺寸
+                    const maxBubbleSize = 50; // 最大气泡尺寸
+                    const minBubbleSize = 10; // 最小气泡尺寸
+                    
+                    // 获取用户数量的最大值
+                    const maxUsers = processedScatterData.length > 0 ? 
+                        Math.max(...processedScatterData.map(item => item[2])) : 1;
+                    
+                    // 配置图表选项
+                    const option = {
+                        title: {
+                            text: title,
+                            left: 'center',
+                            subtext: `总用户数: ${statistics.total_users || 0}人 | 平均充值: ${(statistics.avg_topup || 0).toFixed(2)}元 | 平均消费: ${(statistics.avg_consumption || 0).toFixed(2)}元${correlationText}`,
+                            subtextStyle: {
+                                color: '#666',
+                                fontSize: 12
+                            }
+                        },
+                        grid: {
+                            left: '10%',
+                            right: '10%',
+                            top: 90,
+                            bottom: '15%'
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: function(params) {
+                                if (params.seriesIndex === 0) { // 散点图
+                                    return `充值金额: ${params.value[0]}元<br/>消费金额: ${params.value[1]}元<br/>用户数量: ${params.value[2]}人`;
+                                } else { // 趋势线
+                                    return `趋势线<br/>充值金额: ${params.value[0].toFixed(2)}元<br/>消费金额: ${params.value[1].toFixed(2)}元`;
+                                }
+                            },
+                            confine: true // 限制提示框在图表区域内
+                        },
+                        // 添加缩放功能
+                        dataZoom: [
+                            {
+                                type: 'inside',
+                                xAxisIndex: 0,
+                                filterMode: 'filter'
+                            },
+                            {
+                                type: 'inside',
+                                yAxisIndex: 0,
+                                filterMode: 'filter'
+                            },
+                            {
+                                type: 'slider',
+                                xAxisIndex: 0,
+                                bottom: 5,
+                                height: 20,
+                                handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                                handleSize: '80%',
+                                showDetail: false
+                            }
+                        ],
+                        // 添加工具箱，包括数据视图、缩放等功能
+                        toolbox: {
+                            feature: {
+                                dataZoom: {
+                                    yAxisIndex: 'none'
+                                },
+                                restore: {},
+                                saveAsImage: {}
+                            },
+                            right: 20,
+                            top: 20
+                        },
+                        xAxis: {
+                            name: '充值金额(元)',
+                            nameLocation: 'middle',
+                            nameGap: 45,
+                            type: 'value',
+                            scale: true,
+                            axisLabel: {
+                                formatter: '{value} 元'
+                            },
+                            // 优化刻度，避免拥挤
+                            splitLine: {
+                                show: true,
+                                lineStyle: {
+                                    type: 'dashed',
+                                    opacity: 0.5
+                                }
+                            }
+                        },
+                        yAxis: {
+                            name: '消费金额(元)',
+                            nameLocation: 'middle',
+                            nameGap: 50,
+                            type: 'value',
+                            scale: true,
+                            axisLabel: {
+                                formatter: '{value} 元'
+                            },
+                            // 优化刻度，避免拥挤
+                            splitLine: {
+                                show: true,
+                                lineStyle: {
+                                    type: 'dashed',
+                                    opacity: 0.5
+                                }
+                            }
+                        },
+                        series: [
+                            {
+                                name: '用户分布',
+                                type: 'scatter',
+                                data: processedScatterData,
+                                // 控制气泡大小
+                                symbolSize: function(data) {
+                                    const userCount = data[2];
+                                    // 调整基础气泡大小，减小重叠效果
+                                    const baseSize = 5; // 减小基础大小
+                                    const maxSize = 30; // 减小最大尺寸
+                                    // 计算气泡大小，基于用户数量的对数比例
+                                    return baseSize + (maxSize - baseSize) * (Math.log(userCount) / Math.log(maxUsers > 1 ? maxUsers : 2));
+                                },
+                                // 启用标签显示
+                                label: {
+                                    show: true,
+                                    formatter: function(params) {
+                                        // 只显示用户数量，不显示其他数据
+                                        return params.data[2];
+                                    },
+                                    fontSize: 10,
+                                    color: '#fff',
+                                    position: 'inside'
+                                },
+                                // 增加散点图的透明度
+                                itemStyle: {
+                                    color: function(params) {
+                                        // 基于x和y值的比率设置颜色
+                                        const ratio = params.data[0] > 0 ? params.data[1] / params.data[0] : 1;
+                                        
+                                        if (ratio >= 1.2) return 'rgba(255, 69, 0, 0.6)';  // 消费明显高于充值：红色
+                                        else if (ratio >= 0.8) return 'rgba(0, 150, 136, 0.6)';  // 消费约等于充值：绿色
+                                        else return 'rgba(30, 144, 255, 0.6)';  // 消费低于充值：蓝色
+                                    },
+                                    borderColor: '#fff',
+                                    borderWidth: 1,
+                                    opacity: 0.8 // 提高透明度减轻重叠视觉效果
+                                },
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)',
+                                        opacity: 1
+                                    },
+                                    label: {
+                                        show: true,
+                                        formatter: function(params) {
+                                            return params.data[2] + '人';
+                                        },
+                                        fontSize: 12,
+                                        fontWeight: 'bold'
+                                    }
+                                },
+                                // 添加抖动效果减少重叠
+                                markPoint: {
+                                    symbolSize: 1,
+                                    symbol: 'circle',
+                                    label: {
+                                        show: false
+                                    }
+                                }
+                            }
+                        ]
+                    };
+                    
+                    // 添加视觉映射组件
+                    option.visualMap = {
+                        type: 'continuous',
+                        min: 1,
+                        max: maxUsers,
+                        dimension: 2, // 映射到气泡中的用户数量 (第三个值)
+                        inRange: {
+                            opacity: [0.5, 0.9]
+                        },
+                        show: false
+                    };
+                    
+                    // 如果有趋势线数据，添加趋势线序列
+                    if (trendLine && trendLine.length > 1) {
+                        option.series.push({
+                            name: '趋势线',
+                            type: 'line',
+                            data: trendLine,
+                            smooth: true,
+                            symbol: 'none',
+                            lineStyle: {
+                                color: '#ff7800',
+                                width: 2,
+                                type: 'dashed'
+                            },
+                            tooltip: {
+                                formatter: '趋势线'
+                            }
+                        });
+                        
+                        // 添加图例
+                        option.legend = {
+                            data: ['用户分布', '趋势线'],
+                            bottom: 10
+                        };
+                    }
+                    
+                    // 设置图表选项
+                    window.topupChart.setOption(option, true);
+                })
+                .catch(error => {
+                    console.error('获取用户充值消费关联数据失败:', error);
+                    
+                    // 隐藏加载状态
+                    window.topupChart.hideLoading();
+                    
+                    // 显示错误信息
+                    window.topupChart.setOption({
+                        title: {
+                            text: '用户充值与消费关联',
+                            left: 'center',
+                            subtext: '数据加载失败: ' + error.message,
+                            subtextStyle: {
+                                color: '#ff0000'
+                            }
+                        },
+                        graphic: [
+                            {
+                                type: 'text',
+                                left: 'center',
+                                top: 'middle',
+                                style: {
+                                    text: '数据加载失败，请重试',
+                                    fill: '#999',
+                                    font: '14px Microsoft YaHei'
+                                }
+                            }
+                        ]
+                    });
+                });
+        }
+        
+        // 初始化单位里程收益分析图表
+        function initUnitRevenueChart() {
+        const unitRevenueDom = document.getElementById('unitRevenueChart');
+            if (unitRevenueDom && typeof echarts !== 'undefined') {
+                try {
+                    // 确保容器有宽高
+                    if (unitRevenueDom.offsetHeight === 0) {
+                        console.warn('图表容器高度为0，设置默认高度');
+                        unitRevenueDom.style.height = '350px';
+                    }
+                    
+                    // 初始化图表实例
+            const unitRevenueChart = echarts.init(unitRevenueDom);
+                    
+                    // 保存图表实例到window对象，方便后续访问
+                    window.unitRevenueChart = unitRevenueChart;
+                    
+                    // 显示加载中状态
+                    unitRevenueChart.showLoading({
+                        text: '加载数据中...',
+                        maskColor: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: 14
+                    });
+                    
+                    // 获取当前日期设置
+                    const dateRangeSelect = document.getElementById('date-range');
+                    const customDateFrom = document.getElementById('custom-date-from');
+                    const customDateTo = document.getElementById('custom-date-to');
+                    
+                    let startDate, endDate;
+                    if (customDateFrom && customDateTo && customDateFrom.value && customDateTo.value) {
+                        startDate = customDateFrom.value;
+                        endDate = customDateTo.value;
+                    } else {
+                        // 使用当前月份作为默认值
+                        const today = new Date();
+                        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                        const nextMonthFirstDay = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+                        
+                        const formatDate = (date) => {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        };
+                        
+                        startDate = formatDate(firstDay);
+                        endDate = formatDate(nextMonthFirstDay);
+                    }
+                    
+                    // 调用刷新函数来加载数据
+                    refreshUnitRevenueChart(startDate, endDate);
+                    
+                    // 响应窗口大小变化
+                    window.addEventListener('resize', function() {
+                        if (window.unitRevenueChart) {
+                            window.unitRevenueChart.resize();
+                        }
+                    });
+                } catch (error) {
+                    console.error('初始化单位里程收益分析图表失败:', error);
+                    unitRevenueDom.innerHTML = `<div class="alert alert-warning text-center">图表初始化失败: ${error.message}</div>`;
+                }
+            }
+        }
+        
+        // 刷新单位里程收益分析图表
+        function refreshUnitRevenueChart(startDate, endDate) {
+            const unitRevenueDom = document.getElementById('unitRevenueChart');
+            if (!unitRevenueDom || typeof echarts === 'undefined' || !window.unitRevenueChart) {
+                console.error('找不到单位里程收益分析图表或echarts未加载');
+                // 如果图表还未初始化，则尝试初始化
+                if (typeof initUnitRevenueChart === 'function') {
+                    initUnitRevenueChart();
+                }
+                return;
+            }
+            
+            // 显示加载中状态
+            window.unitRevenueChart.showLoading({
+                text: '刷新数据中...',
+                maskColor: 'rgba(255, 255, 255, 0.8)',
+                fontSize: 14
+            });
+            
+            // 构建API请求URL
+            let apiUrl = '/finance/api/unit_revenue_data';
+            const params = new URLSearchParams();
+            
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            
+            const finalUrl = `${apiUrl}?${params.toString()}`;
+            
+            console.log(`正在请求单位里程收益分析数据，URL: ${finalUrl}`);
+            
+            // 发送API请求获取数据
+            fetch(finalUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`网络错误 (${response.status})`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('获取单位里程收益分析数据成功:', data);
+                    
+                    // 隐藏加载状态
+                    window.unitRevenueChart.hideLoading();
+                    
+                    // 提取图表所需数据
+                    const boxplotData = data.boxplot_data || [];
+                    const distanceRanges = data.distance_ranges || [];
+                    const summaryStats = data.summary_stats || {};
+                    const period = data.period || {};
+                    
+                    // 设置图表标题
+                    let title = '单位里程收益分析';
+                    if (period.start_date && period.end_date) {
+                        title += ` (${period.start_date} 至 ${period.end_date})`;
+                    }
+                    
+                    // 准备小提示文本
+                    let distanceInfo = '';
+                    let maxAvgValue = 0;
+                    let maxAvgRange = '';
+                    
+                    for (const range in summaryStats) {
+                        const stats = summaryStats[range];
+                        if (stats.avg > maxAvgValue && stats.count > 0) {
+                            maxAvgValue = stats.avg;
+                            maxAvgRange = range;
+                        }
+                        
+                        // 如果有订单数据，添加到提示信息
+                        if (stats.count > 0) {
+                            distanceInfo += `${range}: ${stats.count}单 (${stats.percentage}%), 均值: ${stats.avg}元/公里\n`;
+                        }
+                    }
+                    
+                    // 准备箱线图数据集
+                    let preparedData = [];
+                    for (let i = 0; i < boxplotData.length; i++) {
+                        const values = boxplotData[i];
+                        
+                        if (values && values.length > 0) {
+                            preparedData.push(values);
+                        } else {
+                            // 如果没有数据，添加默认值避免echarts报错
+                            preparedData.push([0, 0, 0, 0, 0]);
+                        }
+                    }
+                    
+                    // 检查是否有非空数据
+                    const hasData = preparedData.some(item => item.length > 0 && item.some(v => v > 0));
+                    
+                    if (!hasData) {
+                        // 如果没有任何数据
+                        window.unitRevenueChart.setOption({
+                title: {
+                                text: title,
+                                left: 'center',
+                                subtext: '暂无数据',
+                                subtextStyle: {
+                                    color: '#999',
+                                    fontSize: 12
+                                }
+                            },
+                            graphic: [
+                                {
+                                    type: 'text',
+                                    left: 'center',
+                                    top: 'middle',
+                                    style: {
+                                        text: '所选时间段内暂无数据',
+                                        fill: '#999',
+                                        font: '14px Microsoft YaHei'
+                                    }
+                                }
+                            ]
+                        });
+                        return;
+                    }
+                    
+                    // 添加最优区间信息
+                    const optimizationTip = maxAvgRange ? 
+                        `最优区间: ${maxAvgRange} (${maxAvgValue.toFixed(2)}元/公里)` : '';
+                    
+                    // 配置图表选项
+                    const option = {
+                        title: {
+                            text: title,
+                            left: 'center',
+                            subtext: optimizationTip,
+                            subtextStyle: {
+                                color: '#666',
+                                fontSize: 12
+                            }
+                        },
+                        grid: {
+                            left: '10%',
+                            right: '5%',
+                            bottom: '15%',
+                            top: '15%'
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: function(params) {
+                                const rangeLabel = distanceRanges[params.dataIndex];
+                                const stats = summaryStats[rangeLabel];
+                                
+                                if (!stats || stats.count === 0) {
+                                    return `${rangeLabel}: 暂无数据`;
+                                }
+                                
+                                return `${rangeLabel}:<br/>
+                                        订单数: ${stats.count}单 (${stats.percentage}%)<br/>
+                                        平均值: ${stats.avg}元/公里<br/>
+                                        中位数: ${stats.median}元/公里<br/>
+                                        最小值: ${stats.min}元/公里<br/>
+                                        最大值: ${stats.max}元/公里`;
+                            }
+                        },
+                xAxis: {
+                    type: 'category',
+                            data: distanceRanges,
+                            name: '行程距离',
+                            nameLocation: 'middle',
+                            nameGap: 30,
+                            axisLabel: {
+                                interval: 0,
+                                rotate: 0
+                            }
+                },
+                yAxis: {
+                            type: 'value',
+                            name: '单位里程收益(元/公里)',
+                    nameLocation: 'middle',
+                    nameGap: 40,
+                            axisLabel: {
+                                formatter: '{value} 元'
+                            }
+                        },
+                        dataset: {
+                            source: preparedData
+                },
+                series: [{
+                    name: '单位里程收益',
+                    type: 'boxplot',
+                            datasetIndex: 0,
+                            itemStyle: {
+                                color: function(params) {
+                                    const colors = [
+                                        'rgba(0, 123, 255, 0.7)',    // 蓝色
+                                        'rgba(40, 167, 69, 0.7)',    // 绿色
+                                        'rgba(111, 66, 193, 0.7)',   // 紫色
+                                        'rgba(255, 193, 7, 0.7)',    // 黄色
+                                        'rgba(220, 53, 69, 0.7)'     // 红色
+                                    ];
+                                    return colors[params.dataIndex % colors.length];
+                                },
+                                borderColor: '#fff',
+                                borderWidth: 2
+                            },
+                            tooltip: {
+                                formatter: function(params) {
+                                    return `${params.name}`;
+                                }
+                            }
+                        }]
+                    };
+                    
+                    // 设置图表选项
+                    window.unitRevenueChart.setOption(option, true);
+                })
+                .catch(error => {
+                    console.error('获取单位里程收益分析数据失败:', error);
+                    
+                    // 隐藏加载状态
+                    window.unitRevenueChart.hideLoading();
+                    
+                    // 显示错误信息
+                    window.unitRevenueChart.setOption({
+                        title: {
+                            text: '单位里程收益分析',
+                            left: 'center',
+                            subtext: '数据加载失败: ' + error.message,
+                            subtextStyle: {
+                                color: '#ff0000'
+                            }
+                        },
+                        graphic: [
+                            {
+                                type: 'text',
+                                left: 'center',
+                                top: 'middle',
+                                style: {
+                                    text: '数据加载失败，请重试',
+                                    fill: '#999',
+                                    font: '14px Microsoft YaHei'
+                                }
+                            }
+                        ]
+                    });
+                });
+        }
+        
+        // 处理散点图数据，减少点的重叠
+        function processScatterData(data) {
+            if (!data || data.length === 0) return [];
+            
+            // 创建散点图网格
+            const gridSize = 10; // 网格大小
+            const grid = {};
+            const processedData = [];
+            
+            // 对每个数据点应用微小的随机偏移以减少完全重叠
+            for (let i = 0; i < data.length; i++) {
+                const point = data[i].slice(); // 克隆原始数据点
+                const x = Math.round(point[0] / gridSize) * gridSize;
+                const y = Math.round(point[1] / gridSize) * gridSize;
+                const gridKey = `${x}_${y}`;
+                
+                // 检查网格中是否已有点
+                if (grid[gridKey]) {
+                    // 如果网格内已有点，应用微小偏移
+                    const offsetRange = 5; // 偏移范围
+                    const numPointsInCell = grid[gridKey];
+                    
+                    // 计算均匀分布的偏移
+                    const angle = (Math.PI * 2 * numPointsInCell) / 8;
+                    const offsetX = Math.cos(angle) * (offsetRange * (0.5 + Math.random() * 0.5));
+                    const offsetY = Math.sin(angle) * (offsetRange * (0.5 + Math.random() * 0.5));
+                    
+                    point[0] += offsetX;
+                    point[1] += offsetY;
+                    
+                    grid[gridKey]++;
+                } else {
+                    // 首次出现在该网格
+                    grid[gridKey] = 1;
+                }
+                
+                processedData.push(point);
+            }
+            
+            return processedData;
+        }
+
+        function applyDateFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            // 验证日期
+            if (!startDate || !endDate) {
+                alert('请选择开始和结束日期');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('开始日期不能晚于结束日期');
+                return;
+            }
+            
+            console.log(`应用日期筛选: ${startDate} 至 ${endDate}`);
+            
+            // 加载用户消费数据
+            loadUserConsumptionData(startDate, endDate);
+            
+            // 刷新其他图表
+            refreshTopupConsumptionChart(startDate, endDate);
+            refreshUnitRevenueChart(startDate, endDate);
+            refreshPaymentTimeAnalysis(startDate, endDate);
+        }
+
+        function refreshPaymentTimeAnalysis(startDate, endDate) {
+            console.log(`刷新支付方式时间分析图表，日期范围: ${startDate} 至 ${endDate}`);
+            loadPaymentTimeAnalysisData(startDate, endDate);
+        }
+    });
+</script>
+{% endblock %} 

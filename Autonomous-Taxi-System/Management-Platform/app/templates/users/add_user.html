@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>{{ _("添加新用户") }}</h2>
+        <form method="POST" class="mt-4">
+            <div class="mb-3">
+                <label for="username" class="form-label">{{ _("用户名") }}</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">{{ _("密码") }}</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="real_name" class="form-label">{{ _("真实姓名") }}</label>
+                <input type="text" class="form-control" id="real_name" name="real_name">
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">{{ _("手机号") }}</label>
+                <input type="tel" class="form-control" id="phone" name="phone">
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">{{ _("邮箱") }}</label>
+                <input type="email" class="form-control" id="email" name="email">
+            </div>
+            <div class="mb-3">
+                <label for="gender" class="form-label">{{ _("性别") }}</label>
+                <select class="form-select" id="gender" name="gender">
+                    <option value="男">{{ _("男") }}</option>
+                    <option value="女">{{ _("女") }}</option>
+                    <option value="其他">{{ _("其他") }}</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="birth_date" class="form-label">{{ _("出生日期") }}</label>
+                <input type="date" class="form-control" id="birth_date" name="birth_date">
+            </div>
+            <div class="mb-3">
+                <label for="id_card" class="form-label">{{ _("身份证号") }}</label>
+                <input type="text" class="form-control" id="id_card" name="id_card">
+            </div>
+            <div class="mb-3">
+                <label for="credit_score" class="form-label">{{ _("信用分") }}</label>
+                <input type="number" class="form-control" id="credit_score" name="credit_score" value="100">
+            </div>
+            <div class="mb-3">
+                <label for="balance" class="form-label">{{ _("余额") }}</label>
+                <input type="number" class="form-control" id="balance" name="balance" value="0" step="0.01">
+            </div>
+            <div class="mb-3">
+                <label for="status" class="form-label">{{ _("状态") }}</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="正常">{{ _("正常") }}</option>
+                    <option value="禁用">{{ _("禁用") }}</option>
+                    <option value="注销">{{ _("注销") }}</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="registration_city" class="form-label">{{ _("注册城市") }}</label>
+                <input type="text" class="form-control" id="registration_city" name="registration_city">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="registration_channel" class="form-label">{{ _("注册渠道") }}</label>
+                <select class="form-select" id="registration_channel" name="registration_channel">
+                    <option value="手机应用">{{ _("手机应用") }}</option>
+                    <option value="网站">{{ _("网站") }}</option>
+                    <option value="微信小程序">{{ _("微信小程序") }}</option>
+                    <option value="合作推广">{{ _("合作推广") }}</option>
+                    <option value="其他" selected>{{ _("其他") }}</option>
+                </select>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="tags" class="form-label">{{ _("用户标签") }}</label>
+                <input type="text" class="form-control" id="tags" name="tags" placeholder="{{ _("多个标签请用逗号分隔，如：日常通勤,高频用户,价格敏感") }}">
+                <div class="form-text">多个标签请用逗号分隔，如：日常通勤,高频用户,价格敏感</div>
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">{{ _("添加用户") }}</button>
+                <a href="{{ url_for('users.index') }}" class="btn btn-secondary">{{ _("返回") }}</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,105 @@
+<navigation-bar title="智能客服" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<view class="container">
+  <!-- 历史记录筛选区域 -->
+  <view class="header-toolbar">
+    <view class="date-filter">
+      <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+        <view class="date-picker">
+          <text class="btn-icon">📅</text>
+          <text class="btn-text">{{selectedDate || '选择日期查看历史'}}</text>
+        </view>
+      </picker>
+      <button class="clear-filter" bindtap="clearDateFilter" wx:if="{{selectedDate}}">
+        <text>清除日期筛选</text>
+      </button>
+    </view>
+  </view>
+  
+  <!-- 可用日期提示 -->
+  <view class="available-dates" wx:if="{{availableDates.length > 0 && showAvailableDates}}">
+    <text class="label">有对话记录的日期：</text>
+    <scroll-view class="dates-scroll" scroll-x>
+      <view class="date-item {{item === selectedDate ? 'active' : ''}}" 
+            wx:for="{{availableDates}}" 
+            wx:key="*this"
+            bindtap="selectDate"
+            data-date="{{item}}">
+        {{item}}
+      </view>
+    </scroll-view>
+  </view>
+  <scroll-view class="chat-messages" scroll-y="true" scroll-top="{{scrollTop}}" scroll-into-view="{{toView}}" enhanced="true" show-scrollbar="true" bounces="true">
+    <!-- 历史模式下显示日期标题 -->
+    <view class="date-header" wx:if="{{isHistoryMode && selectedDate}}">
+      <text class="date-title">{{selectedDate}} 的对话记录</text>
+    </view>
+    
+    <!-- 加载中提示 -->
+    <view class="loading-indicator" wx:if="{{historyLoading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载历史记录中...</text>
+    </view>
+    
+    <view class="message-list">
+      <view wx:for="{{messages}}" wx:key="id" class="message-item {{item.role === 'user' ? 'user' : 'assistant'}}" id="msg{{item.id}}">
+        <view class="message-avatar">
+          <image 
+            src="{{item.role === 'user' ? userAvatar : robotAvatar}}" 
+            class="avatar"
+            mode="aspectFill"
+            binderror="onAvatarError"
+            data-role="{{item.role}}"
+            wx:if="{{item.role === 'user' ? showUserImage : showRobotImage}}"
+          ></image>
+          <view class="robot-icon" wx:if="{{item.role === 'assistant' && !showRobotImage}}">🤖</view>
+          <view class="user-icon" wx:if="{{item.role === 'user' && !showUserImage}}">👤</view>
+        </view>
+        <view class="message-content">
+          <view class="message-bubble">
+            <text class="message-text">{{item.content}}</text>
+          </view>
+          <view class="message-time">{{item.time}}</view>
+        </view>
+      </view>
+      <view wx:if="{{isTyping}}" class="message-item assistant">
+        <view class="message-avatar">
+          <image 
+            src="{{robotAvatar}}" 
+            class="avatar"
+            mode="aspectFill"
+            wx:if="{{showRobotImage}}"
+          ></image>
+          <view class="robot-icon" wx:if="{{!showRobotImage}}">🤖</view>
+        </view>
+        <view class="message-content">
+          <view class="message-bubble typing">
+            <view class="typing-indicator">
+              <view class="dot"></view>
+              <view class="dot"></view>
+              <view class="dot"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  
+  <view class="quick-questions" wx:if="{{showQuickQuestions && !isHistoryMode}}">
+    <text class="quick-title">常见问题</text>
+    <view class="question-list">
+      <view wx:for="{{quickQuestions}}" wx:key="index" class="question-item" bindtap="sendQuickQuestion" data-question="{{item}}">
+        <text>{{item}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="chat-input">
+    <view class="input-container">
+      <input class="input-field" placeholder="{{isHistoryMode ? '历史记录查看模式' : '请输入您的问题...'}}" value="{{inputText}}" bindinput="onInput" confirm-type="send" bindconfirm="sendMessage" disabled="{{isHistoryMode}}" />
+      <button class="send-btn {{inputText ? 'active' : ''}}" bindtap="sendMessage" disabled="{{!inputText || isSending || isHistoryMode}}">
+        <text wx:if="{{!isSending}}">发送</text>
+        <text wx:else>...</text>
+      </button>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,104 @@
+<!-- register.wxml -->
+<view class="auth-page" style="background-image: url('/static/images/background.jpg'); background-size: cover;">
+  <view class="auth-header">
+    <view class="auth-back-btn" bindtap="navigateToLogin">
+      <text class="auth-back-icon">←</text>
+    </view>
+    <view class="auth-title">注册</view>
+    <view class="auth-placeholder"></view>
+  </view>
+
+  <view class="auth-content">
+    <view class="auth-form-title">创建新账号</view>
+    <view class="auth-subtitle">加入无人驾驶出租车平台，享受便捷出行</view>
+    
+    <view class="auth-form-item {{usernameError ? 'error' : ''}}">
+      <text class="auth-label">用户名</text>
+      <input 
+        class="auth-input" 
+        type="text" 
+        placeholder="请输入用户名" 
+        bindinput="onUsernameInput"
+        value="{{username}}"
+      />
+      <text wx:if="{{usernameError}}" class="auth-error-message">{{usernameError}}</text>
+    </view>
+    
+    <view class="auth-form-item {{passwordError ? 'error' : ''}}">
+      <text class="auth-label">密码</text>
+      <input 
+        class="auth-input" 
+        password 
+        placeholder="请输入密码" 
+        bindinput="onPasswordInput"
+        value="{{password}}"
+      />
+      <text wx:if="{{passwordError}}" class="auth-error-message">{{passwordError}}</text>
+    </view>
+    
+    <view class="auth-form-item {{emailError ? 'error' : ''}}">
+      <text class="auth-label">邮箱</text>
+      <input 
+        class="auth-input" 
+        type="text" 
+        placeholder="请输入邮箱" 
+        bindinput="onEmailInput"
+        value="{{email}}"
+      />
+      <text wx:if="{{emailError}}" class="auth-error-message">{{emailError}}</text>
+    </view>
+    
+    <view class="auth-form-item {{verifyCodeError ? 'error' : ''}}">
+      <text class="auth-label">验证码</text>
+      <view class="verify-code-container">
+        <input 
+          class="auth-input verify-code-input" 
+          type="number" 
+          placeholder="请输入验证码" 
+          bindinput="onVerifyCodeInput"
+          value="{{verifyCode}}"
+          maxlength="6"
+        />
+        <button 
+          class="verify-code-btn {{codeSending ? 'disabled' : ''}}" 
+          bindtap="sendVerifyCode" 
+          disabled="{{codeSending}}"
+        >
+          {{codeButtonText}}
+        </button>
+      </view>
+      <text wx:if="{{verifyCodeError}}" class="auth-error-message">{{verifyCodeError}}</text>
+    </view>
+    
+    <view class="auth-form-item {{cityError ? 'error' : ''}}">
+      <text class="auth-label">城市</text>
+      <picker 
+        mode="selector" 
+        range="{{cityList}}" 
+        bindchange="onCityChange"
+        value="{{cityIndex}}"
+      >
+        <view class="auth-picker-view">
+          <text wx:if="{{selectedCity}}">{{selectedCity}}</text>
+          <text wx:else class="auth-placeholder"></text>
+          <text class="auth-picker-arrow">▼</text>
+        </view>
+      </picker>
+      <text wx:if="{{cityError}}" class="auth-error-message">{{cityError}}</text>
+    </view>
+    
+    <text wx:if="{{registerError}}" class="auth-form-error">{{registerError}}</text>
+    
+    <button class="auth-btn" bindtap="handleRegister">
+      <text wx:if="{{loading}}" class="auth-loading"></text>
+      <text>立即注册</text>
+    </button>
+    
+    <view class="auth-link-container">
+      <text class="auth-link-text">已有账号？</text>
+      <text class="auth-link" bindtap="navigateToLogin">返回登录</text>
+    </view>
+  </view>
+  
+ 
+</view> 

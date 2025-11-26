@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+
+{% block title %}算法测试平台{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">算法测试平台</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">高级智能订单分配算法说明</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>算法工作原理</h6>
+                            <div class="alert alert-info">
+                                <p><strong>目标：</strong>最小化所有订单的平均等待时间并提升用户体验</p>
+                                <ol>
+                                    <li>按城市动态分组待分配订单</li>
+                                    <li>优先级队列管理，考虑多因素动态调整</li>
+                                    <li>精准预测城市交通流量，实时响应拥堵情况</li>
+                                    <li>智能调度策略：
+                                        <ul>
+                                            <li>多维度评分矩阵动态计算最优方案</li>
+                                            <li>考虑车辆电量、路况、用户评分等因素</li>
+                                            <li>综合优化系统资源利用率和服务质量</li>
+                                            <li>自适应学习并持续优化调度策略</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>算法参数配置</h6>
+                            <div class="alert alert-secondary">
+                                <p><strong>车型速度参数(km/h)：</strong></p>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>车型</th>
+                                            <th>速度</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Alpha-X1</td><td id="alphaX1Speed">120</td></tr>
+                                        <tr><td>Alpha-Nexus</td><td id="alphaNexusSpeed">110</td></tr>
+                                        <tr><td>Alpha-Voyager</td><td id="alphaVoyagerSpeed">115</td></tr>
+                                        <tr><td>Nova-S1</td><td id="novaS1Speed">95</td></tr>
+                                        <tr><td>Nova-Quantum</td><td id="novaQuantumSpeed">90</td></tr>
+                                        <tr><td>Nova-Pulse</td><td id="novaPulseSpeed">80</td></tr>
+                                        <tr><td>Neon-500</td><td id="neon500Speed">100</td></tr>
+                                        <tr><td>Neon-Zero</td><td id="neonZeroSpeed">85</td></tr>
+                                    </tbody>
+                                </table>
+                                <p><small>注：车型速度从配置文件自动加载</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <h6>高级算法决策流程</h6>
+                            <div class="alert alert-light border">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>多维度分析因素：</strong>
+                                        <ul>
+                                            <li>空间距离与实时路况</li>
+                                            <li>车辆电量、类型与性能特征</li>
+                                            <li>用户历史出行偏好与评价</li>
+                                            <li>区域订单密度与高峰期预测</li>
+                                            <li>时空聚类与智能需求预测</li>
+                                        </ul>
+                                    </div>
+                            
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">订单分配算法测试</h5>
+                </div>
+                <div class="card-body">
+                    <form id="assignmentTestForm">
+                        <div class="mb-3">
+                            <label for="orderIds" class="form-label">订单ID列表</label>
+                            <textarea class="form-control" id="orderIds" rows="3" placeholder="输入多个订单ID，用逗号分隔，例如：1,2,3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">测试分配算法</button>
+                    </form>
+                    
+                    <div class="mt-4" id="assignmentResult" style="display: none;">
+                        <h5>分配结果：</h5>
+                        <pre id="assignmentResultJson" class="bg-light p-3" style="max-height: 400px; overflow-y: auto;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">智能车辆匹配算法测试</h5>
+                </div>
+                <div class="card-body">
+                    <form id="nearestVehicleForm">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="city" class="form-label">城市</label>
+                                <select class="form-select" id="city" required>
+                                    <option value="">请选择城市</option>
+                                    <option value="沈阳市">沈阳市</option>
+                                    <option value="上海市">上海市</option>
+                                    <option value="北京市">北京市</option>
+                                    <option value="广州市">广州市</option>
+                                    <option value="深圳市">深圳市</option>
+                                    <option value="杭州市">杭州市</option>
+                                    <option value="南京市">南京市</option>
+                                    <option value="成都市">成都市</option>
+                                    <option value="重庆市">重庆市</option>
+                                    <option value="武汉市">武汉市</option>
+                                    <option value="西安市">西安市</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="pickupX" class="form-label">上车点X坐标</label>
+                                <input type="number" class="form-control" id="pickupX" step="0.000001" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="pickupY" class="form-label">上车点Y坐标</label>
+                                <input type="number" class="form-control" id="pickupY" step="0.000001" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="true" id="useRating" checked>
+                                    <label class="form-check-label" for="useRating">
+                                        使用AI智能评分机制（多维度优化）
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">智能匹配车辆</button>
+                    </form>
+                    
+                    <div class="mt-4" id="nearestResult" style="display: none;">
+                        <h5>匹配结果：</h5>
+                        <pre id="nearestResultJson" class="bg-light p-3" style="max-height: 400px; overflow-y: auto;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">算法性能测试</h5>
+                </div>
+                <div class="card-body">
+                    <form id="performanceTestForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="testType" class="form-label">测试类型</label>
+                                <select class="form-select" id="testType">
+                                    <option value="assignment">智能订单分配算法</option>
+                                    <option value="nearest">智能车辆匹配算法</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="iterations" class="form-label">迭代次数</label>
+                                <input type="number" class="form-control" id="iterations" min="1" max="100" value="10">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">开始性能测试</button>
+                    </form>
+                    
+                    <div class="mt-4" id="performanceResult" style="display: none;">
+                        <h5>性能测试结果：</h5>
+                        <div id="performanceResultContent" class="bg-light p-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // 加载车型速度参数
+        function loadVehicleParams() {
+            try {
+                $.ajax({
+                    url: '/algorithm/api/vehicle_speeds',
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            if (response.data.Alpha_X1_SPEED) $('#alphaX1Speed').text(response.data.Alpha_X1_SPEED);
+                            if (response.data.Alpha_Nexus_SPEED) $('#alphaNexusSpeed').text(response.data.Alpha_Nexus_SPEED);
+                            if (response.data.Alpha_Voyager_SPEED) $('#alphaVoyagerSpeed').text(response.data.Alpha_Voyager_SPEED);
+                            if (response.data.Nova_S1_SPEED) $('#novaS1Speed').text(response.data.Nova_S1_SPEED);
+                            if (response.data.Nova_Quantum_SPEED) $('#novaQuantumSpeed').text(response.data.Nova_Quantum_SPEED);
+                            if (response.data.Nova_Pulse_SPEED) $('#novaPulseSpeed').text(response.data.Nova_Pulse_SPEED);
+                            if (response.data.Neon_500_SPEED) $('#neon500Speed').text(response.data.Neon_500_SPEED);
+                            if (response.data.Neon_Zero_SPEED) $('#neonZeroSpeed').text(response.data.Neon_Zero_SPEED);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('获取车型速度失败:', xhr);
+                    }
+                });
+            } catch (e) {
+                console.error('获取车型速度参数出错:', e);
+            }
+        }
+        
+        // 页面加载时尝试获取速度参数
+        loadVehicleParams();
+
+        // 订单分配算法测试
+        $('#assignmentTestForm').submit(function(e) {
+            e.preventDefault();
+            
+            // 获取订单ID列表
+            const orderIdsText = $('#orderIds').val();
+            const orderIds = orderIdsText.split(',').map(id => id.trim()).filter(id => id !== '');
+            
+            if (orderIds.length === 0) {
+                alert('请输入至少一个订单ID');
+                return;
+            }
+            
+            // 显示加载状态
+            $('#assignmentResult').show();
+            $('#assignmentResultJson').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><div class="mt-2">处理中...</div></div>');
+            
+            // 发送请求
+            $.ajax({
+                url: '/algorithm/api/assign_test',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    order_ids: orderIds
+                }),
+                success: function(response) {
+                    // 格式化显示结果
+                    $('#assignmentResultJson').html(JSON.stringify(response, null, 2));
+                },
+                error: function(xhr) {
+                    // 显示错误信息
+                    $('#assignmentResultJson').html('请求失败: ' + (xhr.responseJSON?.message || xhr.status));
+                }
+            });
+        });
+        
+        // 最近车辆查找测试
+        $('#nearestVehicleForm').submit(function(e) {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const city = $('#city').val();
+            const pickupX = $('#pickupX').val();
+            const pickupY = $('#pickupY').val();
+            const useRating = $('#useRating').is(':checked');
+            
+            if (!city || !pickupX || !pickupY) {
+                alert('请填写完整的表单信息');
+                return;
+            }
+            
+            // 显示加载状态
+            $('#nearestResult').show();
+            $('#nearestResultJson').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><div class="mt-2">查询中...</div></div>');
+            
+            // 发送请求
+            $.ajax({
+                url: '/algorithm/api/nearest_vehicle_test',
+                method: 'GET',
+                data: {
+                    city: city,
+                    pickup_x: pickupX,
+                    pickup_y: pickupY,
+                    use_rating: useRating
+                },
+                success: function(response) {
+                    // 格式化显示结果
+                    $('#nearestResultJson').html(JSON.stringify(response, null, 2));
+                },
+                error: function(xhr) {
+                    // 显示错误信息
+                    $('#nearestResultJson').html('请求失败: ' + (xhr.responseJSON?.message || xhr.status));
+                }
+            });
+        });
+        
+        // 性能测试
+        $('#performanceTestForm').submit(function(e) {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const testType = $('#testType').val();
+            const iterations = parseInt($('#iterations').val());
+            
+            if (iterations < 1 || iterations > 100) {
+                alert('迭代次数必须在1-100之间');
+                return;
+            }
+            
+            // 显示加载状态
+            $('#performanceResult').show();
+            $('#performanceResultContent').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><div class="mt-2">性能测试中，请稍候...</div></div>');
+            
+            // 实际测试代码
+            let results = [];
+            let totalTime = 0;
+            let testPromises = [];
+            
+            // 创建测试函数
+            const runTest = function(i) {
+                const startTime = performance.now();
+                
+                let promise;
+                if (testType === 'assignment') {
+                    // 为了测试，使用固定的订单ID
+                    promise = $.ajax({
+                        url: '/algorithm/api/assign_test',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            order_ids: [1, 2, 3]
+                        })
+                    });
+                } else {
+                    // 为了测试，使用固定的坐标
+                    promise = $.ajax({
+                        url: '/algorithm/api/nearest_vehicle_test',
+                        method: 'GET',
+                        data: {
+                            city: '沈阳市',
+                            pickup_x: 123.456,
+                            pickup_y: 41.789
+                        }
+                    });
+                }
+                
+                return promise.then(function() {
+                    const endTime = performance.now();
+                    const timeUsed = endTime - startTime;
+                    results.push({
+                        iteration: i + 1,
+                        timeMs: timeUsed
+                    });
+                    totalTime += timeUsed;
+                    
+                    // 更新进度
+                    const progress = Math.round((i + 1) / iterations * 100);
+                    $('#performanceResultContent').html(`<div class="text-center">测试进度: ${progress}%</div><div class="progress mb-3"><div class="progress-bar" role="progressbar" style="width: ${progress}%" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"></div></div>`);
+                }).catch(function(xhr) {
+                    console.error('测试失败:', xhr);
+                });
+            };
+            
+            // 顺序执行测试，避免并发请求导致结果不准确
+            let sequence = Promise.resolve();
+            for (let i = 0; i < iterations; i++) {
+                sequence = sequence.then(() => runTest(i));
+            }
+            
+            // 所有测试完成后显示统计结果
+            sequence.then(function() {
+                // 计算统计数据
+                const avgTime = totalTime / iterations;
+                const minTime = Math.min(...results.map(r => r.timeMs));
+                const maxTime = Math.max(...results.map(r => r.timeMs));
+                
+                // 计算标准差
+                const variance = results.reduce((acc, r) => acc + Math.pow(r.timeMs - avgTime, 2), 0) / iterations;
+                const stdDev = Math.sqrt(variance);
+                
+                // 构建结果HTML
+                let htmlResult = `
+                    <h6>测试类型: ${testType === 'assignment' ? '智能订单分配算法' : '智能车辆匹配算法'}</h6>
+                    <h6>迭代次数: ${iterations}</h6>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">平均耗时</h5>
+                                    <p class="card-text">${avgTime.toFixed(2)} ms</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">最小耗时</h5>
+                                    <p class="card-text">${minTime.toFixed(2)} ms</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">最大耗时</h5>
+                                    <p class="card-text">${maxTime.toFixed(2)} ms</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">标准差</h5>
+                                    <p class="card-text">${stdDev.toFixed(2)} ms</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h6>详细测试数据:</h6>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>迭代</th>
+                                    <th>耗时 (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                results.forEach(r => {
+                    htmlResult += `
+                        <tr>
+                            <td>${r.iteration}</td>
+                            <td>${r.timeMs.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+                
+                htmlResult += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                $('#performanceResultContent').html(htmlResult);
+            });
+        });
+    });
+</script>
+{% endblock %} 

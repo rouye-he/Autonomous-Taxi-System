@@ -1,0 +1,117 @@
+/* 搜索区域样式 */
+.search-section {
+    margin-bottom: 20px;
+}
+
+.search-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+.search-toggle:hover {
+    color: #0056b3;
+}
+
+.search-toggle i {
+    transition: transform 0.3s;
+}
+
+.search-toggle.collapsed i {
+    transform: rotate(-90deg);
+}
+
+.search-form {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+.search-form .form-label {
+    font-weight: 500;
+}
+
+/* 搜索标签样式 */
+.search-tags {
+    margin-bottom: 15px;
+}
+
+.search-tag {
+    display: inline-block;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.search-tag .badge {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+/* 浮动提示框样式 */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.custom-toast {
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    text-align: center;
+    animation: fadeInDown 0.5s;
+    opacity: 0.9;
+}
+
+.toast-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.toast-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.toast-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.toast-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 0.9;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 0.9;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
